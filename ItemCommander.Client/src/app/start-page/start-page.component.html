@@ -1,0 +1,131 @@
+<sc-page [showNav]="isNavigationShown">
+  <div scPageHeader>
+    <sc-global-header appName="Item Commander v1.0" [(show)]="isNavigationShown">
+      <a href="#" scGlobalLogo></a>
+      <sc-account-information (logout)="logoutService.logout()"></sc-account-information>
+    </sc-global-header>
+  </div>
+  <div scPageAppHeader>
+    <sc-application-header text="Item Commander"></sc-application-header>
+  </div>
+  <div scPageActionBar>
+    <sc-action-bar>
+      <sc-action-bar-left>
+        <sc-dropdown class="bookmarkTools">
+          <button scDropdownToggle scIconButton>
+            <sc-icon icon="edit"></sc-icon>
+            Edit in content editor
+          </button>
+          <sc-dropdown-menu class="dropdownMenu">
+            <sc-dropdown-header>Content Editor</sc-dropdown-header>
+          </sc-dropdown-menu>
+        </sc-dropdown>
+        <button scIconButton (click)="copy()">
+          <sc-icon icon="copy"></sc-icon>
+          Copy
+        </button>
+        <button scIconButton>
+          <sc-icon icon="arrow_cross"></sc-icon>
+          Move
+        </button>
+        <button scIconButton>
+          <sc-icon icon="earth2"></sc-icon>
+          Publish
+        </button>
+        <button scIconButton>
+          <sc-icon icon="delete"></sc-icon>
+          Delete
+        </button>
+        <button scIconButton>
+          <sc-icon icon="add"></sc-icon>
+          Add folder
+        </button>
+        <button scIconButton (click)="selectAll()">
+          <sc-icon icon="add"></sc-icon>
+          Select Aall</button>
+      </sc-action-bar-left>
+      <sc-action-bar-right>
+        <button scIconButton>
+          <sc-icon icon="gearwheels"></sc-icon>
+          Settings
+        </button>
+        <button type="button" scIconButton [(scToggle)]="isSearching">
+          <sc-icon size="small" icon="magnifying_glass"></sc-icon>
+        </button>
+      </sc-action-bar-right>
+    </sc-action-bar>
+  </div>
+  <article scPageContent class="p-4">
+    <div class="card mb-3 extra-padding">
+      <div class="row">
+        <div class="col-6">
+          <input type="text" class="form-control" [ngModel]="leftPath" disabled />
+          <table *ngIf="!leftLoading" scTable [ngClass]="GetTableClass('left')" (click)="tableSelect('left')">
+            <thead>
+              <tr>
+               
+                <th>Name</th>
+                <th>TemplateName</th>
+                <th>LastModified</th>
+                <th>DIR</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                  <td (dblclick)="loadParent('left')">...</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              <tr *ngFor="let item of leftData.Children" [ngClass]="getClass(item)"
+                (dblclick)="leftDoubleClick(item)"
+                (contextmenu)="onRightClick(item)">
+                <td><img src="{{item.Icon}}"  width="10" height="10"/>&nbsp;{{item.Name}}</td>
+                <td>{{item.TemplateName}}</td>
+                <td>{{item.LastModified}}</td>
+                <td>{{item.HasChildren}}</td>
+              </tr>
+            </tbody>
+          </table>
+          <sc-progress-indicator-panel [show]="leftLoading">
+          </sc-progress-indicator-panel>
+        </div>
+        <div class="col-6">
+          <input type="text" class="form-control" [ngModel]="rightPath" disabled />
+          <table scTable *ngIf="!rightLoading" [ngClass]="GetTableClass('right')" (click)="tableSelect('right')">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>TemplateName</th>
+                <th>LastModified</th>
+                <th>DIR</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td (dblclick)="loadParent('right')">...</td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr *ngFor="let item of rightData.Children" [ngClass]="getClass(item)" (contextmenu)="onRightClick(item)"
+                (dblclick)="rightDoubleClick(item)">
+                <td><img src="{{item.Icon}}" width="10" height="10" />&nbsp;{{item.Name}}</td>
+                <td>{{item.TemplateName}}</td>
+                <td>{{item.LastModified}}</td>
+                <td>{{item.HasChildren}}</td>
+              </tr>
+            </tbody>
+          </table>
+          <sc-progress-indicator-panel [show]="rightLoading">
+          </sc-progress-indicator-panel>
+        </div>
+      </div>
+    </div>
+  </article>
+  <aside scPageContext [show]="isSearching" class="bg-basic-white">
+    <div class="p-3">
+      <h4>Panel by toggle</h4>
+    </div>
+  </aside>
+</sc-page>
