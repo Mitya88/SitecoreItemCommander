@@ -10,7 +10,11 @@
 
         GenericItemEntity QuerySingle(QuerySingleDto query);
 
+        void CreateFolder(FolderRequest folder);
+
         void Copy(CopyRequest query);
+
+        void CopySingle(CopySingle query);
 
         void Move(MoveRequest query);
 

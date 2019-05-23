@@ -17,4 +17,20 @@ export class ItemCommanderService {
   copyItems(body:any){
     return this.httpClient.post('/sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/copy',body);
     }
+
+    moveItems(body:any){
+      return this.httpClient.post('/sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/move',body);
+      }
+
+      deleteItems(body:any){
+        return this.httpClient.post('/sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/delete',body);
+        }
+
+        copySingleItem(body:any){
+          return this.httpClient.post('/sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/copysingle',body);
+          }
+
+          addFolder(body:any){
+            return this.httpClient.post('/sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/folder',body);
+            }
 }

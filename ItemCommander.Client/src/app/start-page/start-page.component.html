@@ -32,17 +32,17 @@
           <sc-icon icon="earth2"></sc-icon>
           Publish
         </button>
-        <button scIconButton>
+        <button scIconButton (click)="deleteClick()">
           <sc-icon icon="delete"></sc-icon>
           Delete
         </button>
-        <button scIconButton>
+        <button scIconButton (click)="openFolderPopup()">
           <sc-icon icon="add"></sc-icon>
           Add folder
         </button>
         <button scIconButton (click)="selectAll()">
-          <sc-icon icon="add"></sc-icon>
-          Select Aall</button>
+          <sc-icon icon="arrow_circle2"></sc-icon>
+          Select all in active tab</button>
       </sc-action-bar-left>
       <sc-action-bar-right>
         <button scIconButton>
@@ -78,6 +78,7 @@
                   <td></td>
                 </tr>
               <tr *ngFor="let item of leftData.Children" [ngClass]="getClass(item)"
+               (click)="singleSelect(item)"
                 (dblclick)="leftDoubleClick(item)"
                 (contextmenu)="onRightClick(item)">
                 <td><img src="{{item.Icon}}"  width="10" height="10"/>&nbsp;{{item.Name}}</td>
@@ -108,7 +109,9 @@
                 <td></td>
                 <td></td>
               </tr>
-              <tr *ngFor="let item of rightData.Children" [ngClass]="getClass(item)" (contextmenu)="onRightClick(item)"
+              <tr *ngFor="let item of rightData.Children" [ngClass]="getClass(item)" 
+              (click)="singleSelect(item)"
+              (contextmenu)="onRightClick(item)"
                 (dblclick)="rightDoubleClick(item)">
                 <td><img src="{{item.Icon}}" width="10" height="10" />&nbsp;{{item.Name}}</td>
                 <td>{{item.TemplateName}}</td>
@@ -129,3 +132,52 @@
     </div>
   </aside>
 </sc-page>
+
+<template #singleCopy>
+  <sc-dialog>
+    <sc-dialog-header>
+      <h4>Copy</h4>
+    </sc-dialog-header>
+    <sc-dialog-body>
+      <h2>Item Name</h2>
+      <input type="text" class="form-control" (input)="parent.onSearchChange($event.target.value)"/>
+
+    </sc-dialog-body>
+    <sc-dialog-footer>
+      <button scButton scDialogClose>Cancel</button>
+      <button scButton="primary" (click)="parent.singleCopy()">Copy</button>
+    </sc-dialog-footer>
+  </sc-dialog>
+</template>
+
+<template #delete>
+  <sc-dialog>
+    <sc-dialog-header>
+      <h4>Delete</h4>
+    </sc-dialog-header>
+    <sc-dialog-body>
+      <h2>Are you sure?</h2>
+    </sc-dialog-body>
+    <sc-dialog-footer>
+      <button scButton scDialogClose>Cancel</button>
+      <button scButton="primary" (click)="parent.delete()">Delete</button>
+    </sc-dialog-footer>
+  </sc-dialog>
+</template>
+
+<template #addFolder>
+  <sc-dialog>
+    <sc-dialog-header>
+      <h4>Add Folder</h4>
+    </sc-dialog-header>
+    <sc-dialog-body>
+      <h2>Folder Name</h2>
+      <input type="text" class="form-control" (input)="parent.onSearchChange($event.target.value)"/>
+
+    </sc-dialog-body>
+    <sc-dialog-footer>
+      <button scButton scDialogClose>Cancel</button>
+      <button scButton="primary" (click)="parent.addFolder()">Add</button>
+    </sc-dialog-footer>
+  </sc-dialog>
+</template>

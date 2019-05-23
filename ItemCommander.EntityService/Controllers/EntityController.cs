@@ -61,6 +61,15 @@
         }
 
         [HttpPost]
+        [ActionName("copysingle")]
+        //Sample: /sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/copy
+        public GenericItemEntity CopySingle(string id, CopySingle query)
+        {
+            _customRepositoryActions.CopySingle(query);
+            return null;
+        }
+
+        [HttpPost]
         [ActionName("move")]
         //Sample: /sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/copy
         public GenericItemEntity Move(string id, MoveRequest query)
@@ -75,6 +84,15 @@
         public GenericItemEntity Delete(string id, DeleteRequest query)
         {
             Task.Run(() => _customRepositoryActions.Delete(query));
+            return null;
+        }
+
+        [HttpPost]
+        [ActionName("folder")]
+        //Sample: /sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/copy
+        public GenericItemEntity folder(string id, FolderRequest query)
+        {
+            _customRepositoryActions.CreateFolder(query);
             return null;
         }
 

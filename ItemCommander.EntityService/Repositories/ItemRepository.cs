@@ -194,11 +194,20 @@
             }
         }
 
-
+        public string FolderTemplate = "{A87A00B1-E6DB-45AB-8B54-636FEC3B5523}";
 
         public void PublishItem(string id, string target, string language)
         {
             
+        }
+
+        public void CreateFolder(FolderRequest folder)
+        {
+            var targetItem = this.database.GetItem(folder.TargetPath);
+            using (new SecurityDisabler())
+            {
+                targetItem.Add(folder.Name, new TemplateID(new ID(FolderTemplate)));
+            }
         }
 
         public void Copy(CopyRequest query)
@@ -230,7 +239,17 @@
 
             Parallel.Invoke(actions.ToArray());
         }
+        public void CopySingle(CopySingle query)
+        {
 
+            var targetItem = this.database.GetItem(query.TargetPath);
+            using (new SecurityDisabler())
+            {
+                var sourceITem = this.database.GetItem(new ID(query.Item));
+
+                sourceITem.CopyTo(targetItem, query.Name, new ID(Guid.NewGuid()), false);
+            }
+        }
         public void Move(MoveRequest query)
         {
 
