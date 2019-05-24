@@ -1,6 +1,7 @@
 ﻿namespace ItemCommander.EntityService.Interfaces
 {
     using ItemCommander.EntityService.Models;
+    using Sitecore.Data.Items;
     using Sitecore.Services.Core;
     using System.Collections.Generic;
 
@@ -20,6 +21,8 @@
 
         void Delete(DeleteRequest delete);
 
+        List<Item> GetItems(List<string> ids);
+
         int GetProcessedCount();
 
         List<GenericItemEntity> QueryMulti(QueryMultiDto query);
@@ -27,5 +30,7 @@
         void PublishItem(string id, string target, string language);
 
         ItemCommanderResponse GetChildren(string id);
+
+        void SetDatabase(string dbName);
     }
 }

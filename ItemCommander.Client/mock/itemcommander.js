@@ -1,5 +1,5 @@
 module.exports = {
-  'GET /sitecore/api/ssc/ItemComander-EntityService-Controllers/Entity/0DE95AE4-41AB-4D01-9EB0-67441B7C2450/children': function (req, res) {
+  'GET /sitecore/api/ssc/ItemComander-EntityService-Controllers/Entity/11111111-1111-1111-1111-111111111111/children': function (req, res) {
     res.json(
      {"CurrentPath":"/sitecore",
         "Children": [
@@ -26,7 +26,7 @@ module.exports = {
   'GET /sitecore/api/ssc/ItemComander-EntityService-Controllers/Entity/0/children': function (req, res) {
     res.json(
      {"CurrentPath":"/sitecore/content",
-     "ParentId":"0DE95AE4-41AB-4D01-9EB0-67441B7C2450",
+     "ParentId":"11111111-1111-1111-1111-111111111111",
         "Children": [
         {
           "Id":"02",

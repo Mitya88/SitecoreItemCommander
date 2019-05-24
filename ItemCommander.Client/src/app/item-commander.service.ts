@@ -33,4 +33,12 @@ export class ItemCommanderService {
           addFolder(body:any){
             return this.httpClient.post('/sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/folder',body);
             }
+
+            setDatabase(id:any){
+              return this.httpClient.get(`/sitecore/api/ssc/ItemComander-EntityService-Controllers/Entity/`+id+'/database');
+            }
+
+            packageItems(body:any){
+              return this.httpClient.post('/sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/package',body);
+              }
 }

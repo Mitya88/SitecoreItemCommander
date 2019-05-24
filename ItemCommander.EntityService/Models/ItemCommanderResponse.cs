@@ -15,4 +15,9 @@ namespace ItemCommander.EntityService.Models
 
         public List<GenericItemEntity> Children { get; set; }
     }
+
+    public class DownloadResponse
+    {
+        public string FileName { get; set; }
+    }
 }

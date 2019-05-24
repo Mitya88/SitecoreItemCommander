@@ -22,3 +22,11 @@ export class FolderRequest{
     TargetPath:string;
     Name:string;
 }
+
+export class PackageRequest{
+    Items:Array<string>;
+}
+
+export class DownloadResponse{
+    FileName:string;
+}

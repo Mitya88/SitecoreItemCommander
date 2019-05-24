@@ -1,7 +1,7 @@
 <sc-page [showNav]="isNavigationShown">
   <div scPageHeader>
     <sc-global-header appName="Item Commander v1.0" [(show)]="isNavigationShown">
-      <a href="#" scGlobalLogo></a>
+      <a href="/" scGlobalLogo></a>
       <sc-account-information (logout)="logoutService.logout()"></sc-account-information>
     </sc-global-header>
   </div>
@@ -24,13 +24,13 @@
           <sc-icon icon="copy"></sc-icon>
           Copy
         </button>
-        <button scIconButton>
+        <button scIconButton (click)="move()">
           <sc-icon icon="arrow_cross"></sc-icon>
           Move
         </button>
-        <button scIconButton>
-          <sc-icon icon="earth2"></sc-icon>
-          Publish
+        <button scIconButton (click)="downloadAsPackage()">
+          <sc-icon icon="arrow_down"></sc-icon>
+          Download as Package
         </button>
         <button scIconButton (click)="deleteClick()">
           <sc-icon icon="delete"></sc-icon>
@@ -45,12 +45,9 @@
           Select all in active tab</button>
       </sc-action-bar-left>
       <sc-action-bar-right>
-        <button scIconButton>
-          <sc-icon icon="gearwheels"></sc-icon>
-          Settings
-        </button>
+       
         <button type="button" scIconButton [(scToggle)]="isSearching">
-          <sc-icon size="small" icon="magnifying_glass"></sc-icon>
+          <sc-icon icon="gearwheels"></sc-icon>
         </button>
       </sc-action-bar-right>
     </sc-action-bar>
@@ -128,7 +125,10 @@
   </article>
   <aside scPageContext [show]="isSearching" class="bg-basic-white">
     <div class="p-3">
-      <h4>Panel by toggle</h4>
+      <h4>Database</h4>
+      <select id="country" [(ngModel)]="selectedCountry" class="form-control" (change)="changeDatabase()">
+        <option *ngFor="let c of countries" [value]="c" >{{ c }}</option>
+       </select> 
     </div>
   </aside>
 </sc-page>

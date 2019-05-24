@@ -1,10 +1,11 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ItemCommanderService } from '../item-commander.service';
 import { Item } from '../contract/Item';
-import { CopyRequest, CopySingle, DeleteRequest, FolderRequest} from '../contract/copyRequest';
+import { CopyRequest, CopySingle, DeleteRequest, FolderRequest, PackageRequest, DownloadResponse} from '../contract/copyRequest';
 import { ItemCommanderResponse } from '../contract/ItemCommanderResponse';
 import { SciLogoutService } from '@speak/ng-sc/logout';
 import { ScDialogService } from '@speak/ng-bcl/dialog';
+import { FormGroup, FormControl } from '@angular/forms';
 @Component({
   selector: 'app-start-page',
   templateUrl: './start-page.component.html',
@@ -23,8 +24,13 @@ export class StartPageComponent implements OnInit {
 
   @ViewChild('addFolder')
   private addFolderRef : TemplateRef<any>
-
+  
   isNavigationShown : boolean;
+  countries: string[] = ['master', 'core', 'web'];
+  selectedCountry: string = 'master';
+
+ 
+
   constructor(private itemCommanderService: ItemCommanderService,
     public logoutService: SciLogoutService, public dialogService: ScDialogService) { }
 
@@ -41,6 +47,10 @@ export class StartPageComponent implements OnInit {
   selectedTable:string;
   singleCopyName:string;
   parent:any;
+
+
+  
+
   ngOnInit() {
     this.selectedTable = "left";
     this.load();
@@ -52,6 +62,15 @@ export class StartPageComponent implements OnInit {
     return this.selectedTable == table ? "table-selected": "table-not-selected";
   }
 
+  changeDatabase(){
+    console.log(this.selectedCountry);
+
+    this.itemCommanderService.setDatabase(this.selectedCountry).subscribe({
+      next: response =>{
+        this.load();
+      }
+    });
+  }
   tableSelect(table:string){
     this.selectedTable = table;
   }
@@ -62,9 +81,9 @@ export class StartPageComponent implements OnInit {
     
     this.rightPath = '/sitecore/content';
 
-    this.loadLeftItems('0DE95AE4-41AB-4D01-9EB0-67441B7C2450');
+    this.loadLeftItems('11111111-1111-1111-1111-111111111111');
 
-    this.loadRightItems('0DE95AE4-41AB-4D01-9EB0-67441B7C2450');
+    this.loadRightItems('11111111-1111-1111-1111-111111111111');
   }
 
 
@@ -102,6 +121,57 @@ export class StartPageComponent implements OnInit {
    openFolderPopup(){
      this.dialogService.open(this.addFolderRef);
    }
+
+   move(){
+      let moveRequest = new CopyRequest();
+      if(this.selectedTable == 'left'){
+        //taget a right
+        moveRequest.TargetPath = this.rightData.CurrentPath;
+  
+        moveRequest.Items = this.leftData.Children.filter( it => it.IsSelected).map(function(it){return it.Id});
+      }
+      else{
+        moveRequest.TargetPath = this.leftData.CurrentPath;
+        moveRequest.Items = this.rightData.Children.filter( it => it.IsSelected).map(function(it){return it.Id});
+      }
+
+      this.itemCommanderService.moveItems(moveRequest).subscribe(
+        {
+          next: response =>{
+           this.loadLeftItems(this.leftData.CurrentId);
+           this.loadRightItems(this.rightData.CurrentId);
+          }
+        }
+       );
+   }
+
+   downloadAsPackage(){
+    let moveRequest = new PackageRequest();
+    if(this.selectedTable == 'left'){
+      
+
+      moveRequest.Items = this.leftData.Children.filter( it => it.IsSelected).map(function(it){return it.Id});
+    }
+    else{
+      moveRequest.Items = this.rightData.Children.filter( it => it.IsSelected).map(function(it){return it.Id});
+    }
+
+    this.itemCommanderService.packageItems(moveRequest).subscribe({
+      next: fileName=>{
+        console.log(fileName);
+        let theFile = '/sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/download?fileName='+(fileName as DownloadResponse).FileName;
+
+        // let url = window.URL.createObjectURL(theFile);
+    window.open(theFile);
+      }
+    });
+   }
+
+   downloadFile(data: any) {
+    const blob = new Blob([data], { type: 'application/zip' });
+    const url= window.URL.createObjectURL(blob);
+    window.open(url);
+  }
   copyRequest:CopyRequest;
   copy(){
 

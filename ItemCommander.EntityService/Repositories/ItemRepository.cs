@@ -18,16 +18,24 @@
 
     public class ItemRepository : IGenericItemRepository<GenericItemEntity>
     {
-        private readonly Database database;
+        private static Database database;
 
         private static ConcurrentQueue<string> queue;
         public ItemRepository()
         {
-            this.database = Sitecore.Data.Database.GetDatabase("master");
+            if(database == null)
+            {
+                database = Sitecore.Data.Database.GetDatabase("master");
+            }
             if (queue ==null)
             {
                 queue = new ConcurrentQueue<string>();
             }
+        }
+
+        public void SetDatabase(string dbName)
+        {
+            database = Sitecore.Data.Database.GetDatabase(dbName);
         }
         public IQueryable<GenericItemEntity> GetAll()
         {
@@ -37,7 +45,7 @@
         public ItemCommanderResponse GetChildren(string id)
         {
             var itemCommanderResponse = new ItemCommanderResponse();
-            var sitecoreItem = this.database.GetItem(new Sitecore.Data.ID(id));
+            var sitecoreItem = database.GetItem(new Sitecore.Data.ID(id));
             itemCommanderResponse.CurrentPath = sitecoreItem.Paths.FullPath;
             itemCommanderResponse.CurrentId = id;
             itemCommanderResponse.ParentId = sitecoreItem.ParentID.ToString();
@@ -93,7 +101,7 @@
         ///sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/{80FDC514-CD6A-4EEF-B9C2-6CFA82B0F37A}
         public GenericItemEntity FindById(string id)
         {
-            var sitecoreItem = this.database.GetItem(new Sitecore.Data.ID(id));
+            var sitecoreItem = database.GetItem(new Sitecore.Data.ID(id));
 
 
 
@@ -139,7 +147,7 @@
                 using (new LanguageSwitcher(Language.Parse(entity.Language)))
                 {
 
-                    var targetItem = this.database.GetItem(new ID(entity.ParentId));
+                    var targetItem = database.GetItem(new ID(entity.ParentId));
 
                     var item = targetItem.Add(entity.Name, new TemplateID(new ID(entity.TemplateId)), new ID(entity.Id));
                 }
@@ -155,7 +163,7 @@
                 return false;
             }
 
-            return this.database.GetItem(new ID(entity.Id)) != null;
+            return database.GetItem(new ID(entity.Id)) != null;
         }
 
 
@@ -167,7 +175,7 @@
                 using (new LanguageSwitcher(Language.Parse(entity.Language)))
                 {
 
-                    var targetItem = this.database.GetItem(new ID(entity.Id));
+                    var targetItem = database.GetItem(new ID(entity.Id));
                     using (new EditContext(targetItem))
                     {
                         foreach(var field in entity.Fields)
@@ -187,7 +195,7 @@
                 using (new LanguageSwitcher(Language.Parse(entity.Language)))
                 {
 
-                    var targetItem = this.database.GetItem(new ID(entity.Id));
+                    var targetItem = database.GetItem(new ID(entity.Id));
 
                     targetItem.Delete();
                 }
@@ -203,7 +211,7 @@
 
         public void CreateFolder(FolderRequest folder)
         {
-            var targetItem = this.database.GetItem(folder.TargetPath);
+            var targetItem = database.GetItem(folder.TargetPath);
             using (new SecurityDisabler())
             {
                 targetItem.Add(folder.Name, new TemplateID(new ID(FolderTemplate)));
@@ -213,7 +221,7 @@
         public void Copy(CopyRequest query)
         {
 
-            var targetItem = this.database.GetItem(query.TargetPath);
+            var targetItem = database.GetItem(query.TargetPath);
             query.Items.ForEach(t => queue.Enqueue(t));
 
             List<Action> actions = new List<Action>();
@@ -227,7 +235,7 @@
                     {
                         using (new SecurityDisabler())
                         {
-                            var sourceITem = this.database.GetItem(new ID(itemId));
+                            var sourceITem = database.GetItem(new ID(itemId));
 
                             sourceITem.CopyTo(targetItem, sourceITem.Name, new ID(Guid.NewGuid()), false);
                         }
@@ -242,10 +250,10 @@
         public void CopySingle(CopySingle query)
         {
 
-            var targetItem = this.database.GetItem(query.TargetPath);
+            var targetItem = database.GetItem(query.TargetPath);
             using (new SecurityDisabler())
             {
-                var sourceITem = this.database.GetItem(new ID(query.Item));
+                var sourceITem = database.GetItem(new ID(query.Item));
 
                 sourceITem.CopyTo(targetItem, query.Name, new ID(Guid.NewGuid()), false);
             }
@@ -253,8 +261,9 @@
         public void Move(MoveRequest query)
         {
 
-            var targetItem = this.database.GetItem(query.TargetPath);
+            var targetItem = database.GetItem(query.TargetPath);
             query.Items.ForEach(t => queue.Enqueue(t));
+
 
             List<Action> actions = new List<Action>();
 
@@ -267,7 +276,7 @@
                     {
                         using (new SecurityDisabler())
                         {
-                            var sourceITem = this.database.GetItem(new ID(itemId));
+                            var sourceITem = database.GetItem(new ID(itemId));
 
                             sourceITem.MoveTo(targetItem);
                         }
@@ -296,7 +305,7 @@
                     {
                         using (new SecurityDisabler())
                         {
-                            var sourceITem = this.database.GetItem(new ID(itemId));
+                            var sourceITem = database.GetItem(new ID(itemId));
 
                             sourceITem.Delete();
                         }
@@ -412,6 +421,11 @@
                     return result;
                 }
             }
+        }
+
+        public List<Item> GetItems(List<string> ids)
+        {
+            return ids.Select(t => database.GetItem(new ID(t))).ToList();
         }
     }
 }
