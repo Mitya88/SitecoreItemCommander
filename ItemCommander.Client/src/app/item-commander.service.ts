@@ -6,39 +6,41 @@ export class ItemCommanderService {
 
   constructor(private httpClient: HttpClient) {
 
-    
-   }
 
-   fetchItems(id:any){
-    return this.httpClient.get(`/sitecore/api/ssc/ItemComander-EntityService-Controllers/Entity/`+id+'/children');
   }
-   
 
-  copyItems(body:any){
-    return this.httpClient.post('/sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/copy',body);
-    }
+  baseUrl = "/sitecore/api/ssc/ItemComander-EntityService-Controllers/Entity/";
 
-    moveItems(body:any){
-      return this.httpClient.post('/sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/move',body);
-      }
+  fetchItems(id: any) {
+    return this.httpClient.get(this.baseUrl + id + '/children');
+  }
 
-      deleteItems(body:any){
-        return this.httpClient.post('/sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/delete',body);
-        }
 
-        copySingleItem(body:any){
-          return this.httpClient.post('/sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/copysingle',body);
-          }
+  copyItems(body: any) {
+    return this.httpClient.post(this.baseUrl + '-/copy', body);
+  }
 
-          addFolder(body:any){
-            return this.httpClient.post('/sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/folder',body);
-            }
+  moveItems(body: any) {
+    return this.httpClient.post(this.baseUrl + '-/move', body);
+  }
 
-            setDatabase(id:any){
-              return this.httpClient.get(`/sitecore/api/ssc/ItemComander-EntityService-Controllers/Entity/`+id+'/database');
-            }
+  deleteItems(body: any) {
+    return this.httpClient.post(this.baseUrl + '-/delete', body);
+  }
 
-            packageItems(body:any){
-              return this.httpClient.post('/sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/package',body);
-              }
+  copySingleItem(body: any) {
+    return this.httpClient.post(this.baseUrl + '-/copysingle', body);
+  }
+
+  addFolder(body: any) {
+    return this.httpClient.post(this.baseUrl + '-/folder', body);
+  }
+
+  setDatabase(id: any) {
+    return this.httpClient.get(this.baseUrl + id + '/database');
+  }
+
+  packageItems(body: any) {
+    return this.httpClient.post(this.baseUrl + '-/package', body);
+  }
 }

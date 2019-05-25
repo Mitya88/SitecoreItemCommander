@@ -20,11 +20,11 @@
             <sc-dropdown-header>Content Editor</sc-dropdown-header>
           </sc-dropdown-menu>
         </sc-dropdown>
-        <button scIconButton (click)="copy()">
+        <button scIconButton (click)="openConfirmDialog('copy')">
           <sc-icon icon="copy"></sc-icon>
           Copy
         </button>
-        <button scIconButton (click)="move()">
+        <button scIconButton (click)="openConfirmDialog('move')">
           <sc-icon icon="arrow_cross"></sc-icon>
           Move
         </button>
@@ -32,20 +32,35 @@
           <sc-icon icon="arrow_down"></sc-icon>
           Download as Package
         </button>
-        <button scIconButton (click)="deleteClick()">
+        <button scIconButton (click)="openConfirmDialog('delete')">
           <sc-icon icon="delete"></sc-icon>
           Delete
         </button>
-        <button scIconButton (click)="openFolderPopup()">
+        <button scIconButton (click)="openInputDialog('addFolder')">
           <sc-icon icon="add"></sc-icon>
           Add folder
         </button>
+        <button scIconButton (click)="openInputDialog('search')">
+          <sc-icon icon="magnifying_glass"></sc-icon>
+          Search
+        </button>
         <button scIconButton (click)="selectAll()">
           <sc-icon icon="arrow_circle2"></sc-icon>
-          Select all in active tab</button>
+          Select all in active tab
+        </button>
+        <sc-dropdown> <button scButton scDropdownToggle>
+            <sc-icon icon="lock"></sc-icon>
+            Lock/UnLock<sc-icon icon="lock_open"></sc-icon>
+          </button>
+          <sc-dropdown-menu class="dropdownMenu">
+            <sc-dropdown-header>Lock/Unlock</sc-dropdown-header>
+            <a scDropdownItem (click)="openConfirmDialog('lock')">Lock</a>
+            <a scDropdownItem (click)="openConfirmDialog('unlock')">Unlock</a>
+          </sc-dropdown-menu>
+        </sc-dropdown>
       </sc-action-bar-left>
       <sc-action-bar-right>
-       
+
         <button type="button" scIconButton [(scToggle)]="isSearching">
           <sc-icon icon="gearwheels"></sc-icon>
         </button>
@@ -60,7 +75,7 @@
           <table *ngIf="!leftLoading" scTable [ngClass]="GetTableClass('left')" (click)="tableSelect('left')">
             <thead>
               <tr>
-               
+
                 <th>Name</th>
                 <th>TemplateName</th>
                 <th>LastModified</th>
@@ -69,16 +84,14 @@
             </thead>
             <tbody>
               <tr>
-                  <td (dblclick)="loadParent('left')">...</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-              <tr *ngFor="let item of leftData.Children" [ngClass]="getClass(item)"
-               (click)="singleSelect(item)"
-                (dblclick)="leftDoubleClick(item)"
-                (contextmenu)="onRightClick(item)">
-                <td><img src="{{item.Icon}}"  width="10" height="10"/>&nbsp;{{item.Name}}</td>
+                <td (dblclick)="loadParent('left')">...</td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr *ngFor="let item of leftData.Children" [ngClass]="getClass(item)" (click)="singleSelect(item)"
+                (dblclick)="leftDoubleClick(item)" (contextmenu)="onRightClick(item)">
+                <td><img src="{{item.Icon}}" width="10" height="10" />&nbsp;{{item.Name}}</td>
                 <td>{{item.TemplateName}}</td>
                 <td>{{item.LastModified}}</td>
                 <td>{{item.HasChildren}}</td>
@@ -106,10 +119,8 @@
                 <td></td>
                 <td></td>
               </tr>
-              <tr *ngFor="let item of rightData.Children" [ngClass]="getClass(item)" 
-              (click)="singleSelect(item)"
-              (contextmenu)="onRightClick(item)"
-                (dblclick)="rightDoubleClick(item)">
+              <tr *ngFor="let item of rightData.Children" [ngClass]="getClass(item)" (click)="singleSelect(item)"
+                (contextmenu)="onRightClick(item)" (dblclick)="rightDoubleClick(item)">
                 <td><img src="{{item.Icon}}" width="10" height="10" />&nbsp;{{item.Name}}</td>
                 <td>{{item.TemplateName}}</td>
                 <td>{{item.LastModified}}</td>
@@ -126,58 +137,66 @@
   <aside scPageContext [show]="isSearching" class="bg-basic-white">
     <div class="p-3">
       <h4>Database</h4>
-      <select id="country" [(ngModel)]="selectedCountry" class="form-control" (change)="changeDatabase()">
-        <option *ngFor="let c of countries" [value]="c" >{{ c }}</option>
-       </select> 
+      <select id="database" [(ngModel)]="selectedDatabase" class="form-control" (change)="changeDatabase()">
+        <option *ngFor="let c of databases" [value]="c">{{ c }}</option>
+      </select>
     </div>
   </aside>
 </sc-page>
 
-<template #singleCopy>
+
+<template #confirmDialog>
   <sc-dialog>
     <sc-dialog-header>
-      <h4>Copy</h4>
-    </sc-dialog-header>
-    <sc-dialog-body>
-      <h2>Item Name</h2>
-      <input type="text" class="form-control" (input)="parent.onSearchChange($event.target.value)"/>
-
-    </sc-dialog-body>
-    <sc-dialog-footer>
-      <button scButton scDialogClose>Cancel</button>
-      <button scButton="primary" (click)="parent.singleCopy()">Copy</button>
-    </sc-dialog-footer>
-  </sc-dialog>
-</template>
-
-<template #delete>
-  <sc-dialog>
-    <sc-dialog-header>
-      <h4>Delete</h4>
+      <h4>{{parent.confirmTitle}}</h4>
     </sc-dialog-header>
     <sc-dialog-body>
       <h2>Are you sure?</h2>
+      <p>{{parent.confirmText}}</p>
     </sc-dialog-body>
     <sc-dialog-footer>
       <button scButton scDialogClose>Cancel</button>
-      <button scButton="primary" (click)="parent.delete()">Delete</button>
+      <button scButton="primary" (click)="parent.Action()">Ok</button>
     </sc-dialog-footer>
   </sc-dialog>
 </template>
 
-<template #addFolder>
+<template #simpleInput>
   <sc-dialog>
     <sc-dialog-header>
-      <h4>Add Folder</h4>
+      <h4>{{parent.singleInputTitle}}</h4>
     </sc-dialog-header>
     <sc-dialog-body>
-      <h2>Folder Name</h2>
-      <input type="text" class="form-control" (input)="parent.onSearchChange($event.target.value)"/>
+      <h2>{{parent.singleInputText}}</h2>
+      <input type="text" class="form-control" (input)="parent.onSearchChange($event.target.value)" />
 
     </sc-dialog-body>
     <sc-dialog-footer>
       <button scButton scDialogClose>Cancel</button>
-      <button scButton="primary" (click)="parent.addFolder()">Add</button>
+      <button scButton="primary" (click)="parent.singleInputAction()">Go</button>
+    </sc-dialog-footer>
+  </sc-dialog>
+</template>
+
+<template #warning>
+  <sc-dialog>
+    <sc-dialog-header>
+      <h4>Warning</h4>
+    </sc-dialog-header>
+    <sc-dialog-body>
+      <div class="row">
+        <div class="col-2">
+          <sc-icon icon="about" size="xxxlarge"></sc-icon>
+        </div>
+        <div class="col-10" style="padding-top:30px;">
+          <h2>There is no selected item in the active tab.{{parent.warningText}}</h2>
+        </div>
+      </div>
+
+
+    </sc-dialog-body>
+    <sc-dialog-footer>
+      <button scButton scButton="primary" scDialogClose>Close</button>
     </sc-dialog-footer>
   </sc-dialog>
 </template>
