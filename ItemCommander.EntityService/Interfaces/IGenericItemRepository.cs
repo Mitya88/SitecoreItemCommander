@@ -21,6 +21,8 @@
 
         void Delete(DeleteRequest delete);
 
+        void Lock(LockRequest lockRequest);
+
         List<Item> GetItems(List<string> ids);
 
         int GetProcessedCount();
@@ -30,6 +32,9 @@
         void PublishItem(string id, string target, string language);
 
         ItemCommanderResponse GetChildren(string id);
+
+
+        ItemCommanderResponse Search(string keyword);
 
         void SetDatabase(string dbName);
     }

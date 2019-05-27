@@ -35,4 +35,10 @@ namespace ItemCommander.EntityService.Models
     {
         public List<string> Items { get; set; }
     }
+
+    public class LockRequest
+    {
+        public bool Lock { get; set; }
+        public List<string> Items { get; set; }
+    }
 }

@@ -105,6 +105,15 @@
         }
 
         [HttpPost]
+        [ActionName("lock")]
+        //Sample: /sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/copy
+        public GenericItemEntity Lock(string id, LockRequest query)
+        {
+            _customRepositoryActions.Lock(query);
+            return null;
+        }
+
+        [HttpPost]
         [ActionName("folder")]
         //Sample: /sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/copy
         public GenericItemEntity folder(string id, FolderRequest query)
@@ -129,6 +138,16 @@
             _customRepositoryActions.SetDatabase(id);
 
             return 0;
+        }
+
+        [HttpGet]
+        [ActionName("search")]
+        //Sample: /sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/copy
+        public ItemCommanderResponse search(string id, string keyword)
+        {
+            
+
+            return _customRepositoryActions.Search(keyword);
         }
 
         [HttpPost]

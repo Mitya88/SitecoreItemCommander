@@ -9,6 +9,10 @@
     using ItemCommander.EntityService.Interfaces;
     using ItemCommander.EntityService.Models;
     using Sitecore;
+    using Sitecore.ContentSearch;
+    using Sitecore.ContentSearch.Linq;
+    using Sitecore.ContentSearch.Linq.Utilities;
+    using Sitecore.ContentSearch.SearchTypes;
     using Sitecore.Data;
     using Sitecore.Data.Fields;
     using Sitecore.Data.Items;
@@ -60,13 +64,68 @@
                 Fields = new List<FieldDto>(),
                 HasChildren = t.HasChildren,
                 LastModified = t.Statistics.Updated,
-                Icon =GetIcon(t)
+                Created = t.Statistics.Created,
+                Icon =GetIcon(t),
+                IsLocked = t.Locking.IsLocked()
             }).ToList();
 
             return itemCommanderResponse;
         }
 
+        public ItemCommanderResponse Search(string keyword)
+        {
+            var itemCommanderResponse = new ItemCommanderResponse();
 
+
+
+            using (var searchContext = GetSearchIndex().CreateSearchContext())
+            {
+                var queryable = searchContext.GetQueryable<SearchResultItem>();
+
+                var predicate = PredicateBuilder.True<SearchResultItem>();
+                var subPredicate = PredicateBuilder.True<SearchResultItem>();
+                predicate = predicate.And(t => t.Path.StartsWith("/sitecore/content"));
+                subPredicate = subPredicate.Or(t => t.Name.Contains(keyword));
+                subPredicate = subPredicate.Or(t => t.Content.Contains(keyword));
+                predicate = predicate.And(subPredicate);
+
+                queryable = queryable.Filter(predicate);
+                var results = queryable.GetResults().Where(t=>t.Document.GetItem() != null);
+                itemCommanderResponse.Children = results.Select(t => new GenericItemEntity
+                {
+                    Name = t.Document.Name,
+                    Id = t.Document.ItemId.ToString(),
+                    Language = t.Document.Language.ToString(),
+                    Path = t.Document.Path,
+                    TemplateName = t.Document.TemplateName,
+                    Fields = new List<FieldDto>(),
+                    HasChildren = t.Document.GetItem().HasChildren,
+                    LastModified = t.Document.Updated,
+                    Created = t.Document.CreatedDate,
+                    Icon = GetIcon(t.Document.GetItem())
+                }).ToList();
+                itemCommanderResponse.CurrentId = "";
+            }
+            return itemCommanderResponse;
+        }
+
+        /// <summary>
+        /// Gets the index of the search.
+        /// </summary>
+        /// <returns>Returns with the search index.</returns>
+        public ISearchIndex GetSearchIndex()
+        {
+            try
+            {
+                return ContentSearchManager.GetIndex(string.Format("sitecore_{0}_index", database.Name));
+            }
+            catch (Exception exce)
+            {
+                Sitecore.Diagnostics.Log.Error("Error at the search service. May the index was not found?", exce, this);
+            }
+
+            return null;
+        }
         /// <summary>
         /// Gets the icon of the item
         /// </summary>
@@ -74,6 +133,10 @@
         /// <returns>The icon path</returns>
         private string GetIcon(Sitecore.Data.Items.Item sitecoreItem)
         {
+            if(sitecoreItem == null)
+            {
+                return "";
+            }
             string iconImageRaw = ThemeManager.GetIconImage(sitecoreItem, 32, 32, "", "");
             if (!string.IsNullOrWhiteSpace(iconImageRaw) && iconImageRaw.Contains("src="))
             {
@@ -316,6 +379,23 @@
             }
 
             Parallel.Invoke(actions.ToArray());
+        }
+
+        public void Lock(LockRequest lockRequest)
+        {
+            foreach(var item in lockRequest.Items)
+            {
+                var scItem = database.GetItem(new ID(item));
+
+                if(scItem.Locking.IsLocked() && !lockRequest.Lock)
+                {
+                    scItem.Locking.Unlock();
+                } else if(!scItem.Locking.IsLocked() && lockRequest.Lock)
+                {
+                    scItem.Locking.Lock();
+                }
+
+            }
         }
 
         public int GetProcessedCount()

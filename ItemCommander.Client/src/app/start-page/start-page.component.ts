@@ -122,6 +122,9 @@ export class StartPageComponent implements OnInit {
     } else if (dialogAction == 'addFolder') {
       this.singleInputTitle = 'Add Folder';
       this.singleInputText = 'New folder\'s name';
+    }else if(dialogAction == 'search'){
+      this.singleInputTitle = 'Search';
+      this.singleInputText = 'Enter a keyword...';
     }
   }
 
@@ -162,9 +165,21 @@ export class StartPageComponent implements OnInit {
       this.addFolder();
     } else if (this.inputAction == 'singleCopy') {
       this.singleCopy();
+    } else if(this.inputAction == 'search'){
+      this.search();
     }
   }
-
+  
+  search(){
+     this.leftLoading = true;
+    this.itemCommanderService.search(this.inputDialogValue).subscribe({
+      next: response => {
+        this.leftData = response as ItemCommanderResponse;
+        this.leftPath = this.inputDialogValue;
+        this.leftLoading = false;
+      },
+    })
+  }
   move() {
     let moveRequest = new CopyRequest();
     if (this.selectedTable == 'left') {
@@ -242,7 +257,7 @@ export class StartPageComponent implements OnInit {
   onSearchChange(searchValue: string) {
     this.inputDialogValue = searchValue
   }
-  
+
   multipleCopy() {
     console.log(this.copyRequest);
     this.itemCommanderService.copyItems(this.copyRequest).subscribe(
@@ -377,6 +392,7 @@ export class StartPageComponent implements OnInit {
 
   rightDoubleClick(item: Item) {
     this.loadRightItems(item.Id);
+    
   }
 
   getClass(item: Item) {
@@ -384,5 +400,29 @@ export class StartPageComponent implements OnInit {
       return "selectedItem";
     }
     return "";
+  }
+
+  options = [
+    {name:'Name', value:'name', checked:true},
+    {name:'SitecorePath', value:'sitecorepath', checked:false},
+    {name:'TemplateName', value:'templatename', checked:true},
+    {name:'Created', value:'created', checked:false},
+    {name:'LastModified', value:'lastmodified', checked:true},
+    {name:'HasChildren', value:'haschildren', checked:true}
+
+  ]
+
+  selectedOptions() { // right now: ['1','3']
+    return this.options
+              .filter(opt => opt.checked)
+              .map(opt => opt.value)
+  }
+
+ showColumn(columnName:string){
+   return this.options.filter(opt => opt.value==columnName && opt.checked).length > 0;
+ }
+ getSelectedOptions(){
+   return this.options
+   .filter(opt => opt.checked);
   }
 }

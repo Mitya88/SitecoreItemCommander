@@ -15,7 +15,11 @@
         public string ParentId { get; set; }
         public bool HasChildren { get; set; }
 
+        public bool IsLocked { get; set; }
+
         public DateTime LastModified { get; set; }
+
+        public DateTime Created { get; set; }
 
 
         public List<FieldDto> Fields { get; set; }

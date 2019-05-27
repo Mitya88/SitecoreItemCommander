@@ -43,4 +43,8 @@ export class ItemCommanderService {
   packageItems(body: any) {
     return this.httpClient.post(this.baseUrl + '-/package', body);
   }
+
+  search(keyword: any) {
+    return this.httpClient.get(this.baseUrl +'-/search?keyword='+keyword);
+  }
 }

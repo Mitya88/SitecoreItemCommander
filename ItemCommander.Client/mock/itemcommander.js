@@ -9,7 +9,8 @@ module.exports = {
           "Icon": "https://via.placeholder.com/32x32",
           "TemplateName":"Sample",
           "LastModified":"20180510",
-          "HasChildren":true
+          "HasChildren":true,
+          "IsLocked":true
         },
         {
           "Id":"1",
@@ -17,7 +18,8 @@ module.exports = {
           "Icon": "https://via.placeholder.com/32x32",
           "TemplateName":"Sample",
           "LastModified":"20180510",
-          "HasChildren":true
+          "HasChildren":true,
+          "IsLocked":false
         }
       
     ]});

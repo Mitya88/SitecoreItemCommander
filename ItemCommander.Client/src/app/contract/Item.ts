@@ -5,6 +5,9 @@ export interface Item {
     TemplateName: string;
     HasChildren: boolean;
     LastModified: string;
+    
+    Created: string;
+    
     IsSelected: boolean;
     Path:string;
 }

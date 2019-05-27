@@ -76,10 +76,7 @@
             <thead>
               <tr>
 
-                <th>Name</th>
-                <th>TemplateName</th>
-                <th>LastModified</th>
-                <th>DIR</th>
+                  <th *ngFor="let item of getSelectedOptions()">{{item.name}}</th>
               </tr>
             </thead>
             <tbody>
@@ -92,9 +89,11 @@
               <tr *ngFor="let item of leftData.Children" [ngClass]="getClass(item)" (click)="singleSelect(item)"
                 (dblclick)="leftDoubleClick(item)" (contextmenu)="onRightClick(item)">
                 <td><img src="{{item.Icon}}" width="10" height="10" />&nbsp;{{item.Name}}</td>
-                <td>{{item.TemplateName}}</td>
-                <td>{{item.LastModified}}</td>
-                <td>{{item.HasChildren}}</td>
+                <td *ngIf="showColumn('sitecorepath')">{{item.Path}}</td>
+                <td *ngIf="showColumn('templatename')">{{item.TemplateName}}</td>
+                <td *ngIf="showColumn('lastmodified')">{{item.LastModified}}</td>
+                <td *ngIf="showColumn('created')">{{item.Created}}</td>
+                <td *ngIf="showColumn('haschildren')">{{item.HasChildren}}</td>
               </tr>
             </tbody>
           </table>
@@ -106,10 +105,12 @@
           <table scTable *ngIf="!rightLoading" [ngClass]="GetTableClass('right')" (click)="tableSelect('right')">
             <thead>
               <tr>
-                <th>Name</th>
+                <!-- <th>Name</th>
                 <th>TemplateName</th>
                 <th>LastModified</th>
-                <th>DIR</th>
+                <th>DIR</th> -->
+                <th *ngFor="let item of getSelectedOptions()">{{item.name}}</th>
+               
               </tr>
             </thead>
             <tbody>
@@ -122,9 +123,11 @@
               <tr *ngFor="let item of rightData.Children" [ngClass]="getClass(item)" (click)="singleSelect(item)"
                 (contextmenu)="onRightClick(item)" (dblclick)="rightDoubleClick(item)">
                 <td><img src="{{item.Icon}}" width="10" height="10" />&nbsp;{{item.Name}}</td>
-                <td>{{item.TemplateName}}</td>
-                <td>{{item.LastModified}}</td>
-                <td>{{item.HasChildren}}</td>
+                <td *ngIf="showColumn('sitecorepath')">{{item.Path}}</td>
+                <td *ngIf="showColumn('templatename')">{{item.TemplateName}}</td>
+                <td *ngIf="showColumn('lastmodified')">{{item.LastModified}}</td>
+                <td *ngIf="showColumn('created')">{{item.Created}}</td>
+                <td *ngIf="showColumn('haschildren')">{{item.HasChildren}}</td>
               </tr>
             </tbody>
           </table>
@@ -140,6 +143,19 @@
       <select id="database" [(ngModel)]="selectedDatabase" class="form-control" (change)="changeDatabase()">
         <option *ngFor="let c of databases" [value]="c">{{ c }}</option>
       </select>
+    </div>
+
+    <div class="p-3">
+        <label for="options">Show columns:</label>
+        <div *ngFor="let option of options">
+            <label>
+                <input  type="checkbox"
+                       name="options"
+                       value="{{option.value}}"
+                       [(ngModel)]="option.checked"/>
+                {{option.name}}
+            </label>
+        </div>
     </div>
   </aside>
 </sc-page>
