@@ -1,11 +1,12 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, Inject } from '@angular/core';
 import { ItemCommanderService } from '../item-commander.service';
 import { Item } from '../contract/Item';
 import { CopyRequest, CopySingle, DeleteRequest, FolderRequest, PackageRequest, DownloadResponse } from '../contract/copyRequest';
 import { ItemCommanderResponse } from '../contract/ItemCommanderResponse';
 import { SciLogoutService } from '@speak/ng-sc/logout';
 import { ScDialogService } from '@speak/ng-bcl/dialog';
-import { FormGroup, FormControl } from '@angular/forms';
+import { LOCAL_STORAGE, WebStorageService } from 'angular-webstorage-service'
+
 @Component({
   selector: 'app-start-page',
   templateUrl: './start-page.component.html',
@@ -37,8 +38,12 @@ export class StartPageComponent implements OnInit {
 
 
 
-  constructor(private itemCommanderService: ItemCommanderService,
-    public logoutService: SciLogoutService, public dialogService: ScDialogService) { }
+  constructor(
+    @Inject(LOCAL_STORAGE) private storage: WebStorageService,
+    private itemCommanderService: ItemCommanderService,
+    public logoutService: SciLogoutService,
+    public dialogService: ScDialogService,
+  ) { }
 
   isSearching = false;
   leftData: ItemCommanderResponse;
@@ -55,9 +60,17 @@ export class StartPageComponent implements OnInit {
   parent: any;
 
   ngOnInit() {
+
+    this.selectedDatabase = this.storage.get('database');
+
+    if (!this.selectedDatabase) {
+      this.selectedDatabase = 'master';
+    }
+
     this.selectedTable = "left";
     this.load();
     this.parent = this;
+
   }
 
   GetTableClass(table: string) {
@@ -65,11 +78,8 @@ export class StartPageComponent implements OnInit {
   }
 
   changeDatabase() {
-    this.itemCommanderService.setDatabase(this.selectedDatabase).subscribe({
-      next: response => {
-        this.load();
-      }
-    });
+    this.storage.set('database', this.selectedDatabase);
+    this.load();
   }
 
   tableSelect(table: string) {
@@ -122,7 +132,7 @@ export class StartPageComponent implements OnInit {
     } else if (dialogAction == 'addFolder') {
       this.singleInputTitle = 'Add Folder';
       this.singleInputText = 'New folder\'s name';
-    }else if(dialogAction == 'search'){
+    } else if (dialogAction == 'search') {
       this.singleInputTitle = 'Search';
       this.singleInputText = 'Enter a keyword...';
     }
@@ -165,14 +175,14 @@ export class StartPageComponent implements OnInit {
       this.addFolder();
     } else if (this.inputAction == 'singleCopy') {
       this.singleCopy();
-    } else if(this.inputAction == 'search'){
+    } else if (this.inputAction == 'search') {
       this.search();
     }
   }
-  
-  search(){
-     this.leftLoading = true;
-    this.itemCommanderService.search(this.inputDialogValue).subscribe({
+
+  search() {
+    this.leftLoading = true;
+    this.itemCommanderService.search(this.inputDialogValue, this.selectedDatabase).subscribe({
       next: response => {
         this.leftData = response as ItemCommanderResponse;
         this.leftPath = this.inputDialogValue;
@@ -193,7 +203,7 @@ export class StartPageComponent implements OnInit {
       moveRequest.Items = this.rightData.Children.filter(it => it.IsSelected).map(function (it) { return it.Id });
     }
 
-    this.itemCommanderService.moveItems(moveRequest).subscribe(
+    this.itemCommanderService.moveItems(moveRequest, this.selectedDatabase).subscribe(
       {
         next: response => {
           this.loadLeftItems(this.leftData.CurrentId);
@@ -222,7 +232,7 @@ export class StartPageComponent implements OnInit {
       moveRequest.Items = this.rightData.Children.filter(it => it.IsSelected).map(function (it) { return it.Id });
     }
 
-    this.itemCommanderService.packageItems(moveRequest).subscribe({
+    this.itemCommanderService.packageItems(moveRequest, this.selectedDatabase).subscribe({
       next: fileName => {
         console.log(fileName);
         let theFile = '/sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/download?fileName=' + (fileName as DownloadResponse).FileName;
@@ -260,7 +270,7 @@ export class StartPageComponent implements OnInit {
 
   multipleCopy() {
     console.log(this.copyRequest);
-    this.itemCommanderService.copyItems(this.copyRequest).subscribe(
+    this.itemCommanderService.copyItems(this.copyRequest, this.selectedDatabase).subscribe(
       {
         next: response => {
           this.loadLeftItems(this.leftData.CurrentId);
@@ -275,7 +285,7 @@ export class StartPageComponent implements OnInit {
     contract.Item = this.copyRequest.Items[0];
     contract.TargetPath = this.copyRequest.TargetPath;
     contract.Name = this.parent.inputDialogValue;
-    this.itemCommanderService.copySingleItem(contract).subscribe({
+    this.itemCommanderService.copySingleItem(contract, this.selectedDatabase).subscribe({
       next: response => {
         this.loadLeftItems(this.leftData.CurrentId);
         this.loadRightItems(this.rightData.CurrentId);
@@ -288,7 +298,7 @@ export class StartPageComponent implements OnInit {
     let contract = new FolderRequest();
     contract.TargetPath = this.getTargetPathForFolder();
     contract.Name = this.parent.inputDialogValue;
-    this.itemCommanderService.addFolder(contract).subscribe({
+    this.itemCommanderService.addFolder(contract, this.selectedDatabase).subscribe({
       next: response => {
         this.loadLeftItems(this.leftData.CurrentId);
         this.loadRightItems(this.rightData.CurrentId);
@@ -319,7 +329,7 @@ export class StartPageComponent implements OnInit {
       deleteRequest.Items = this.rightData.Children.filter(it => it.IsSelected).map(function (it) { return it.Id });
     }
 
-    this.itemCommanderService.deleteItems(deleteRequest).subscribe({
+    this.itemCommanderService.deleteItems(deleteRequest, this.selectedDatabase).subscribe({
       next: response => {
         this.loadLeftItems(this.leftData.CurrentId);
         this.loadRightItems(this.rightData.CurrentId);
@@ -330,7 +340,7 @@ export class StartPageComponent implements OnInit {
 
   loadLeftItems(id: string) {
     this.leftLoading = true;
-    this.itemCommanderService.fetchItems(id).subscribe({
+    this.itemCommanderService.fetchItems(id, this.selectedDatabase).subscribe({
       next: response => {
         this.leftData = response as ItemCommanderResponse;
         this.leftPath = this.leftData.CurrentPath;
@@ -343,7 +353,7 @@ export class StartPageComponent implements OnInit {
   loadRightItems(id: string) {
     this.rightLoading = true;
 
-    this.itemCommanderService.fetchItems(id).subscribe({
+    this.itemCommanderService.fetchItems(id, this.selectedDatabase).subscribe({
       next: response => {
         this.rightData = response as ItemCommanderResponse;
         this.rightPath = this.rightData.CurrentPath;
@@ -392,7 +402,7 @@ export class StartPageComponent implements OnInit {
 
   rightDoubleClick(item: Item) {
     this.loadRightItems(item.Id);
-    
+
   }
 
   getClass(item: Item) {
@@ -403,26 +413,26 @@ export class StartPageComponent implements OnInit {
   }
 
   options = [
-    {name:'Name', value:'name', checked:true},
-    {name:'SitecorePath', value:'sitecorepath', checked:false},
-    {name:'TemplateName', value:'templatename', checked:true},
-    {name:'Created', value:'created', checked:false},
-    {name:'LastModified', value:'lastmodified', checked:true},
-    {name:'HasChildren', value:'haschildren', checked:true}
+    { name: 'Name', value: 'name', checked: true },
+    { name: 'SitecorePath', value: 'sitecorepath', checked: false },
+    { name: 'TemplateName', value: 'templatename', checked: true },
+    { name: 'Created', value: 'created', checked: false },
+    { name: 'LastModified', value: 'lastmodified', checked: true },
+    { name: 'HasChildren', value: 'haschildren', checked: true }
 
   ]
 
   selectedOptions() { // right now: ['1','3']
     return this.options
-              .filter(opt => opt.checked)
-              .map(opt => opt.value)
+      .filter(opt => opt.checked)
+      .map(opt => opt.value)
   }
 
- showColumn(columnName:string){
-   return this.options.filter(opt => opt.value==columnName && opt.checked).length > 0;
- }
- getSelectedOptions(){
-   return this.options
-   .filter(opt => opt.checked);
+  showColumn(columnName: string) {
+    return this.options.filter(opt => opt.value == columnName && opt.checked).length > 0;
+  }
+  getSelectedOptions() {
+    return this.options
+      .filter(opt => opt.checked);
   }
 }

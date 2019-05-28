@@ -33,6 +33,7 @@ import { ItemCommanderService } from './item-commander.service';
 import { FastViewPageComponent } from './fast-view-page/fast-view-page.component';
 import { ImageViewComponent } from './fast-view/image-view/image-view.component';
 import { TextComponent } from './fast-view/text/text.component';
+import { StorageServiceModule, WebStorageService} from 'angular-webstorage-service';
 
 @NgModule({
   declarations: [
@@ -46,6 +47,7 @@ import { TextComponent } from './fast-view/text/text.component';
   imports: [
     BrowserModule,
     FormsModule,
+    StorageServiceModule,
     HttpModule,
     HttpClientModule,
     RouterModule.forRoot([
