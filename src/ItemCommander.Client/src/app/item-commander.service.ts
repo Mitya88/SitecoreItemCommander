@@ -11,44 +11,40 @@ export class ItemCommanderService {
 
   baseUrl = "/sitecore/api/ssc/ItemComander-EntityService-Controllers/Entity/";
 
-  fetchItems(id: any) {
-    return this.httpClient.get(this.baseUrl + id + '/children');
+  fetchItems(id: any, database:string) {
+    return this.httpClient.get(this.baseUrl + id + '/children?db='+database);
   }
 
 
-  copyItems(body: any) {
-    return this.httpClient.post(this.baseUrl + '-/copy', body);
+  copyItems(body: any, database:string) {
+    return this.httpClient.post(this.baseUrl + '-/copy?db='+database, body);
   }
 
-  moveItems(body: any) {
-    return this.httpClient.post(this.baseUrl + '-/move', body);
+  moveItems(body: any, database:string) {
+    return this.httpClient.post(this.baseUrl + '-/move?db='+database, body);
   }
 
-  deleteItems(body: any) {
-    return this.httpClient.post(this.baseUrl + '-/delete', body);
+  deleteItems(body: any, database:string) {
+    return this.httpClient.post(this.baseUrl + '-/delete?db='+database, body);
   }
 
-  copySingleItem(body: any) {
-    return this.httpClient.post(this.baseUrl + '-/copysingle', body);
+  copySingleItem(body: any, database:string) {
+    return this.httpClient.post(this.baseUrl + '-/copysingle?db='+database, body);
   }
 
-  addFolder(body: any) {
-    return this.httpClient.post(this.baseUrl + '-/folder', body);
+  addFolder(body: any, database:string) {
+    return this.httpClient.post(this.baseUrl + '-/folder?db='+database, body);
   }
 
-  setDatabase(id: any) {
-    return this.httpClient.get(this.baseUrl + id + '/database');
+  packageItems(body: any, database:string) {
+    return this.httpClient.post(this.baseUrl + '-/package?db='+database, body);
   }
 
-  packageItems(body: any) {
-    return this.httpClient.post(this.baseUrl + '-/package', body);
-  }
-
-  search(keyword: any) {
-    return this.httpClient.get(this.baseUrl +'-/search?keyword='+keyword);
+  search(keyword: any, database:string) {
+    return this.httpClient.get(this.baseUrl +'-/search?keyword='+keyword +'&db='+database);
   }
   
-  fastView(id: any) {
-    return this.httpClient.get(this.baseUrl + id + '/fastview');
+  fastView(id: any, database:string) {
+    return this.httpClient.get(this.baseUrl + id + '/fastview?db='+database);
   }
 }

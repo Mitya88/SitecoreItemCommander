@@ -22,7 +22,7 @@
 
     public class ItemRepository : IGenericItemRepository<GenericItemEntity>
     {
-        private static Database database;
+        private Database database;
 
         private static ConcurrentQueue<string> queue;
         public ItemRepository()
@@ -37,17 +37,14 @@
             }
         }
 
-        public void SetDatabase(string dbName)
-        {
-            database = Sitecore.Data.Database.GetDatabase(dbName);
-        }
         public IQueryable<GenericItemEntity> GetAll()
         {
             throw new NotImplementedException();
         }
 
-        public FastViewResponse GetFastView(string id)
+        public FastViewResponse GetFastView(string id, string db)
         {
+            database = Sitecore.Configuration.Factory.GetDatabase(db);
             var item = database.GetItem(new ID(id));
             FastViewResponse vr = new FastViewResponse();
             vr.Languages = item.Languages.Select(t => t.Name).ToList();
@@ -85,8 +82,9 @@
             return vr;
         }
 
-        public ItemCommanderResponse GetChildren(string id)
+        public ItemCommanderResponse GetChildren(string id, string db)
         {
+            database = Sitecore.Configuration.Factory.GetDatabase(db);
             var itemCommanderResponse = new ItemCommanderResponse();
             var sitecoreItem = database.GetItem(new Sitecore.Data.ID(id));
             itemCommanderResponse.CurrentPath = sitecoreItem.Paths.FullPath;
@@ -111,8 +109,9 @@
             return itemCommanderResponse;
         }
 
-        public ItemCommanderResponse Search(string keyword)
+        public ItemCommanderResponse Search(string keyword, string db)
         {
+            database = Sitecore.Configuration.Factory.GetDatabase(db);
             var itemCommanderResponse = new ItemCommanderResponse();
 
 
@@ -306,13 +305,9 @@
 
         public string FolderTemplate = "{A87A00B1-E6DB-45AB-8B54-636FEC3B5523}";
 
-        public void PublishItem(string id, string target, string language)
+        public void CreateFolder(FolderRequest folder, string db)
         {
-            
-        }
-
-        public void CreateFolder(FolderRequest folder)
-        {
+            database = Sitecore.Configuration.Factory.GetDatabase(db);
             var targetItem = database.GetItem(folder.TargetPath);
             using (new SecurityDisabler())
             {
@@ -320,9 +315,9 @@
             }
         }
 
-        public void Copy(CopyRequest query)
+        public void Copy(CopyRequest query, string db)
         {
-
+            database = Sitecore.Configuration.Factory.GetDatabase(db);
             var targetItem = database.GetItem(query.TargetPath);
             query.Items.ForEach(t => queue.Enqueue(t));
 
@@ -349,9 +344,9 @@
 
             Parallel.Invoke(actions.ToArray());
         }
-        public void CopySingle(CopySingle query)
+        public void CopySingle(CopySingle query, string db)
         {
-
+            database = Sitecore.Configuration.Factory.GetDatabase(db);
             var targetItem = database.GetItem(query.TargetPath);
             using (new SecurityDisabler())
             {
@@ -360,9 +355,9 @@
                 sourceITem.CopyTo(targetItem, query.Name, new ID(Guid.NewGuid()), false);
             }
         }
-        public void Move(MoveRequest query)
+        public void Move(MoveRequest query, string db)
         {
-
+            database = Sitecore.Configuration.Factory.GetDatabase(db);
             var targetItem = database.GetItem(query.TargetPath);
             query.Items.ForEach(t => queue.Enqueue(t));
 
@@ -391,9 +386,9 @@
             Parallel.Invoke(actions.ToArray());
         }
 
-        public void Delete(DeleteRequest query)
+        public void Delete(DeleteRequest query, string db)
         {
-           
+            database = Sitecore.Configuration.Factory.GetDatabase(db);
             query.Items.ForEach(t => queue.Enqueue(t));
 
             List<Action> actions = new List<Action>();
@@ -420,8 +415,9 @@
             Parallel.Invoke(actions.ToArray());
         }
 
-        public void Lock(LockRequest lockRequest)
+        public void Lock(LockRequest lockRequest, string db)
         {
+            database = Sitecore.Configuration.Factory.GetDatabase(db);
             foreach(var item in lockRequest.Items)
             {
                 var scItem = database.GetItem(new ID(item));
@@ -437,115 +433,9 @@
             }
         }
 
-        public int GetProcessedCount()
+        public List<Item> GetItems(List<string> ids, string db)
         {
-            return queue.Count;
-        }
-
-        public GenericItemEntity QuerySingle(QuerySingleDto query)
-        {
-            using (new SecurityDisabler())
-            {
-                using (new LanguageSwitcher(Language.Parse(query.Language)))
-                {
-                    var db = Sitecore.Data.Database.GetDatabase(query.Database);
-
-                    Item sitecoreItem;
-                    if (!string.IsNullOrEmpty(query.ItemId))
-                    {
-                        sitecoreItem = db.GetItem(new ID(query.ItemId));
-                    }
-                    else
-                    {
-                        sitecoreItem = db.GetItem(query.Query);
-                    }
-
-                    GenericItemEntity item = new GenericItemEntity
-                    {
-                        Name = sitecoreItem.Name,
-                        Id = sitecoreItem.ID.ToString(),
-                        Language = sitecoreItem.Language.ToString(),
-                        Path = sitecoreItem.Paths.FullPath,
-                        TemplateId = sitecoreItem.TemplateID.ToString(),
-                        TemplateName = sitecoreItem.TemplateName,
-                        Fields = new List<FieldDto>()
-                    };
-
-                    foreach (Field field in sitecoreItem.Fields)
-                    {
-                        item.Fields.Add(new FieldDto
-                        {
-                            Name = field.Name,
-                            Value = field.Value,
-                            Id = field.ID.ToString(),
-                            SectionName = field.Section
-                        });
-                    }
-                    return item;
-                }
-            }
-        }
-
-        public List<GenericItemEntity> QueryMulti(QueryMultiDto query)
-        {
-            using (new SecurityDisabler())
-            {
-                using (new LanguageSwitcher(Language.Parse(query.Language)))
-                {
-                    var db = Sitecore.Data.Database.GetDatabase(query.Database);
-
-                    Item sitecoreItem;
-                    List<Item> items;
-                    if (!string.IsNullOrEmpty(query.RootItemId))
-                    {
-                        sitecoreItem = db.GetItem(new ID(query.RootItemId));
-                        if (query.IncludeDescendants)
-                        {
-                            items = sitecoreItem.Axes.GetDescendants().ToList();
-                        }
-                        else
-                        {
-                            items = sitecoreItem.Children.ToList();
-                        }
-                    }
-                    else
-                    {
-                        items = db.SelectItems(query.Query).ToList();
-                    }
-                    List<GenericItemEntity> result = new List<GenericItemEntity>();
-                    foreach(var item in items)
-                    {
-                        var genericItem = new GenericItemEntity
-                        {
-                            Name = item.Name,
-                            Id = item.ID.ToString(),
-                            Language = item.Language.ToString(),
-                            Path = item.Paths.FullPath,
-                            TemplateName = item.TemplateName,
-                            TemplateId = item.TemplateID.ToString(),
-                            Fields = new List<FieldDto>()
-                        };
-
-                        foreach (Field field in item.Fields)
-                        {
-                            genericItem.Fields.Add(new FieldDto
-                            {
-                                Name = field.Name,
-                                Value = field.Value,
-                                Id = field.ID.ToString()                                ,
-                                Type = field.Type
-                            });
-                        }
-                        result.Add(genericItem);
-                    }
-
-                    return result;
-                }
-            }
-        }
-
-        public List<Item> GetItems(List<string> ids)
-        {
+            database = Sitecore.Configuration.Factory.GetDatabase(db);
             return ids.Select(t => database.GetItem(new ID(t))).ToList();
         }
     }

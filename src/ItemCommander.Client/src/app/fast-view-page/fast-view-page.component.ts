@@ -14,10 +14,14 @@ export class FastViewPageComponent implements OnInit {
 
   objectKeys = Object.keys;
   responseData: any;
+  
+  isNavigationShown: boolean;
+  //TODO: SELECTED DATABASE
+  selectedDatabase:any;
   ngOnInit() {
 
     var data = this.route.snapshot.queryParamMap.get('itemid');
-    this.itemCommanderService.fastView(data).subscribe({
+    this.itemCommanderService.fastView(data, this.selectedDatabase).subscribe({
       next: response =>{
           this.responseData = response;
       }

@@ -1,16 +1,5 @@
 ﻿namespace ItemCommander.EntityService.Controllers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-    using System.Net;
-    using System.Net.Http;
-    using System.Net.Http.Headers;
-    using System.Threading.Tasks;
-    using System.Web;
-    using System.Web.Http;
-    using System.Web.Http.Cors;
     using ItemCommander.EntityService.Interfaces;
     using ItemCommander.EntityService.Models;
     using ItemCommander.EntityService.Repositories;
@@ -25,147 +14,142 @@
     using Sitecore.Security.Accounts;
     using Sitecore.Services.Core;
     using Sitecore.Services.Infrastructure.Sitecore.Services;
-    using Sitecore.Web.UI.Sheer;
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Net;
+    using System.Net.Http;
+    using System.Net.Http.Headers;
+    using System.Threading.Tasks;
+    using System.Web;
+    using System.Web.Http;
+    using System.Web.Http.Cors;
 
+    /// <summary>
+    /// Entity controller for item commander
+    /// </summary>
+    /// <seealso cref="Sitecore.Services.Infrastructure.Sitecore.Services.EntityService{ItemCommander.EntityService.Models.GenericItemEntity}" />
     [ServicesController]
     [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class EntityController : EntityService<GenericItemEntity>
     {
+        /// <summary>
+        /// The custom repository actions
+        /// </summary>
         private IGenericItemRepository<GenericItemEntity> _customRepositoryActions;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityController"/> class.
+        /// </summary>
+        /// <param name="repository">The repository.</param>
         public EntityController(IGenericItemRepository<GenericItemEntity> repository)
             : base(repository)
         {
             _customRepositoryActions = repository;
         }
 
+        //SampleUR: /sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/{id}/{actionName}?{queryStrings}
+        //SampleUR: /sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/{80FDC514-CD6A-4EEF-B9C2-6CFA82B0F37A}/findbyid?language=en-gb
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityController"/> class.
+        /// </summary>
         public EntityController()
             : this(new ItemRepository())
         {
         }
 
+        /// <summary>
+        /// Gets the children.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <param name="db">The database.</param>
+        /// <returns></returns>
         [HttpGet]
         [ActionName("Children")]
-        //Sample: /sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/{80FDC514-CD6A-4EEF-B9C2-6CFA82B0F37A}/findbyid?language=en-gb
-        public ItemCommanderResponse GetItemBchi(string id)
+        public ItemCommanderResponse GetChildren(string id, string db)
         {
-            return _customRepositoryActions.GetChildren(id);
+            return _customRepositoryActions.GetChildren(id, db);
         }
 
         [HttpGet]
         [ActionName("fastview")]
-        //Sample: /sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/{80FDC514-CD6A-4EEF-B9C2-6CFA82B0F37A}/findbyid?language=en-gb
-        public FastViewResponse FastVIew(string id)
+        public FastViewResponse FastVIew(string id, string db)
         {
-            return _customRepositoryActions.GetFastView(id);
+            return _customRepositoryActions.GetFastView(id, db);
         }
 
         [HttpGet]
         [ActionName("FindById")]
-        //Sample: /sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/{80FDC514-CD6A-4EEF-B9C2-6CFA82B0F37A}/findbyid?language=en-gb
+        [Obsolete]
         public GenericItemEntity GetItemById(string id, string language)
         {
             return _customRepositoryActions.FindById(id, language);
         }
 
         [HttpPost]
-        [ActionName("QuerySingle")]
-        //Sample: /sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/{80FDC514-CD6A-4EEF-B9C2-6CFA82B0F37A}/QuerySingle
-        public GenericItemEntity Query(string id, QuerySingleDto query)
-        {
-            return _customRepositoryActions.QuerySingle(query);
-        }
-
-        [HttpPost]
         [ActionName("copy")]
-        //Sample: /sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/copy
-        public GenericItemEntity Query(string id, CopyRequest query)
+        public IHttpActionResult Query(string id, CopyRequest query, string db)
         {
-            Task.Run(() =>  _customRepositoryActions.Copy(query));
-            return null;
+            _customRepositoryActions.Copy(query, db);
+            return this.Ok();
         }
 
         [HttpPost]
         [ActionName("copysingle")]
-        //Sample: /sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/copy
-        public GenericItemEntity CopySingle(string id, CopySingle query)
+        public IHttpActionResult CopySingle(string id, CopySingle query, string db)
         {
-            _customRepositoryActions.CopySingle(query);
-            return null;
+            _customRepositoryActions.CopySingle(query, db);
+            return this.Ok();
         }
 
         [HttpPost]
         [ActionName("move")]
-        //Sample: /sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/copy
-        public GenericItemEntity Move(string id, MoveRequest query)
+        public IHttpActionResult Move(string id, MoveRequest query, string db)
         {
-            Task.Run(() => _customRepositoryActions.Move(query));
-            return null;
+            _customRepositoryActions.Move(query, db);
+            return this.Ok();
         }
 
         [HttpPost]
         [ActionName("delete")]
-        //Sample: /sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/copy
-        public GenericItemEntity Delete(string id, DeleteRequest query)
+        public IHttpActionResult Delete(string id, DeleteRequest query, string db)
         {
-            Task.Run(() => _customRepositoryActions.Delete(query));
-            return null;
+            _customRepositoryActions.Delete(query, db);
+            return this.Ok();
         }
 
         [HttpPost]
         [ActionName("lock")]
-        //Sample: /sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/copy
-        public GenericItemEntity Lock(string id, LockRequest query)
+        public IHttpActionResult Lock(string id, LockRequest query, string db)
         {
-            _customRepositoryActions.Lock(query);
-            return null;
+            _customRepositoryActions.Lock(query, db);
+            return this.Ok();
         }
 
         [HttpPost]
         [ActionName("folder")]
-        //Sample: /sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/copy
-        public GenericItemEntity folder(string id, FolderRequest query)
+        public IHttpActionResult folder(string id, FolderRequest query, string db)
         {
-            _customRepositoryActions.CreateFolder(query);
-            return null;
-        }
-
-        [HttpGet]
-        [ActionName("processed")]
-        //Sample: /sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/copy
-        public int processed(string id)
-        {
-            return _customRepositoryActions.GetProcessedCount();
-        }
-
-        [HttpGet]
-        [ActionName("database")]
-        //Sample: /sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/copy
-        public int Database(string id)
-        {
-            _customRepositoryActions.SetDatabase(id);
-
-            return 0;
+            _customRepositoryActions.CreateFolder(query, db);
+            return this.Ok();
         }
 
         [HttpGet]
         [ActionName("search")]
-        //Sample: /sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/copy
-        public ItemCommanderResponse search(string id, string keyword)
+        public ItemCommanderResponse search(string id, string keyword, string db)
         {
-            
-
-            return _customRepositoryActions.Search(keyword);
+            return _customRepositoryActions.Search(keyword, db);
         }
 
         [HttpPost]
         [ActionName("package")]
-        public DownloadResponse Package(string id, DeleteRequest request)
+        public DownloadResponse Package(string id, DeleteRequest request, string db)
         {
-            var file = GeneratePackage(this._customRepositoryActions.GetItems(request.Items));
+            var file = GeneratePackage(this._customRepositoryActions.GetItems(request.Items, db));
 
             return new DownloadResponse { FileName = Path.GetFileName(file) };
-            }
+        }
 
         [HttpGet]
         [ActionName("download")]
@@ -191,25 +175,9 @@
             return result;
         }
 
-        [HttpPost]
-        [ActionName("QueryMulti")]
-        //Sample: /sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/{80FDC514-CD6A-4EEF-B9C2-6CFA82B0F37A}/QueryMulti
-        public List<GenericItemEntity> QueryMulti(string id, QueryMultiDto query)
-        {
-            return _customRepositoryActions.QueryMulti(query);
-        }
-
-        [HttpGet]
-        [ActionName("PublishItem")]
-        ///sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/{80FDC514-CD6A-4EEF-B9C2-6CFA82B0F37A}/publishitem?target=web&language=en-gb
-        public void Get(string id, string target, string language)
-        {
-            _customRepositoryActions.PublishItem(id, target, language);
-        }
-
         [HttpGet]
         [ActionName("IsOk")]
-        ///sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/Ok
+        [Obsolete]
         public string IsOk()
         {
             return "Ok";

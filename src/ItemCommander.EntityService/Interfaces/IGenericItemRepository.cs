@@ -9,35 +9,25 @@
     {
         GenericItemEntity FindById(string id, string language);
 
-        GenericItemEntity QuerySingle(QuerySingleDto query);
+        void CreateFolder(FolderRequest folder, string db);
 
-        void CreateFolder(FolderRequest folder);
+        void Copy(CopyRequest query, string db);
 
-        void Copy(CopyRequest query);
+        void CopySingle(CopySingle query, string db);
 
-        void CopySingle(CopySingle query);
+        void Move(MoveRequest query, string db);
 
-        void Move(MoveRequest query);
+        void Delete(DeleteRequest delete, string db);
 
-        void Delete(DeleteRequest delete);
+        void Lock(LockRequest lockRequest, string db);
 
-        void Lock(LockRequest lockRequest);
+        List<Item> GetItems(List<string> ids, string db);
 
-        List<Item> GetItems(List<string> ids);
-
-        int GetProcessedCount();
-
-        List<GenericItemEntity> QueryMulti(QueryMultiDto query);
-
-        void PublishItem(string id, string target, string language);
-
-        ItemCommanderResponse GetChildren(string id);
+        ItemCommanderResponse GetChildren(string id, string db);
 
 
-        ItemCommanderResponse Search(string keyword);
+        ItemCommanderResponse Search(string keyword, string db);
 
-        void SetDatabase(string dbName);
-
-        FastViewResponse GetFastView(string id);
+        FastViewResponse GetFastView(string id, string db);
     }
 }
