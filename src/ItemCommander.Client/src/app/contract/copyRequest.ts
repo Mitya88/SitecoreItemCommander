@@ -17,7 +17,10 @@ export class MoveRequest{
 export class DeleteRequest{
     Items:Array<string>;
 }
-
+export class LockRequest{
+    Lock:boolean;
+    Items:Array<string>;
+}
 export class FolderRequest{
     TargetPath:string;
     Name:string;

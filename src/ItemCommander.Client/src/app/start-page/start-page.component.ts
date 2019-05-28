@@ -1,7 +1,7 @@
 import { Component, OnInit, TemplateRef, ViewChild, Inject } from '@angular/core';
 import { ItemCommanderService } from '../item-commander.service';
 import { Item } from '../contract/Item';
-import { CopyRequest, CopySingle, DeleteRequest, FolderRequest, PackageRequest, DownloadResponse } from '../contract/copyRequest';
+import { CopyRequest, CopySingle, DeleteRequest, FolderRequest, PackageRequest, DownloadResponse, LockRequest } from '../contract/copyRequest';
 import { ItemCommanderResponse } from '../contract/ItemCommanderResponse';
 import { SciLogoutService } from '@speak/ng-sc/logout';
 import { ScDialogService } from '@speak/ng-bcl/dialog';
@@ -154,6 +154,12 @@ export class StartPageComponent implements OnInit {
     } else if (this.confirmAction == 'delete') {
       this.parent.confirmTitle = 'Delete';
       this.parent.confirmText = 'Are you sure to delete?';
+    } else if(this.confirmAction=='lock'){
+      this.parent.confirmTitle = 'Lock';
+      this.parent.confirmText = 'Are you sure to lock?';
+    }else if(this.confirmAction=='unlock'){
+      this.parent.confirmTitle = 'Unlock';
+      this.parent.confirmText = 'Are you sure to unlock?';
     }
 
   }
@@ -167,6 +173,11 @@ export class StartPageComponent implements OnInit {
       this.delete();
     } else if (this.confirmAction == 'multipleCopy') {
       this.multipleCopy();
+    } else if(this.confirmAction == 'lock'){
+      this.lock(true);
+    }
+    else if(this.confirmAction == 'unlock'){
+      this.lock(false);
     }
   }
 
@@ -187,6 +198,7 @@ export class StartPageComponent implements OnInit {
         this.leftData = response as ItemCommanderResponse;
         this.leftPath = this.inputDialogValue;
         this.leftLoading = false;
+        this.dialogService.close();
       },
     })
   }
@@ -208,6 +220,7 @@ export class StartPageComponent implements OnInit {
         next: response => {
           this.loadLeftItems(this.leftData.CurrentId);
           this.loadRightItems(this.rightData.CurrentId);
+          this.dialogService.close();
         }
       }
     );
@@ -338,7 +351,32 @@ export class StartPageComponent implements OnInit {
     });
   }
 
+  lock(lock:boolean) {
+
+    let lockRequest = new LockRequest();
+    lockRequest.Lock = lock;
+    if (this.selectedTable == 'left') {
+      //taget a right
+      lockRequest.Items = this.leftData.Children.filter(it => it.IsSelected).map(function (it) { return it.Id });
+    }
+    else {
+      lockRequest.Items = this.rightData.Children.filter(it => it.IsSelected).map(function (it) { return it.Id });
+    }
+
+    this.itemCommanderService.lockItems(lockRequest, this.selectedDatabase).subscribe({
+      next: response => {
+        this.loadLeftItems(this.leftData.CurrentId);
+        this.loadRightItems(this.rightData.CurrentId);
+        this.dialogService.close();
+      }
+    });
+  }
+
   loadLeftItems(id: string) {
+
+    if(id == ''){
+      return;
+    }
     this.leftLoading = true;
     this.itemCommanderService.fetchItems(id, this.selectedDatabase).subscribe({
       next: response => {
@@ -379,9 +417,15 @@ export class StartPageComponent implements OnInit {
 
   loadParent(side: string) {
     if (side == "left") {
+      if(this.leftData.ParentId == '{00000000-0000-0000-0000-000000000000}'){
+        return;
+      }
       this.loadLeftItems(this.leftData.ParentId);
     }
     else {
+      if(this.rightData.ParentId == '{00000000-0000-0000-0000-000000000000}'){
+        return;
+      }
       this.loadRightItems(this.rightData.ParentId);
     }
   }
