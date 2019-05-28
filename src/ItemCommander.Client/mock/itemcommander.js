@@ -1,4 +1,11 @@
 module.exports = {
+  
+'GET /sitecore/api/ssc/ItemComander-EntityService-Controllers/Entity/-/search':function(req,res){
+  res.json({"CurrentPath":null,"CurrentId":"","ParentId":null,"Children":[{"Name":"Home","Path":"/sitecore/content/home","Language":"ja-JP","Icon":"/temp/iconcache/network/32x32/home.png","TemplateName":"Sample Item","TemplateId":null,"ParentId":null,"HasChildren":true,"IsLocked":false,"LastModified":"2018-06-04T03:44:00Z","Created":"2018-06-04T03:44:00Z","Fields":[],"Id":"{110D559F-DEA5-42EA-9C1C-8A5DF7E70EF9}","Url":null},{"Name":"Home","Path":"/sitecore/content/home","Language":"da","Icon":"/temp/iconcache/network/32x32/home.png","TemplateName":"Sample Item","TemplateId":null,"ParentId":null,"HasChildren":true,"IsLocked":false,"LastModified":"2018-06-04T03:38:00Z","Created":"2018-06-04T03:38:00Z","Fields":[],"Id":"{110D559F-DEA5-42EA-9C1C-8A5DF7E70EF9}","Url":null},{"Name":"Home","Path":"/sitecore/content/home/home","Language":"en","Icon":"/temp/iconcache/network/32x32/home.png","TemplateName":"Sample Item","TemplateId":null,"ParentId":null,"HasChildren":true,"IsLocked":false,"LastModified":"2015-11-09T08:30:00Z","Created":"2008-04-07T10:59:00Z","Fields":[],"Id":"{ED9B40AD-C41B-4FF3-9948-BD4BA38BE6E9}","Url":null},{"Name":"Home","Path":"/sitecore/content/home/home","Language":"ja-JP","Icon":"/temp/iconcache/network/32x32/home.png","TemplateName":"Sample Item","TemplateId":null,"ParentId":null,"HasChildren":true,"IsLocked":false,"LastModified":"2018-06-04T03:44:00Z","Created":"2018-06-04T03:44:00Z","Fields":[],"Id":"{ED9B40AD-C41B-4FF3-9948-BD4BA38BE6E9}","Url":null},{"Name":"Home","Path":"/sitecore/content/home/home","Language":"da","Icon":"/temp/iconcache/network/32x32/home.png","TemplateName":"Sample Item","TemplateId":null,"ParentId":null,"HasChildren":true,"IsLocked":false,"LastModified":"2018-06-04T03:38:00Z","Created":"2018-06-04T03:38:00Z","Fields":[],"Id":"{ED9B40AD-C41B-4FF3-9948-BD4BA38BE6E9}","Url":null},{"Name":"Home","Path":"/sitecore/content/home","Language":"en","Icon":"/temp/iconcache/network/32x32/home.png","TemplateName":"Sample Item","TemplateId":null,"ParentId":null,"HasChildren":true,"IsLocked":false,"LastModified":"2019-05-27T15:12:00Z","Created":"2008-04-07T10:59:00Z","Fields":[],"Id":"{110D559F-DEA5-42EA-9C1C-8A5DF7E70EF9}","Url":null}]});
+},
+'POST /sitecore/api/ssc/ItemComander-EntityService-Controllers/Entity/-/copysingle':function(req,res){
+  res.json({});
+},
   'GET /sitecore/api/ssc/ItemComander-EntityService-Controllers/Entity/11111111-1111-1111-1111-111111111111/children': function (req, res) {
     res.json(
      {"CurrentPath":"/sitecore",
@@ -41,7 +48,6 @@ module.exports = {
       
     ]});
   },
-
   'GET /sitecore/api/ssc/ItemComander-EntityService-Controllers/Entity/0/fastview': function(req, res){
     res.json({
       "Languages": [

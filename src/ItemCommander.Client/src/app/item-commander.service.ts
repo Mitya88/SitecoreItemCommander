@@ -28,6 +28,10 @@ export class ItemCommanderService {
     return this.httpClient.post(this.baseUrl + '-/delete?db='+database, body);
   }
 
+  lockItems(body: any, database:string) {
+    return this.httpClient.post(this.baseUrl + '-/lock?db='+database, body);
+  }
+
   copySingleItem(body: any, database:string) {
     return this.httpClient.post(this.baseUrl + '-/copysingle?db='+database, body);
   }

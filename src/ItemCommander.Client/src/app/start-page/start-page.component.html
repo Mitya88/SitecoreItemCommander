@@ -75,20 +75,22 @@
           <table *ngIf="!leftLoading" scTable [ngClass]="GetTableClass('left')" (click)="tableSelect('left')">
             <thead>
               <tr>
-
                   <th *ngFor="let item of getSelectedOptions()">{{item.name}}</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td (dblclick)="loadParent('left')">...</td>
+              <tr (dblclick)="loadParent('left')">
+                <td >...</td>
                 <td></td>
                 <td></td>
                 <td></td>
               </tr>
               <tr *ngFor="let item of leftData.Children" [ngClass]="getClass(item)" (click)="singleSelect(item)"
                 (dblclick)="leftDoubleClick(item)" (contextmenu)="onRightClick(item)">
-                <td><img src="{{item.Icon}}" width="10" height="10" />&nbsp;{{item.Name}}</td>
+                <td><img src="{{item.Icon}}" width="10" height="10" />
+                  &nbsp;{{item.Name}}
+                  <sc-icon icon="lock" style="color:red" size="small" *ngIf="item.IsLocked"></sc-icon>
+                </td>
                 <td *ngIf="showColumn('sitecorepath')">{{item.Path}}</td>
                 <td *ngIf="showColumn('templatename')">{{item.TemplateName}}</td>
                 <td *ngIf="showColumn('lastmodified')">{{item.LastModified}}</td>
@@ -105,24 +107,22 @@
           <table scTable *ngIf="!rightLoading" [ngClass]="GetTableClass('right')" (click)="tableSelect('right')">
             <thead>
               <tr>
-                <!-- <th>Name</th>
-                <th>TemplateName</th>
-                <th>LastModified</th>
-                <th>DIR</th> -->
-                <th *ngFor="let item of getSelectedOptions()">{{item.name}}</th>
-               
+                <th *ngFor="let item of getSelectedOptions()">{{item.name}}</th>               
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td (dblclick)="loadParent('right')">...</td>
+              <tr (dblclick)="loadParent('right')">
+                <td>...</td>
                 <td></td>
                 <td></td>
                 <td></td>
               </tr>
               <tr *ngFor="let item of rightData.Children" [ngClass]="getClass(item)" (click)="singleSelect(item)"
                 (contextmenu)="onRightClick(item)" (dblclick)="rightDoubleClick(item)">
-                <td><img src="{{item.Icon}}" width="10" height="10" />&nbsp;{{item.Name}}</td>
+                <td><img src="{{item.Icon}}" width="10" height="10" />
+                  &nbsp;{{item.Name}}
+                  <sc-icon icon="lock" style="color:red" size="small" *ngIf="item.IsLocked"></sc-icon>
+                </td>
                 <td *ngIf="showColumn('sitecorepath')">{{item.Path}}</td>
                 <td *ngIf="showColumn('templatename')">{{item.TemplateName}}</td>
                 <td *ngIf="showColumn('lastmodified')">{{item.LastModified}}</td>
