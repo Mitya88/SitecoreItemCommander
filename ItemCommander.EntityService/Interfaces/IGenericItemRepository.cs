@@ -37,5 +37,7 @@
         ItemCommanderResponse Search(string keyword);
 
         void SetDatabase(string dbName);
+
+        FastViewResponse GetFastView(string id);
     }
 }

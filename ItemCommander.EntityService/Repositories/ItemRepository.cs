@@ -46,6 +46,45 @@
             throw new NotImplementedException();
         }
 
+        public FastViewResponse GetFastView(string id)
+        {
+            var item = database.GetItem(new ID(id));
+            FastViewResponse vr = new FastViewResponse();
+            vr.Languages = item.Languages.Select(t => t.Name).ToList();
+
+            vr.Data = new Dictionary<string, Dictionary<string, List<FieldDto>>>();
+            foreach (var language in item.Languages)
+            {
+                var sitecoreItem = database.GetItem(new ID(id), language);
+
+                GenericItemEntity entity = new GenericItemEntity
+                {
+                    Name = sitecoreItem.Name,
+                    Id = sitecoreItem.ID.ToString(),
+                    Language = sitecoreItem.Language.ToString(),
+                    Path = sitecoreItem.Paths.FullPath,
+                    TemplateName = sitecoreItem.TemplateName,
+                    Fields = new List<FieldDto>()
+                };
+
+                foreach (Field field in sitecoreItem.Fields)
+                {
+                    entity.Fields.Add(new FieldDto
+                    {
+                        Name = field.Name,
+                        Value = field.Value,
+                        Id = field.ID.ToString(),
+                        Type = field.Type,
+                        SectionName = field.Section
+                    });
+                }
+
+                vr.Data.Add(language.Name, entity.Fields.GroupBy(t => t.SectionName).ToDictionary(t=>t.Key, t=>t.ToList() ));
+            }
+
+            return vr;
+        }
+
         public ItemCommanderResponse GetChildren(string id)
         {
             var itemCommanderResponse = new ItemCommanderResponse();
@@ -438,7 +477,8 @@
                         {
                             Name = field.Name,
                             Value = field.Value,
-                            Id = field.ID.ToString()
+                            Id = field.ID.ToString(),
+                            SectionName = field.Section
                         });
                     }
                     return item;
@@ -492,7 +532,8 @@
                             {
                                 Name = field.Name,
                                 Value = field.Value,
-                                Id = field.ID.ToString()
+                                Id = field.ID.ToString()                                ,
+                                Type = field.Type
                             });
                         }
                         result.Add(genericItem);

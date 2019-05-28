@@ -53,6 +53,14 @@
         }
 
         [HttpGet]
+        [ActionName("fastview")]
+        //Sample: /sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/{80FDC514-CD6A-4EEF-B9C2-6CFA82B0F37A}/findbyid?language=en-gb
+        public FastViewResponse FastVIew(string id)
+        {
+            return _customRepositoryActions.GetFastView(id);
+        }
+
+        [HttpGet]
         [ActionName("FindById")]
         //Sample: /sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/{80FDC514-CD6A-4EEF-B9C2-6CFA82B0F37A}/findbyid?language=en-gb
         public GenericItemEntity GetItemById(string id, string language)

@@ -7,3 +7,13 @@ export interface ItemCommanderResponse {
     CurrentId: string;
 }
 
+
+
+export interface FieldDto
+{
+    Id:String;
+    Name:string;
+    Value:string;
+    Type:string;
+    SectionName:string;
+}

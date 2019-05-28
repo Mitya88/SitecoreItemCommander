@@ -195,6 +195,7 @@
     <Compile Include="Models\CopyRequest.cs" />
     <Compile Include="Models\FieldDto.cs" />
     <Compile Include="Models\GenericItemEntity.cs" />
+    <Compile Include="Models\FastViewResponse.cs" />
     <Compile Include="Models\ItemCommanderResponse.cs" />
     <Compile Include="Models\QueryMultiDto.cs" />
     <Compile Include="Models\QuerySingleDto.cs" />

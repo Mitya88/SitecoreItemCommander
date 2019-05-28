@@ -30,12 +30,18 @@ import { AppComponent } from './app.component';
 import { StartPageComponent } from './start-page/start-page.component';
 import { ServiceSamplePageComponent } from './service-sample-page/service-sample-page.component';
 import { ItemCommanderService } from './item-commander.service';
+import { FastViewPageComponent } from './fast-view-page/fast-view-page.component';
+import { ImageViewComponent } from './fast-view/image-view/image-view.component';
+import { TextComponent } from './fast-view/text/text.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     StartPageComponent,
-    ServiceSamplePageComponent
+    ServiceSamplePageComponent,
+    FastViewPageComponent,
+    ImageViewComponent,
+    TextComponent
   ],
   imports: [
     BrowserModule,
@@ -44,7 +50,8 @@ import { ItemCommanderService } from './item-commander.service';
     HttpClientModule,
     RouterModule.forRoot([
       { path: '', component: StartPageComponent, pathMatch: 'full' },
-      { path: 'servicesample', component: ServiceSamplePageComponent }
+      { path: 'servicesample', component: ServiceSamplePageComponent },
+      { path: 'fastview', component: FastViewPageComponent }
     ]),
     ScAccountInformationModule,
     ScActionBarModule,

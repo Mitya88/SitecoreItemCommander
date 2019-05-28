@@ -47,4 +47,8 @@ export class ItemCommanderService {
   search(keyword: any) {
     return this.httpClient.get(this.baseUrl +'-/search?keyword='+keyword);
   }
+  
+  fastView(id: any) {
+    return this.httpClient.get(this.baseUrl + id + '/fastview');
+  }
 }
