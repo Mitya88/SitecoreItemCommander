@@ -6,6 +6,7 @@ import { ItemCommanderResponse } from '../contract/ItemCommanderResponse';
 import { SciLogoutService } from '@speak/ng-sc/logout';
 import { ScDialogService } from '@speak/ng-bcl/dialog';
 import { LOCAL_STORAGE, WebStorageService } from 'angular-webstorage-service'
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-start-page',
@@ -43,6 +44,7 @@ export class StartPageComponent implements OnInit {
     private itemCommanderService: ItemCommanderService,
     public logoutService: SciLogoutService,
     public dialogService: ScDialogService,
+    private router: Router
   ) { }
 
   isSearching = false;
@@ -57,6 +59,8 @@ export class StartPageComponent implements OnInit {
 
   selectedTable: string;
   inputDialogValue: string;
+  selectedItem: any;
+  targetPath: any;
   parent: any;
 
   ngOnInit() {
@@ -84,6 +88,8 @@ export class StartPageComponent implements OnInit {
 
   tableSelect(table: string) {
     this.selectedTable = table;
+
+    
   }
 
   load() {
@@ -97,6 +103,7 @@ export class StartPageComponent implements OnInit {
   singleSelect(item: Item) {
     if (item.IsSelected) {
       item.IsSelected = false;
+      this.selectedItem = null;
       return;
     }
 
@@ -109,6 +116,7 @@ export class StartPageComponent implements OnInit {
     }
 
     item.IsSelected = true;
+    this.selectedItem = item;
   }
 
   selectAll() {
@@ -139,10 +147,22 @@ export class StartPageComponent implements OnInit {
   }
 
   openConfirmDialog(dialogAction: string) {
-    if (this.showWarning()) {
+    if (this.hasSelectedItem()) {
+      this.warningText = 'There is no selected item';
       this.dialogService.open(this.warningRef);
       return;
     }
+     this.getSelectedItems();
+    console.log(dialogAction);
+    console.log(this.selectedItem.Path);
+    console.log(this.targetPath);
+    if (dialogAction == 'move' && this.selectedItem.Path == this.targetPath) {
+      this.warningText = 'You cannot move item into itself';
+      this.dialogService.open(this.warningRef);
+      return;
+    }
+
+
     this.dialogService.open(this.confirmDialog);
     this.confirmAction = dialogAction;
 
@@ -154,10 +174,16 @@ export class StartPageComponent implements OnInit {
     } else if (this.confirmAction == 'delete') {
       this.parent.confirmTitle = 'Delete';
       this.parent.confirmText = 'Are you sure to delete?';
-    } else if(this.confirmAction=='lock'){
+
+      var hasChildren = this.getSelectedItems().filter(function(t){return t.HasChildren}).length > 0;
+
+      if(hasChildren){
+        this.parent.confirmText+= ' (Child items will aslo be deleted)';
+      }
+    } else if (this.confirmAction == 'lock') {
       this.parent.confirmTitle = 'Lock';
       this.parent.confirmText = 'Are you sure to lock?';
-    }else if(this.confirmAction=='unlock'){
+    } else if (this.confirmAction == 'unlock') {
       this.parent.confirmTitle = 'Unlock';
       this.parent.confirmText = 'Are you sure to unlock?';
     }
@@ -173,10 +199,10 @@ export class StartPageComponent implements OnInit {
       this.delete();
     } else if (this.confirmAction == 'multipleCopy') {
       this.multipleCopy();
-    } else if(this.confirmAction == 'lock'){
+    } else if (this.confirmAction == 'lock') {
       this.lock(true);
     }
-    else if(this.confirmAction == 'unlock'){
+    else if (this.confirmAction == 'unlock') {
       this.lock(false);
     }
   }
@@ -191,6 +217,21 @@ export class StartPageComponent implements OnInit {
     }
   }
 
+  getSelectedItems() {
+    if (this.selectedTable == 'left') {
+      //taget a right
+      this.targetPath = this.rightData.CurrentPath;
+
+      return this.leftData.Children.filter(it => it.IsSelected);
+    }
+    else {
+      this.targetPath = this.leftData.CurrentPath;
+      return this.rightData.Children.filter(it => it.IsSelected);
+    }
+  }
+
+  
+
   search() {
     this.leftLoading = true;
     this.itemCommanderService.search(this.inputDialogValue, this.selectedDatabase).subscribe({
@@ -202,18 +243,11 @@ export class StartPageComponent implements OnInit {
       },
     })
   }
+
   move() {
     let moveRequest = new CopyRequest();
-    if (this.selectedTable == 'left') {
-      //taget a right
-      moveRequest.TargetPath = this.rightData.CurrentPath;
-
-      moveRequest.Items = this.leftData.Children.filter(it => it.IsSelected).map(function (it) { return it.Id });
-    }
-    else {
-      moveRequest.TargetPath = this.leftData.CurrentPath;
-      moveRequest.Items = this.rightData.Children.filter(it => it.IsSelected).map(function (it) { return it.Id });
-    }
+    moveRequest.Items = this.getSelectedItems().map(function (it) { return it.Id });
+    moveRequest.TargetPath = this.targetPath;
 
     this.itemCommanderService.moveItems(moveRequest, this.selectedDatabase).subscribe(
       {
@@ -226,9 +260,8 @@ export class StartPageComponent implements OnInit {
     );
   }
 
-  showWarning() {
+  hasSelectedItem() {
     if (this.selectedTable == 'left') {
-
       return this.leftData.Children.filter(it => it.IsSelected).map(function (it) { return it.Id }).length == 0;
     }
     else {
@@ -238,16 +271,11 @@ export class StartPageComponent implements OnInit {
 
   downloadAsPackage() {
     let moveRequest = new PackageRequest();
-    if (this.selectedTable == 'left') {
-      moveRequest.Items = this.leftData.Children.filter(it => it.IsSelected).map(function (it) { return it.Id });
-    }
-    else {
-      moveRequest.Items = this.rightData.Children.filter(it => it.IsSelected).map(function (it) { return it.Id });
-    }
+
+    moveRequest.Items = this.getSelectedItems().map(function (it) { return it.Id });
 
     this.itemCommanderService.packageItems(moveRequest, this.selectedDatabase).subscribe({
       next: fileName => {
-        console.log(fileName);
         let theFile = '/sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/download?fileName=' + (fileName as DownloadResponse).FileName;
         window.open(theFile);
       }
@@ -257,19 +285,11 @@ export class StartPageComponent implements OnInit {
   copyRequest: CopyRequest;
   copy() {
     this.copyRequest = new CopyRequest();
-
-    if (this.selectedTable == 'left') {
-      //taget a right
-      this.copyRequest.TargetPath = this.rightData.CurrentPath;
-
-      this.copyRequest.Items = this.leftData.Children.filter(it => it.IsSelected).map(function (it) { return it.Id });
-    }
-    else {
-      this.copyRequest.TargetPath = this.leftData.CurrentPath;
-      this.copyRequest.Items = this.rightData.Children.filter(it => it.IsSelected).map(function (it) { return it.Id });
-    }
+    this.copyRequest.Items = this.getSelectedItems().map(function (it) { return it.Id });
+    this.copyRequest.TargetPath = this.targetPath;
 
     if (this.copyRequest.Items.length == 1) {
+      this.inputDialogValue = this.selectedItem.Name;
       this.openInputDialog('singleCopy');
     }
     else {
@@ -277,12 +297,7 @@ export class StartPageComponent implements OnInit {
     }
   }
 
-  onSearchChange(searchValue: string) {
-    this.inputDialogValue = searchValue
-  }
-
   multipleCopy() {
-    console.log(this.copyRequest);
     this.itemCommanderService.copyItems(this.copyRequest, this.selectedDatabase).subscribe(
       {
         next: response => {
@@ -333,14 +348,7 @@ export class StartPageComponent implements OnInit {
   delete() {
 
     let deleteRequest = new DeleteRequest();
-
-    if (this.selectedTable == 'left') {
-      //taget a right
-      deleteRequest.Items = this.leftData.Children.filter(it => it.IsSelected).map(function (it) { return it.Id });
-    }
-    else {
-      deleteRequest.Items = this.rightData.Children.filter(it => it.IsSelected).map(function (it) { return it.Id });
-    }
+    deleteRequest.Items = this.getSelectedItems().map(function (it) { return it.Id });
 
     this.itemCommanderService.deleteItems(deleteRequest, this.selectedDatabase).subscribe({
       next: response => {
@@ -351,17 +359,11 @@ export class StartPageComponent implements OnInit {
     });
   }
 
-  lock(lock:boolean) {
+  lock(lock: boolean) {
 
     let lockRequest = new LockRequest();
     lockRequest.Lock = lock;
-    if (this.selectedTable == 'left') {
-      //taget a right
-      lockRequest.Items = this.leftData.Children.filter(it => it.IsSelected).map(function (it) { return it.Id });
-    }
-    else {
-      lockRequest.Items = this.rightData.Children.filter(it => it.IsSelected).map(function (it) { return it.Id });
-    }
+    lockRequest.Items = this.getSelectedItems().map(function (it) { return it.Id });
 
     this.itemCommanderService.lockItems(lockRequest, this.selectedDatabase).subscribe({
       next: response => {
@@ -373,10 +375,11 @@ export class StartPageComponent implements OnInit {
   }
 
   loadLeftItems(id: string) {
-
-    if(id == ''){
+    // Search has no id
+    if (id == '') {
       return;
     }
+
     this.leftLoading = true;
     this.itemCommanderService.fetchItems(id, this.selectedDatabase).subscribe({
       next: response => {
@@ -390,7 +393,6 @@ export class StartPageComponent implements OnInit {
 
   loadRightItems(id: string) {
     this.rightLoading = true;
-
     this.itemCommanderService.fetchItems(id, this.selectedDatabase).subscribe({
       next: response => {
         this.rightData = response as ItemCommanderResponse;
@@ -417,13 +419,13 @@ export class StartPageComponent implements OnInit {
 
   loadParent(side: string) {
     if (side == "left") {
-      if(this.leftData.ParentId == '{00000000-0000-0000-0000-000000000000}'){
+      if (this.leftData.ParentId == '{00000000-0000-0000-0000-000000000000}') {
         return;
       }
       this.loadLeftItems(this.leftData.ParentId);
     }
     else {
-      if(this.rightData.ParentId == '{00000000-0000-0000-0000-000000000000}'){
+      if (this.rightData.ParentId == '{00000000-0000-0000-0000-000000000000}') {
         return;
       }
       this.loadRightItems(this.rightData.ParentId);
@@ -436,6 +438,8 @@ export class StartPageComponent implements OnInit {
     }
     else {
       item.IsSelected = true;
+      //Last selected item 
+      this.selectedItem = item;
     }
     return false;
   }
@@ -446,7 +450,10 @@ export class StartPageComponent implements OnInit {
 
   rightDoubleClick(item: Item) {
     this.loadRightItems(item.Id);
+  }
 
+  openFastView(item:Item){
+    this.router.navigateByUrl('/fastview?itemid='+item.Id);
   }
 
   getClass(item: Item) {

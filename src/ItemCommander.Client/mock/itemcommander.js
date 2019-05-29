@@ -16,7 +16,7 @@ module.exports = {
           "Icon": "https://via.placeholder.com/32x32",
           "TemplateName":"Sample",
           "LastModified":"20180510",
-          "HasChildren":true,
+          "HasChildren":false,
           "IsLocked":true
         },
         {

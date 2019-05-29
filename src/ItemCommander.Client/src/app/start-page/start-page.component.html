@@ -184,7 +184,7 @@
     </sc-dialog-header>
     <sc-dialog-body>
       <h2>{{parent.singleInputText}}</h2>
-      <input type="text" class="form-control" (input)="parent.onSearchChange($event.target.value)" />
+      <input type="text" class="form-control" [(ngModel)]="parent.inputDialogValue"  />
 
     </sc-dialog-body>
     <sc-dialog-footer>
@@ -205,7 +205,7 @@
           <sc-icon icon="about" size="xxxlarge"></sc-icon>
         </div>
         <div class="col-10" style="padding-top:30px;">
-          <h2>There is no selected item in the active tab.{{parent.warningText}}</h2>
+          <h2>{{parent.warningText}}</h2>
         </div>
       </div>
 
