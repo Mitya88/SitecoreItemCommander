@@ -21,6 +21,8 @@
 
         public DateTime Created { get; set; }
 
+        public bool IsHidden { get; set; }
+
 
         public List<FieldDto> Fields { get; set; }
     }

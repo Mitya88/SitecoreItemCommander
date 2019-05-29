@@ -20,6 +20,10 @@
             <sc-dropdown-header>Content Editor</sc-dropdown-header>
           </sc-dropdown-menu>
         </sc-dropdown>
+        <button scIconButton *ngIf="selectedItem" routerLink="/fastview" [queryParams]="{itemid: selectedItem.Id, database: selectedDatabase}" >
+            <sc-icon icon="eye"></sc-icon>
+            View
+        </button>
         <button scIconButton (click)="openConfirmDialog('copy')">
           <sc-icon icon="copy"></sc-icon>
           Copy
@@ -85,8 +89,11 @@
                 <td></td>
                 <td></td>
               </tr>
-              <tr *ngFor="let item of leftData.Children" [ngClass]="getClass(item)" (click)="singleSelect(item)"
-                (dblclick)="leftDoubleClick(item)" (contextmenu)="onRightClick(item)">
+              <tr *ngFor="let item of leftData.Children | filterchildren: hiddenItems" 
+              [ngClass]="getClass(item)" 
+              (click)="singleSelect(item)"
+                (dblclick)="leftDoubleClick(item)" 
+                (contextmenu)="onRightClick(item)">
                 <td><img src="{{item.Icon}}" width="10" height="10" />
                   &nbsp;{{item.Name}}
                   <sc-icon icon="lock" style="color:red" size="small" *ngIf="item.IsLocked"></sc-icon>
@@ -117,7 +124,7 @@
                 <td></td>
                 <td></td>
               </tr>
-              <tr *ngFor="let item of rightData.Children" [ngClass]="getClass(item)" (click)="singleSelect(item)"
+              <tr *ngFor="let item of rightData.Children | filterchildren: hiddenItems" [ngClass]="getClass(item)" (click)="singleSelect(item)"
                 (contextmenu)="onRightClick(item)" (dblclick)="rightDoubleClick(item)">
                 <td><img src="{{item.Icon}}" width="10" height="10" />
                   &nbsp;{{item.Name}}
@@ -146,9 +153,9 @@
     </div>
 
     <div class="p-3">
-        <label for="options">Show columns:</label>
+        <label>Show columns:</label>
         <div *ngFor="let option of options">
-            <label>
+            <label >
                 <input  type="checkbox"
                        name="options"
                        value="{{option.value}}"
@@ -157,6 +164,14 @@
             </label>
         </div>
     </div>
+
+    <div class="p-3">
+      <label>Show hidden items:
+      <input  type="checkbox"
+                     name="hiddenItems"
+                     [(ngModel)]="hiddenItems"
+                     (change)="showHiddenItems()"/></label>
+  </div>
   </aside>
 </sc-page>
 

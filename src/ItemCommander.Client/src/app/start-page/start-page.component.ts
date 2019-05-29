@@ -62,9 +62,10 @@ export class StartPageComponent implements OnInit {
   selectedItem: any;
   targetPath: any;
   parent: any;
+  hiddenItems:any;
 
   ngOnInit() {
-
+    this.hiddenItems = true;
     this.selectedDatabase = this.storage.get('database');
 
     if (!this.selectedDatabase) {
@@ -77,6 +78,9 @@ export class StartPageComponent implements OnInit {
 
   }
 
+  showHiddenItems(){
+    
+  }
   GetTableClass(table: string) {
     return this.selectedTable == table ? "table-selected" : "table-not-selected";
   }
@@ -87,9 +91,7 @@ export class StartPageComponent implements OnInit {
   }
 
   tableSelect(table: string) {
-    this.selectedTable = table;
-
-    
+    this.selectedTable = table;    
   }
 
   load() {

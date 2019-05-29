@@ -10,4 +10,5 @@ export interface Item {
     
     IsSelected: boolean;
     Path:string; 
+    IsHidden: boolean;
 }

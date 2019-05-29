@@ -42,6 +42,7 @@
             throw new NotImplementedException();
         }
 
+        List<string> standardFields = new List<string>() { "Statistics", "Lifetime", "Security", "Help", "Appearance", "Insert Options", "Workflow", "Publishing", "Tasks", "Validation Rules" };
         public FastViewResponse GetFastView(string id, string db)
         {
             database = Sitecore.Configuration.Factory.GetDatabase(db);
@@ -76,7 +77,7 @@
                     });
                 }
 
-                vr.Data.Add(language.Name, entity.Fields.GroupBy(t => t.SectionName).ToDictionary(t=>t.Key, t=>t.ToList() ));
+                vr.Data.Add(language.Name, entity.Fields.GroupBy(t => t.SectionName).OrderBy(t=> standardFields.Contains(t.Key)).ThenBy(t=>t.Key).ToDictionary(t=>t.Key, t=>t.ToList() ));
             }
 
             return vr;
@@ -102,8 +103,9 @@
                 HasChildren = t.HasChildren,
                 LastModified = t.Statistics.Updated,
                 Created = t.Statistics.Created,
-                Icon =GetIcon(t),
-                IsLocked = t.Locking.IsLocked()
+                Icon = GetIcon(t),
+                IsLocked = t.Locking.IsLocked(),
+                IsHidden = t["__Hidden"] == "1"
             }).ToList();
 
             return itemCommanderResponse;
