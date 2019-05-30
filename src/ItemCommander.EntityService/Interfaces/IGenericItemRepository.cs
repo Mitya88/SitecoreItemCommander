@@ -9,7 +9,7 @@
     {
         GenericItemEntity FindById(string id, string language);
 
-        void CreateFolder(FolderRequest folder, string db);
+        void CreateItem(CreateItemRequest folder, string db);
 
         void Copy(CopyRequest query, string db);
 
@@ -29,5 +29,7 @@
         ItemCommanderResponse Search(string keyword, string db);
 
         FastViewResponse GetFastView(string id, string db);
+
+        List<GenericItemEntity> GetInsertOptions(string id, string db);
     }
 }

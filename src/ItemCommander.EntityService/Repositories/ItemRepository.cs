@@ -48,6 +48,23 @@
             database = Sitecore.Configuration.Factory.GetDatabase(db);
             var item = database.GetItem(new ID(id));
             FastViewResponse vr = new FastViewResponse();
+            vr.Item = new GenericItemEntity
+            {
+                Name = item.Name,
+                Id = item.ID.ToString(),
+                Language = item.Language.ToString(),
+                Path = item.Paths.FullPath,
+                TemplateName = item.TemplateName,
+                TemplateId = item.TemplateID.ToString(),
+                ParentId = item.ParentID.ToString(),
+                Fields = new List<FieldDto>(),
+                HasChildren = item.HasChildren,
+                LastModified = item.Statistics.Updated,
+                Created = item.Statistics.Created,
+                Icon = GetIcon(item),
+                IsLocked = item.Locking.IsLocked(),
+                IsHidden = item["__Hidden"] == "1"
+            };
             vr.Languages = item.Languages.Select(t => t.Name).ToList();
 
             vr.Data = new Dictionary<string, Dictionary<string, List<FieldDto>>>();
@@ -307,13 +324,13 @@
 
         public string FolderTemplate = "{A87A00B1-E6DB-45AB-8B54-636FEC3B5523}";
 
-        public void CreateFolder(FolderRequest folder, string db)
+        public void CreateItem(CreateItemRequest folder, string db)
         {
             database = Sitecore.Configuration.Factory.GetDatabase(db);
             var targetItem = database.GetItem(folder.TargetPath);
             using (new SecurityDisabler())
             {
-                targetItem.Add(folder.Name, new TemplateID(new ID(FolderTemplate)));
+                targetItem.Add(folder.Name, new TemplateID(new ID(folder.TemplateId)));
             }
         }
 
@@ -439,6 +456,63 @@
         {
             database = Sitecore.Configuration.Factory.GetDatabase(db);
             return ids.Select(t => database.GetItem(new ID(t))).ToList();
+        }
+
+        public List<GenericItemEntity> GetInsertOptions(string id, string db)
+        {
+            database = Sitecore.Configuration.Factory.GetDatabase(db);
+
+            var item = database.GetItem(new ID(id));
+
+            var insertOptions = item["__Masters"];
+
+            List<GenericItemEntity> result = new List<GenericItemEntity>();
+
+            var templateIds = insertOptions.Split('|');
+            if (!string.IsNullOrEmpty(insertOptions) && templateIds.Any())
+            {
+                foreach(var templateId in templateIds)
+                {
+                    var templateItem = this.database.GetItem(new ID(templateId));
+                    result.Add(new GenericItemEntity
+                    {
+                        Name = templateItem.Name,
+                        Id = templateItem.ID.ToString(),
+                        Language = templateItem.Language.ToString(),
+                        Path = templateItem.Paths.FullPath,
+                        TemplateName = templateItem.TemplateName,
+                        Fields = new List<FieldDto>(),
+                        HasChildren = templateItem.HasChildren,
+                        LastModified = templateItem.Statistics.Updated,
+                        Created = templateItem.Statistics.Created,
+                        Icon = GetIcon(templateItem)
+                    });
+                }
+               
+            }
+
+            var folderItem = database.GetItem(new ID("{A87A00B1-E6DB-45AB-8B54-636FEC3B5523}"));
+
+            if(result.FirstOrDefault(t=>t.Name == "Folder") == null)
+            {
+                result.Insert(0, new GenericItemEntity
+                {
+                    Name = folderItem.Name,
+                    Id = folderItem.ID.ToString(),
+                    Language = folderItem.Language.ToString(),
+                    Path = folderItem.Paths.FullPath,
+                    TemplateName = folderItem.TemplateName,
+                    Fields = new List<FieldDto>(),
+                    HasChildren = folderItem.HasChildren,
+                    LastModified = folderItem.Statistics.Updated,
+                    Created = folderItem.Statistics.Created,
+                    Icon = GetIcon(folderItem)
+                });
+            }
+           
+
+            return result;
+            
         }
     }
 }

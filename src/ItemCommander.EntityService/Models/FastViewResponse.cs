@@ -9,6 +9,8 @@ namespace ItemCommander.EntityService.Models
     {
         public List<string> Languages { get; set; }
 
+        public GenericItemEntity Item { get; set; }
+
         public Dictionary<string, Dictionary<string, List<FieldDto>>> Data { get; set; }
 
     }

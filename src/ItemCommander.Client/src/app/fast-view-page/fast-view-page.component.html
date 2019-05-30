@@ -15,13 +15,58 @@
             <label>Show standardFields items:
                 <input  type="checkbox"
                                name="standardFields"
-                               [(ngModel)]="showStandardFields"/></label>
+                               [(ngModel)]="showStandardFields"
+                               (change)="changeStandardFields()"/></label>
         </sc-action-bar-left>
         </sc-action-bar>
     </div>
     <article scPageContent class="page-nav" *ngIf="responseData">
+        <div class="card mb-3">
+            <div class="card-block">
+              <h4 class="card-title">Headings</h4>
+              <table>
+                  <tr>
+                    <td class="display-4">Name</td>
+                    <td>{{responseData.Item.Name}}</td>
+                  </tr>
+                  <tr>
+                      <td class="display-4">Id</td>
+                      <td>{{responseData.Item.Id}}</td>
+                    </tr>
+                    <tr>
+                        <td class="display-4">Path</td>
+                        <td>{{responseData.Item.Path}}</td>
+                      </tr>
+                      <tr>
+                          <td class="display-4">Template</td>
+                          <td>{{responseData.Item.TemplateName}} ({{responseData.Item.TemplateId}})</td>
+                        </tr>
+                        <tr>
+                            <td class="display-4">ParentId</td>
+                            <td>{{responseData.Item.ParentId}}</td>
+                          </tr>
+                          <tr>
+                              <td class="display-4">Created</td>
+                              <td>{{responseData.Item.Created}}</td>
+                            </tr>
+                            <tr>
+                                <td class="display-4">LastModified</td>
+                                <td>{{responseData.Item.LastModified}}</td>
+                              </tr>
+                              <tr>
+                                  <td class="display-4">Icon</td>
+                                  <td>{{responseData.Item.Icon}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="display-4">IsLocked</td>
+                                    <td>{{responseData.Item.IsLocked}}</td>
+                                  </tr>
+                              
+                </table>
+            </div>
+          </div>
         <sc-tab-group variant="switch" *ngIf="responseData.Languages">
-            <sc-tab  *ngFor='let language of languages'  label="{{language}}">
+            <sc-tab  *ngFor='let language of responseData.Languages'  label="{{language}}">
               <nav>  
               <sc-menu> 
                   <sc-menu-category *ngFor='let section of GetSection(language)' icon="cake_slice" text="{{section}}" [open]="true">

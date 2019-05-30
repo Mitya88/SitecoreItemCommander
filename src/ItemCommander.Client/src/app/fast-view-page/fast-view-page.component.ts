@@ -1,7 +1,8 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, Inject } from '@angular/core';
 import { SciLogoutService } from '@speak/ng-sc/logout';
 import { ItemCommanderService } from '../item-commander.service';
 import { ActivatedRoute } from '@angular/router';
+import { LOCAL_STORAGE, WebStorageService } from 'angular-webstorage-service';
 
 @Component({
   selector: 'app-fast-view-page',
@@ -10,59 +11,67 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class FastViewPageComponent implements OnInit {
 
-  constructor(private cdRef:ChangeDetectorRef, private route: ActivatedRoute, public logoutService: SciLogoutService, private itemCommanderService: ItemCommanderService) {
-     this.standardFields =  ["Statistics", "Lifetime", "Security","Help", "Appearance","Insert Options", "Workflow", "Publishing", "Tasks","Validation Rules"];
-  this.itemId = this.route.snapshot.queryParamMap.get('itemid');
-  this.selectedDatabase = this.route.snapshot.queryParamMap.get('database');
+  constructor(@Inject(LOCAL_STORAGE) private storage: WebStorageService,
+    private cdRef: ChangeDetectorRef,
+    private route: ActivatedRoute,
+    public logoutService: SciLogoutService,
+    private itemCommanderService: ItemCommanderService) {
+    this.standardFields = ["Statistics", "Lifetime", "Security", "Help", "Appearance", "Insert Options", "Workflow", "Publishing", "Tasks", "Validation Rules"];
+    this.itemId = this.route.snapshot.queryParamMap.get('itemid');
+    this.selectedDatabase = this.route.snapshot.queryParamMap.get('database');
 
-  this.languages = ["en"];
-}
-  itemId:string;
+    this.showStandardFields = this.storage.get('standardfields');    
+
+  }
+  itemId: string;
   objectKeys = Object.keys;
   responseData: any;
-  showStandardFields:boolean;
-  standardFields:Array<string>;
-  languages:any;
-  
+  showStandardFields: boolean;
+  standardFields: Array<string>;
+  languages: any;
+
   isNavigationShown: boolean;
   //TODO: SELECTED DATABASE
-  selectedDatabase:any;
+  selectedDatabase: any;
   ngOnInit() {
-    
+
     this.itemCommanderService.fastView(this.itemId, this.selectedDatabase).subscribe({
-      next: response =>{
-          this.responseData = response;
-          this.cdRef.detectChanges();
+      next: response => {
+        this.responseData = response;
+        this.cdRef.detectChanges();
       }
-    })  ;
+    });
   }
 
-  ngAfterViewChecked()
-{
-}
-  GetSection(language:string){
+  ngAfterViewChecked() {
+  }
+  GetSection(language: string) {
     console.log('getsection1');
     var data = Object.keys(this.responseData.Data[language]);
-    if(!this.showStandardFields){
+    if (!this.showStandardFields) {
       this.standardFields.forEach(element => {
         var i = data.indexOf(element);
-        if(i>-1){
-          data.splice(i,1);
+        if (i > -1) {
+          data.splice(i, 1);
         }
       });
     }
     return data;
   }
 
-  ShowSection(section: string){
-    if(!this.showStandardFields){
-    return !this.standardFields.includes(section);
+  ShowSection(section: string) {
+    if (!this.showStandardFields) {
+      return !this.standardFields.includes(section);
     }
     return true;
   }
 
-  GetFields(language:string, section:string)
-  {
+  GetFields(language: string, section: string) {
     return this.responseData.Data[language][section].map(function (it) { return it })
+  }
+
+  changeStandardFields(){
+    console.log('change');
+    this.storage.set('standardfields',this.showStandardFields);
   }
 }

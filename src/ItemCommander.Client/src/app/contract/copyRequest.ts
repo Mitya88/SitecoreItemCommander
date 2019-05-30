@@ -24,6 +24,7 @@ export class LockRequest{
 export class FolderRequest{
     TargetPath:string;
     Name:string;
+    TemplateId:string;
 }
 
 export class PackageRequest{

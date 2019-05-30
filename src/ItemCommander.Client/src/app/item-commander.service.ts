@@ -51,4 +51,8 @@ export class ItemCommanderService {
   fastView(id: any, database:string) {
     return this.httpClient.get(this.baseUrl + id + '/fastview?db='+database);
   }
+
+  insertOptions(id: any, database:string) {
+    return this.httpClient.get(this.baseUrl + id + '/insertoptions?db='+database);
+  }
 }

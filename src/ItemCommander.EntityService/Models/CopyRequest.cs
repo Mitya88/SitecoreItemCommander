@@ -5,10 +5,12 @@ using System.Web;
 
 namespace ItemCommander.EntityService.Models
 {
-    public class FolderRequest
+    public class CreateItemRequest
     {
         public string TargetPath { get; set; }
         public string Name { get; set; }
+
+        public string TemplateId { get; set; }
     }
     public class CopyRequest
     {

@@ -25,6 +25,9 @@ export class StartPageComponent implements OnInit {
   @ViewChild('warning')
   private warningRef: TemplateRef<any>
 
+  @ViewChild('insertOptions')
+  private insertOptionRef: TemplateRef<any>
+
   confirmText: string = '';
   confirmTitle: string = '';
   singleInputTitle: string = '';
@@ -63,10 +66,16 @@ export class StartPageComponent implements OnInit {
   targetPath: any;
   parent: any;
   hiddenItems:any;
+  insertOptions:Array<Item>;
 
   ngOnInit() {
-    this.hiddenItems = true;
+    this.hiddenItems = this.storage.get('hiddenitems');
     this.selectedDatabase = this.storage.get('database');
+
+    let storedOptions = this.storage.get('options');
+    if(storedOptions){
+      this.options = storedOptions;
+    }
 
     if (!this.selectedDatabase) {
       this.selectedDatabase = 'master';
@@ -78,8 +87,13 @@ export class StartPageComponent implements OnInit {
 
   }
 
+  storeOptions(){
+    console.log('fired');
+    this.storage.set('options', this.options);
+  }
+
   showHiddenItems(){
-    
+    this.storage.set('hiddenitems',this.hiddenItems);
   }
   GetTableClass(table: string) {
     return this.selectedTable == table ? "table-selected" : "table-not-selected";
@@ -139,10 +153,8 @@ export class StartPageComponent implements OnInit {
     if (dialogAction == 'singleCopy') {
       this.singleInputTitle = 'Copy';
       this.singleInputText = 'New item\'s name';
-    } else if (dialogAction == 'addFolder') {
-      this.singleInputTitle = 'Add Folder';
-      this.singleInputText = 'New folder\'s name';
-    } else if (dialogAction == 'search') {
+    } 
+     else if (dialogAction == 'search') {
       this.singleInputTitle = 'Search';
       this.singleInputText = 'Enter a keyword...';
     }
@@ -210,9 +222,7 @@ export class StartPageComponent implements OnInit {
   }
 
   singleInputAction() {
-    if (this.inputAction == 'addFolder') {
-      this.addFolder();
-    } else if (this.inputAction == 'singleCopy') {
+     if (this.inputAction == 'singleCopy') {
       this.singleCopy();
     } else if (this.inputAction == 'search') {
       this.search();
@@ -324,18 +334,7 @@ export class StartPageComponent implements OnInit {
     });
   }
 
-  addFolder() {
-    let contract = new FolderRequest();
-    contract.TargetPath = this.getTargetPathForFolder();
-    contract.Name = this.parent.inputDialogValue;
-    this.itemCommanderService.addFolder(contract, this.selectedDatabase).subscribe({
-      next: response => {
-        this.loadLeftItems(this.leftData.CurrentId);
-        this.loadRightItems(this.rightData.CurrentId);
-        this.dialogService.close();
-      }
-    });
-  }
+  
 
   getTargetPathForFolder() {
     if (this.selectedTable == 'left') {
@@ -346,6 +345,8 @@ export class StartPageComponent implements OnInit {
       return this.rightData.CurrentPath;
     }
   }
+
+  
 
   delete() {
 
@@ -487,5 +488,38 @@ export class StartPageComponent implements OnInit {
   getSelectedOptions() {
     return this.options
       .filter(opt => opt.checked);
+  }
+
+  selectedInsertOptions:any;
+  openInsertOptions(){
+    var id = '';
+    if(this.selectedTable == 'left'){
+      id=this.leftData.CurrentId;
+    }
+    else{
+      id=this.rightData.CurrentId;
+    }
+    this.itemCommanderService.insertOptions(id, this.selectedDatabase).subscribe({
+      next: response =>{
+        this.insertOptions = response as Array<Item>;
+        console.log(this.insertOptions);
+    this.dialogService.open(this.insertOptionRef);
+      }
+    });
+  }
+
+  createItem(){
+    let contract = new FolderRequest();
+    contract.TargetPath = this.getTargetPathForFolder();
+    contract.Name = this.parent.inputDialogValue;
+    contract.TemplateId = this.selectedInsertOptions;
+    console.log(contract);
+    this.itemCommanderService.addFolder(contract, this.selectedDatabase).subscribe({
+      next: response => {
+        this.loadLeftItems(this.leftData.CurrentId);
+        this.loadRightItems(this.rightData.CurrentId);
+        this.dialogService.close();
+      }
+    });
   }
 }

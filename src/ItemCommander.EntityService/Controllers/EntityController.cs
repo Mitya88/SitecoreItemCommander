@@ -129,9 +129,9 @@
 
         [HttpPost]
         [ActionName("folder")]
-        public IHttpActionResult folder(string id, FolderRequest query, string db)
+        public IHttpActionResult folder(string id, CreateItemRequest query, string db)
         {
-            _customRepositoryActions.CreateFolder(query, db);
+            _customRepositoryActions.CreateItem(query, db);
             return this.Ok();
         }
 
@@ -140,6 +140,13 @@
         public ItemCommanderResponse search(string id, string keyword, string db)
         {
             return _customRepositoryActions.Search(keyword, db);
+        }
+
+        [HttpGet]
+        [ActionName("insertoptions")]
+        public List<GenericItemEntity> InsertOptions(string id,  string db)
+        {
+            return _customRepositoryActions.GetInsertOptions(id, db);
         }
 
         [HttpPost]

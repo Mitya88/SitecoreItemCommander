@@ -40,9 +40,9 @@
           <sc-icon icon="delete"></sc-icon>
           Delete
         </button>
-        <button scIconButton (click)="openInputDialog('addFolder')">
+        <button scIconButton (click)="openInsertOptions()">
           <sc-icon icon="add"></sc-icon>
-          Add folder
+          Create Item
         </button>
         <button scIconButton (click)="openInputDialog('search')">
           <sc-icon icon="magnifying_glass"></sc-icon>
@@ -154,9 +154,9 @@
 
     <div class="p-3">
         <label>Show columns:</label>
-        <div *ngFor="let option of options">
+        <div *ngFor="let option of options" >
             <label >
-                <input  type="checkbox"
+                <input (change)="storeOptions()" type="checkbox"
                        name="options"
                        value="{{option.value}}"
                        [(ngModel)]="option.checked"/>
@@ -231,3 +231,35 @@
     </sc-dialog-footer>
   </sc-dialog>
 </template>
+
+<template #insertOptions>
+    <sc-dialog>
+      <sc-dialog-header>
+        <h4>New item</h4>
+      </sc-dialog-header>
+      <sc-dialog-body>
+        <div class="row">
+          <div class="col-6">
+              <h4>Template</h4>
+              <select id="insertOptions" [(ngModel)]="parent.selectedInsertOptions" class="form-control" >
+                  <option *ngFor="let c of parent.insertOptions" [value]="c.Id" style="background-image:url({{c.Icon}});">{{ c.Name }}</option>
+                </select>
+          </div>
+          <div class="col-6" >
+              <h4>Item name</h4>
+              <input type="text" class="form-control" [(ngModel)]="parent.inputDialogValue"  />
+          </div>
+        </div>
+        <!-- <select ng-model="choice" *ngIf="insertOptions">
+            <option ng-repeat="item in insertOptions" data-image="{{item.Icon}}">{{item.Name}}</option>
+        </select> -->
+
+        
+          
+      </sc-dialog-body>
+      <sc-dialog-footer>
+        <button scButton scDialogClose>Close</button>
+        <button scButton="primary" (click)="parent.createItem()">Create</button>
+      </sc-dialog-footer>
+    </sc-dialog>
+  </template>
