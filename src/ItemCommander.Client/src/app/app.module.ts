@@ -35,6 +35,7 @@ import { ImageViewComponent } from './fast-view/image-view/image-view.component'
 import { TextComponent } from './fast-view/text/text.component';
 import { StorageServiceModule, WebStorageService} from 'angular-webstorage-service';
 import { FilterChildren } from './filter';
+import { MultilistComponent } from './fast-view/multilist/multilist.component';
 
 @NgModule({
   declarations: [
@@ -44,7 +45,8 @@ import { FilterChildren } from './filter';
     FastViewPageComponent,
     ImageViewComponent,
     TextComponent,
-    FilterChildren
+    FilterChildren,
+    MultilistComponent
   ],
   imports: [
     BrowserModule,

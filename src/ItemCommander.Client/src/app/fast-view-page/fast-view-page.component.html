@@ -74,7 +74,8 @@
                      <div *ngFor='let field of GetFields(language, section)' class="field-padding">
                       
                           <app-image-view *ngIf="field.Type=='Image'" [context]=field></app-image-view>
-                          <app-text *ngIf="field.Type!='Image'" [context]=field></app-text>
+                          <app-text *ngIf="(field.Type!='Image' && field.Type!='Multilist' && field.Type != 'Treelist')" [context]=field></app-text>
+                          <app-multilist *ngIf="(field.Type == 'Treelist' || field.Type=='Multilist' )" [context]=field></app-multilist>
                        </div>          
                   </sc-menu-category>
                   </sc-menu></nav>

@@ -213,13 +213,18 @@
   <ItemGroup>
     <Compile Include="Controllers\EntityController.cs" />
     <Compile Include="Interfaces\IGenericItemRepository.cs" />
+    <Compile Include="Models\BaseItemListRequest.cs" />
     <Compile Include="Models\CopyRequest.cs" />
-    <Compile Include="Models\FieldDto.cs" />
-    <Compile Include="Models\GenericItemEntity.cs" />
+    <Compile Include="Models\CopySingleRequest.cs" />
+    <Compile Include="Models\CreateItemRequest.cs" />
+    <Compile Include="Models\DeleteRequest.cs" />
+    <Compile Include="Models\FieldResponse.cs" />
+    <Compile Include="Models\ItemResponse.cs" />
     <Compile Include="Models\FastViewResponse.cs" />
+    <Compile Include="Models\GetItemRequest.cs" />
     <Compile Include="Models\ItemCommanderResponse.cs" />
-    <Compile Include="Models\QueryMultiDto.cs" />
-    <Compile Include="Models\QuerySingleDto.cs" />
+    <Compile Include="Models\LockRequest.cs" />
+    <Compile Include="Models\MoveRequest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\ItemRepository.cs" />
   </ItemGroup>
@@ -239,8 +244,8 @@
     <Content Include="App_Config\Include\Unicorn\Unicorn.Configs.Default.example" />
     <Content Include="App_Config\Include\Unicorn\Unicorn.config" />
     <Content Include="App_Config\Include\Unicorn\Unicorn.AutoPublish.config" />
-    <Content Include="App_Config\Include\ItemCommander\Feature.ItemCommander.config" />
-    <Content Include="App_Config\Include\ItemCommander\Feature.ItemCommander.Serialization.config" />
+    <Content Include="App_Config\Include\ItemCommander\Sitecore.ItemCommander.config" />
+    <Content Include="App_Config\Include\ItemCommander\Sitecore.ItemCommander.Serialization.config" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
   </ItemGroup>
   <PropertyGroup>

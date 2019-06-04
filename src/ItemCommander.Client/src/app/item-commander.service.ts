@@ -55,4 +55,12 @@ export class ItemCommanderService {
   insertOptions(id: any, database:string) {
     return this.httpClient.get(this.baseUrl + id + '/insertoptions?db='+database);
   }
+
+  mediaUrl(id: any, database:string) {
+    return this.httpClient.get(this.baseUrl + id + '/mediaurl?db='+database);
+  }
+
+  getItems(body: any, database:string) {
+    return this.httpClient.post(this.baseUrl + '-/GetItems?db='+database, body);
+  }
 }

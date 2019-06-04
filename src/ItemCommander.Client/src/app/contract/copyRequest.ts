@@ -31,6 +31,12 @@ export class PackageRequest{
     Items:Array<string>;
 }
 
+
+export class GetItemRequest{
+    Items:Array<string>;
+    RawValue:string;
+}
+
 export class DownloadResponse{
     FileName:string;
 }

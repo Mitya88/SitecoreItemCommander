@@ -1,0 +1,13 @@
+<p class="lead">
+    {{context.Name}}
+    </p>
+    <p>
+      <input type="text" disabled value="{{context.Value}}" class="form-control"/>
+      
+    </p><p *ngFor="let item of responseData" 
+>
+   <img src="{{item.Icon}}" width="32" height="32" />
+     &nbsp;{{item.Name}}
+     <sc-icon icon="lock" style="color:red" size="small" *ngIf="item.IsLocked"></sc-icon>
+   
+  </p>

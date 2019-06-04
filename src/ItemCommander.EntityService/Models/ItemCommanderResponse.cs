@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Collections.Generic;
 
 namespace ItemCommander.EntityService.Models
 {
@@ -13,7 +10,7 @@ namespace ItemCommander.EntityService.Models
 
         public string ParentId { get; set; }
 
-        public List<GenericItemEntity> Children { get; set; }
+        public List<ItemResponse> Children { get; set; }
     }
 
     public class DownloadResponse
