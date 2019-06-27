@@ -7,6 +7,7 @@
     using Sitecore.Configuration;
     using Sitecore.Data;
     using Sitecore.Data.Items;
+    using Sitecore.Diagnostics;
     using Sitecore.Install;
     using Sitecore.Install.Framework;
     using Sitecore.Install.Items;
@@ -211,7 +212,17 @@
         [ActionName("download")]
         public HttpResponseMessage Package(string id, string fileName)
         {
-            var file = HttpContext.Current.Server.MapPath(Path.Combine(Settings.PackagePath, fileName));
+            string file = string.Empty;
+            Log.Info("Package Path" + Settings.PackagePath, this);
+            if (Settings.PackagePath[1] == ':')
+            {
+                file = Path.Combine(Settings.PackagePath, fileName);
+            }
+            else
+            {
+                file = HttpContext.Current.Server.MapPath(Path.Combine(Settings.PackagePath, fileName));
+            }
+
             var fileExtenstion = Path.GetExtension(file);
 
             var dataBytes = File.ReadAllBytes(file);
