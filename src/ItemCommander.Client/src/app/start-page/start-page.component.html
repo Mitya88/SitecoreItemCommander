@@ -50,7 +50,7 @@
         </button>
         <button scIconButton (click)="selectAll()">
           <sc-icon icon="arrow_circle2"></sc-icon>
-          Select all in active tab
+          {{selectText}} all in active tab
         </button>
         <sc-dropdown> <button scButton scDropdownToggle>
             <sc-icon icon="lock"></sc-icon>
@@ -76,7 +76,7 @@
       <div class="row">
         <div class="col-6">
           <input type="text" class="form-control" [ngModel]="leftPath" disabled />
-          <table *ngIf="!leftLoading" scTable [ngClass]="GetTableClass('left')" (click)="tableSelect('left')">
+          <table *ngIf="!leftLoading" scTable [ngClass]="getTableClass('left')" (click)="tableSelect('left')">
             <thead>
               <tr>
                   <th *ngFor="let item of getSelectedOptions()">{{item.name}}</th>
@@ -112,7 +112,7 @@
         <div class="col-6">
             <sc-fast-view-page *ngIf="fastViewEnabled" [selectedDatabase] = selectedDatabase></sc-fast-view-page>
           <input type="text" class="form-control" [ngModel]="rightPath" disabled *ngIf="!fastViewEnabled"/>
-          <table scTable *ngIf="!rightLoading && !fastViewEnabled" [ngClass]="GetTableClass('right')" (click)="tableSelect('right')">
+          <table scTable *ngIf="!rightLoading && !fastViewEnabled" [ngClass]="getTableClass('right')" (click)="tableSelect('right')">
             <thead>
               <tr>
                 <th *ngFor="let item of getSelectedOptions()">{{item.name}}</th>               

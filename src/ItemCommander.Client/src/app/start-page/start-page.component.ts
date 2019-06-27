@@ -41,8 +41,6 @@ export class StartPageComponent implements OnInit {
   databases: string[] = ['master', 'core', 'web'];
   selectedDatabase: string = 'master';
 
-
-
   constructor(
     @Inject(LOCAL_STORAGE) private storage: WebStorageService,
     private itemCommanderService: ItemCommanderService,
@@ -87,18 +85,17 @@ export class StartPageComponent implements OnInit {
     this.selectedTable = "left";
     this.load();
     this.parent = this;
-
   }
 
   storeOptions(){
-    console.log('fired');
     this.storage.set('options', this.options);
   }
 
   showHiddenItems(){
     this.storage.set('hiddenitems',this.hiddenItems);
   }
-  GetTableClass(table: string) {
+  
+  getTableClass(table: string) {
     return this.selectedTable == table ? "table-selected" : "table-not-selected";
   }
 
@@ -120,23 +117,18 @@ export class StartPageComponent implements OnInit {
   }
 
   singleSelect(item: Item) {
-
-   
-
     if (item.IsSelected) {
       item.IsSelected = false;
       this.selectedItem = null;
       return;
     }
 
-    if(this.fastViewEnabled){
-      
+    if(this.fastViewEnabled){      
     this.fastviewService.search.emit(item.Id);
     return;
     }
 
     if (this.selectedTable == "left") {
-
       this.leftData.Children.forEach(function (it) { it.IsSelected = false; });
     }
     else {
@@ -147,18 +139,28 @@ export class StartPageComponent implements OnInit {
     this.selectedItem = item;
   }
 
+  selectText = 'Select';
   selectAll() {
-    if (this.selectedTable == "left") {
 
-      this.leftData.Children.forEach(function (it) { it.IsSelected = true; });
+    let selectValue = false;
+    if(this.selectText == 'Select'){
+      selectValue = true;
+      this.selectText = "Deselect"
+    }
+    else{
+      this.selectText = 'Select';
+      selectValue = false;
+    }
+
+    if (this.selectedTable == "left") {
+      this.leftData.Children.forEach(function (it) { it.IsSelected = selectValue; });
     }
     else {
-      this.rightData.Children.forEach(function (it) { it.IsSelected = true; });
+      this.rightData.Children.forEach(function (it) { it.IsSelected = selectValue; });
     }
   }
 
   openInputDialog(dialogAction: string) {
-
     this.dialogService.open(this.simpleInputRef);
     this.inputAction = dialogAction;
 
@@ -252,13 +254,10 @@ export class StartPageComponent implements OnInit {
       this.targetPath = this.leftData.CurrentPath;
       return this.rightData.Children.filter(it => it.IsSelected);
     }
-  }
-
-  
+  }  
 
   search() {
-    this.leftLoading = true;
-    
+    this.leftLoading = true;    
     this.leftIdBeforeSearch = this.leftData.CurrentId;
     this.itemCommanderService.search(this.inputDialogValue, this.selectedDatabase).subscribe({
       next: response => {
@@ -348,8 +347,6 @@ export class StartPageComponent implements OnInit {
     });
   }
 
-  
-
   getTargetPathForFolder() {
     if (this.selectedTable == 'left') {
       //taget a right
@@ -359,8 +356,6 @@ export class StartPageComponent implements OnInit {
       return this.rightData.CurrentPath;
     }
   }
-
-  
 
   delete() {
 
@@ -441,7 +436,6 @@ export class StartPageComponent implements OnInit {
         item.IsSelected = true;
       }
       return false;
-
     }
   }
 
@@ -503,7 +497,6 @@ export class StartPageComponent implements OnInit {
     { name: 'Created', value: 'created', checked: false },
     { name: 'LastModified', value: 'lastmodified', checked: true },
     { name: 'HasChildren', value: 'haschildren', checked: true }
-
   ]
 
   selectedOptions() { // right now: ['1','3']
