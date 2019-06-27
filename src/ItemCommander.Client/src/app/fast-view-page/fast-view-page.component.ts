@@ -1,29 +1,37 @@
-import { Component, OnInit, ChangeDetectorRef, Inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, Inject, Input } from '@angular/core';
 import { SciLogoutService } from '@speak/ng-sc/logout';
 import { ItemCommanderService } from '../item-commander.service';
 import { ActivatedRoute } from '@angular/router';
 import { LOCAL_STORAGE, WebStorageService } from 'angular-webstorage-service';
+import { FastViewService } from '../fast-view/fastview.service';
 
 @Component({
-  selector: 'app-fast-view-page',
+  selector: 'sc-fast-view-page',
   templateUrl: './fast-view-page.component.html',
   styleUrls: ['./fast-view-page.component.scss']
 })
 export class FastViewPageComponent implements OnInit {
 
+  @Input()  
+  selectedDatabase: any;
+
   constructor(@Inject(LOCAL_STORAGE) private storage: WebStorageService,
     private cdRef: ChangeDetectorRef,
     private route: ActivatedRoute,
     public logoutService: SciLogoutService,
-    private itemCommanderService: ItemCommanderService) {
+    private itemCommanderService: ItemCommanderService,
+    private fastviewService: FastViewService) {
     this.standardFields = ["Statistics", "Lifetime", "Security", "Help", "Appearance", "Insert Options", "Workflow", "Publishing", "Tasks", "Validation Rules"];
-    this.itemId = this.route.snapshot.queryParamMap.get('itemid');
-    this.selectedDatabase = this.route.snapshot.queryParamMap.get('database');
+    // this.itemId = this.route.snapshot.queryParamMap.get('itemid');
+    //this.selectedDatabase = this.route.snapshot.queryParamMap.get('database');
 
     this.showStandardFields = this.storage.get('standardfields');    
-
+    this.fastviewService.search.subscribe(value => {
+      console.log(value);
+      this.load(value);
+    });
   }
-  itemId: string;
+  
   objectKeys = Object.keys;
   responseData: any;
   showStandardFields: boolean;
@@ -31,11 +39,13 @@ export class FastViewPageComponent implements OnInit {
   languages: any;
 
   isNavigationShown: boolean;
-  //TODO: SELECTED DATABASE
-  selectedDatabase: any;
   ngOnInit() {
 
-    this.itemCommanderService.fastView(this.itemId, this.selectedDatabase).subscribe({
+    
+  }
+
+  load(itemId){
+    this.itemCommanderService.fastView(itemId, this.selectedDatabase).subscribe({
       next: response => {
         this.responseData = response;
         this.cdRef.detectChanges();

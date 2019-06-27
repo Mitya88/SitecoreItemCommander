@@ -36,6 +36,7 @@ import { TextComponent } from './fast-view/text/text.component';
 import { StorageServiceModule, WebStorageService} from 'angular-webstorage-service';
 import { FilterChildren } from './filter';
 import { MultilistComponent } from './fast-view/multilist/multilist.component';
+import { FastViewService } from './fast-view/fastview.service';
 
 @NgModule({
   declarations: [
@@ -82,7 +83,7 @@ import { MultilistComponent } from './fast-view/multilist/multilist.component';
     })
   ],
   providers: [
-    ItemCommanderService, SciLogoutService
+    ItemCommanderService, SciLogoutService, FastViewService
   ],
   bootstrap: [AppComponent]
 })

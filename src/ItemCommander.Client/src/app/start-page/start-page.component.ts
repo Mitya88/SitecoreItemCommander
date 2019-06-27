@@ -7,6 +7,7 @@ import { SciLogoutService } from '@speak/ng-sc/logout';
 import { ScDialogService } from '@speak/ng-bcl/dialog';
 import { LOCAL_STORAGE, WebStorageService } from 'angular-webstorage-service'
 import { Router } from '@angular/router';
+import { FastViewService } from '../fast-view/fastview.service';
 
 @Component({
   selector: 'app-start-page',
@@ -47,13 +48,15 @@ export class StartPageComponent implements OnInit {
     private itemCommanderService: ItemCommanderService,
     public logoutService: SciLogoutService,
     public dialogService: ScDialogService,
-    private router: Router
+    private router: Router,
+    private fastviewService: FastViewService
   ) { }
 
-  isSearching = false;
+  leftIdBeforeSearch:string;
   leftData: ItemCommanderResponse;
   rightData: ItemCommanderResponse;
 
+  isSearching:boolean;
 
   leftLoading: boolean;
   rightLoading: boolean;
@@ -117,10 +120,19 @@ export class StartPageComponent implements OnInit {
   }
 
   singleSelect(item: Item) {
+
+   
+
     if (item.IsSelected) {
       item.IsSelected = false;
       this.selectedItem = null;
       return;
+    }
+
+    if(this.fastViewEnabled){
+      
+    this.fastviewService.search.emit(item.Id);
+    return;
     }
 
     if (this.selectedTable == "left") {
@@ -246,6 +258,8 @@ export class StartPageComponent implements OnInit {
 
   search() {
     this.leftLoading = true;
+    
+    this.leftIdBeforeSearch = this.leftData.CurrentId;
     this.itemCommanderService.search(this.inputDialogValue, this.selectedDatabase).subscribe({
       next: response => {
         this.leftData = response as ItemCommanderResponse;
@@ -362,6 +376,17 @@ export class StartPageComponent implements OnInit {
     });
   }
 
+  fastViewEnabled = false;
+  fastView(){
+
+    if(this.fastViewEnabled){
+      this.fastViewEnabled = false;
+    }
+    else{
+      this.fastViewEnabled = true;
+    }
+  }
+
   lock(lock: boolean) {
 
     let lockRequest = new LockRequest();
@@ -423,6 +448,11 @@ export class StartPageComponent implements OnInit {
   loadParent(side: string) {
     if (side == "left") {
       if (this.leftData.ParentId == '{00000000-0000-0000-0000-000000000000}') {
+        return;
+      }
+
+      if (this.leftData.ParentId == null){
+        this.loadLeftItems(this.leftIdBeforeSearch);
         return;
       }
       this.loadLeftItems(this.leftData.ParentId);

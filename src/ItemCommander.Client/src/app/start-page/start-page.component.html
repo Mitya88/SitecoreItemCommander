@@ -20,7 +20,7 @@
             <sc-dropdown-header>Content Editor</sc-dropdown-header>
           </sc-dropdown-menu>
         </sc-dropdown>
-        <button scIconButton *ngIf="selectedItem" routerLink="/fastview" [queryParams]="{itemid: selectedItem.Id, database: selectedDatabase}" >
+        <button scIconButton (click)="fastView()" >
             <sc-icon icon="eye"></sc-icon>
             View
         </button>
@@ -110,15 +110,16 @@
           </sc-progress-indicator-panel>
         </div>
         <div class="col-6">
-          <input type="text" class="form-control" [ngModel]="rightPath" disabled />
-          <table scTable *ngIf="!rightLoading" [ngClass]="GetTableClass('right')" (click)="tableSelect('right')">
+            <sc-fast-view-page *ngIf="fastViewEnabled" [selectedDatabase] = selectedDatabase></sc-fast-view-page>
+          <input type="text" class="form-control" [ngModel]="rightPath" disabled *ngIf="!fastViewEnabled"/>
+          <table scTable *ngIf="!rightLoading && !fastViewEnabled" [ngClass]="GetTableClass('right')" (click)="tableSelect('right')">
             <thead>
               <tr>
                 <th *ngFor="let item of getSelectedOptions()">{{item.name}}</th>               
               </tr>
             </thead>
             <tbody>
-              <tr (dblclick)="loadParent('right')">
+              <tr (dblclick)="loadParent('right')" >
                 <td>...</td>
                 <td></td>
                 <td></td>
