@@ -1,7 +1,7 @@
 import { Component, OnInit, TemplateRef, ViewChild, Inject } from '@angular/core';
 import { ItemCommanderService } from '../item-commander.service';
 import { Item } from '../contract/Item';
-import { CopyRequest, CopySingle, DeleteRequest, FolderRequest, PackageRequest, DownloadResponse, LockRequest } from '../contract/copyRequest';
+import { CopyRequest, CopySingle, DeleteRequest, FolderRequest, PackageRequest, DownloadResponse, LockRequest, RenameRequest } from '../contract/copyRequest';
 import { ItemCommanderResponse } from '../contract/ItemCommanderResponse';
 import { SciLogoutService } from '@speak/ng-sc/logout';
 import { ScDialogService } from '@speak/ng-bcl/dialog';
@@ -172,6 +172,10 @@ export class StartPageComponent implements OnInit {
       this.singleInputTitle = 'Search';
       this.singleInputText = 'Enter a keyword...';
     }
+    else if(dialogAction=='rename'){
+      this.singleInputTitle = 'Rename';
+      this.singleInputText = 'Available patterns {C}, {oldName}, {yyyy}, {MM}';
+    }
   }
 
   openConfirmDialog(dialogAction: string) {
@@ -241,6 +245,9 @@ export class StartPageComponent implements OnInit {
     } else if (this.inputAction == 'search') {
       this.search();
     }
+    else if(this.inputAction == 'rename'){
+      this.rename();
+    }
   }
 
   getSelectedItems() {
@@ -264,6 +271,22 @@ export class StartPageComponent implements OnInit {
         this.leftData = response as ItemCommanderResponse;
         this.leftPath = this.inputDialogValue;
         this.leftLoading = false;
+        this.dialogService.close();
+      },
+    })
+  }
+
+  rename() {
+
+    let request = new RenameRequest();
+    request.Items = this.getSelectedItems().map(function (it) { return it.Id });
+    
+    request.NameOrPattern=this.inputDialogValue
+    
+    this.itemCommanderService.rename(request, this.selectedDatabase).subscribe({
+      next: response => {
+        this.loadLeftItems(this.leftData.CurrentId);
+        this.loadRightItems(this.rightData.CurrentId);
         this.dialogService.close();
       },
     })

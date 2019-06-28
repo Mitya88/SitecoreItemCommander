@@ -426,6 +426,26 @@
         }
 
         /// <summary>
+        /// Renames the specified request.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="db">The database.</param>
+        public void Rename(RenameRequest request, string db)
+        {
+            this.database = Sitecore.Configuration.Factory.GetDatabase(db);
+
+            foreach(var itemId in request.Items)
+            {
+                var item = this.database.GetItem(new ID(itemId));
+
+                using (new EditContext(item))
+                {
+                    item.Name = this.GetName(item.Name, request.NameOrPattern, request.Items.IndexOf(itemId));
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets the children.
         /// </summary>
         /// <param name="id">The identifier.</param>
@@ -507,6 +527,18 @@
         }
 
         #endregion Custom Repository implementations
+
+        private string GetName(string name, string pattern, int count)
+        {
+            return pattern.Replace("{C}", count.ToString())
+                .Replace("{OldName}",name)
+                .Replace("{yyyy}", DateTime.Now.ToString("yyyy"))
+                .Replace("{MM}", DateTime.Now.ToString("MM"))
+                .Replace("{dd}", DateTime.Now.ToString("dd"))
+                .Replace("{hh}", DateTime.Now.ToString("hh"))
+                .Replace("{mm}", DateTime.Now.ToString("mm"))
+                .Replace("{ss}", DateTime.Now.ToString("ss"));
+        }
 
         /// <summary>
         /// Gets the index of the search.

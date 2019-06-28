@@ -214,6 +214,7 @@
     <Compile Include="Controllers\EntityController.cs" />
     <Compile Include="Interfaces\IGenericItemRepository.cs" />
     <Compile Include="Models\BaseItemListRequest.cs" />
+    <Compile Include="Models\RenameRequest.cs" />
     <Compile Include="Models\CopyRequest.cs" />
     <Compile Include="Models\CopySingleRequest.cs" />
     <Compile Include="Models\CreateItemRequest.cs" />

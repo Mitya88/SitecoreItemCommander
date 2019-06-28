@@ -9,7 +9,6 @@
     using Sitecore.Data.Items;
     using Sitecore.Diagnostics;
     using Sitecore.Install;
-    using Sitecore.Install.Framework;
     using Sitecore.Install.Items;
     using Sitecore.Install.Zip;
     using Sitecore.Security.Accounts;
@@ -116,6 +115,13 @@
             return this.Ok();
         }
 
+        /// <summary>
+        /// Moves the specified identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <param name="query">The query.</param>
+        /// <param name="db">The database.</param>
+        /// <returns></returns>
         [HttpPost]
         [ActionName("move")]
         public IHttpActionResult Move(string id, MoveRequest query, string db)
@@ -124,6 +130,28 @@
             return this.Ok();
         }
 
+        /// <summary>
+        /// Renames the specified identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <param name="query">The query.</param>
+        /// <param name="db">The database.</param>
+        /// <returns></returns>
+        [HttpPost]
+        [ActionName("rename")]
+        public IHttpActionResult Rename(string id, RenameRequest query, string db)
+        {
+            this._customRepositoryActions.Rename(query, db);
+            return this.Ok();
+        }
+
+        /// <summary>
+        /// Deletes the specified identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <param name="query">The query.</param>
+        /// <param name="db">The database.</param>
+        /// <returns></returns>
         [HttpPost]
         [ActionName("delete")]
         public IHttpActionResult Delete(string id, DeleteRequest query, string db)
@@ -132,6 +160,13 @@
             return this.Ok();
         }
 
+        /// <summary>
+        /// Locks the specified identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <param name="query">The query.</param>
+        /// <param name="db">The database.</param>
+        /// <returns></returns>
         [HttpPost]
         [ActionName("lock")]
         public IHttpActionResult Lock(string id, LockRequest query, string db)
@@ -140,6 +175,13 @@
             return this.Ok();
         }
 
+        /// <summary>
+        /// Folders the specified identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <param name="query">The query.</param>
+        /// <param name="db">The database.</param>
+        /// <returns></returns>
         [HttpPost]
         [ActionName("folder")]
         public IHttpActionResult folder(string id, CreateItemRequest query, string db)
@@ -148,6 +190,13 @@
             return this.Ok();
         }
 
+        /// <summary>
+        /// Searches the specified identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <param name="keyword">The keyword.</param>
+        /// <param name="db">The database.</param>
+        /// <returns></returns>
         [HttpGet]
         [ActionName("search")]
         public ItemCommanderResponse search(string id, string keyword, string db)
@@ -155,6 +204,12 @@
             return this._customRepositoryActions.Search(keyword, db);
         }
 
+        /// <summary>
+        /// Inserts the options.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <param name="db">The database.</param>
+        /// <returns></returns>
         [HttpGet]
         [ActionName("insertoptions")]
         public List<ItemResponse> InsertOptions(string id, string db)
@@ -162,6 +217,12 @@
             return this._customRepositoryActions.GetInsertOptions(id, db);
         }
 
+        /// <summary>
+        /// Medias the URL.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <param name="db">The database.</param>
+        /// <returns></returns>
         [HttpGet]
         [ActionName("mediaurl")]
         public DownloadResponse MediaUrl(string id, string db)
@@ -169,6 +230,13 @@
             return new DownloadResponse { FileName = _customRepositoryActions.GetMediaUrl(id, db) };
         }
 
+        /// <summary>
+        /// Packages the specified identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <param name="request">The request.</param>
+        /// <param name="db">The database.</param>
+        /// <returns></returns>
         [HttpPost]
         [ActionName("package")]
         public DownloadResponse Package(string id, DeleteRequest request, string db)
@@ -178,6 +246,13 @@
             return new DownloadResponse { FileName = Path.GetFileName(file) };
         }
 
+        /// <summary>
+        /// Gets the item.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <param name="request">The request.</param>
+        /// <param name="db">The database.</param>
+        /// <returns></returns>
         [HttpPost]
         [ActionName("GetItems")]
         public List<ItemResponse> GetItem(string id, GetItemRequest request, string db)
@@ -208,6 +283,12 @@
             }).ToList();
         }
 
+        /// <summary>
+        /// Packages the specified identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <param name="fileName">Name of the file.</param>
+        /// <returns></returns>
         [HttpGet]
         [ActionName("download")]
         public HttpResponseMessage Package(string id, string fileName)
@@ -239,6 +320,10 @@
             return result;
         }
 
+        /// <summary>
+        /// Determines whether this instance is ok.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [ActionName("IsOk")]
         [Obsolete]
@@ -247,6 +332,11 @@
             return "Ok";
         }
 
+        /// <summary>
+        /// Generates the package.
+        /// </summary>
+        /// <param name="list">The list.</param>
+        /// <returns></returns>
         private string GeneratePackage(List<Item> list)
         {
             string fullName = Context.User.Profile.FullName;
@@ -261,12 +351,12 @@
 
                 Item[] objArray = list.ToArray();
                 if (objArray != null && objArray.Length > 0)
-                    list.AddRange((IEnumerable<Item>)objArray);
+                    list.AddRange(objArray);
                 foreach (Item obj in list)
                 {
                     explicitItemSource.Entries.Add(new ItemReference(obj.Uri, false).ToString());
                 }
-                solution.Sources.Add((ISource<PackageEntry>)explicitItemSource);
+                solution.Sources.Add(explicitItemSource);
                 solution.SaveProject = true;
 
                 string fileName = list[0].Name + "_" + DateTime.Now.ToString("dd_MM_yyyy_hh_mm_ss_fffffff") + ".zip";
@@ -275,8 +365,8 @@
                 using (PackageWriter packageWriter = new PackageWriter(str + fileName))
                 {
                     Context.SetActiveSite("shell");
-                    ((BaseSink<PackageEntry>)packageWriter).Initialize(Installer.CreateInstallationContext());
-                    PackageGenerator.GeneratePackage(solution, (ISink<PackageEntry>)packageWriter);
+                    packageWriter.Initialize(Installer.CreateInstallationContext());
+                    PackageGenerator.GeneratePackage(solution, packageWriter);
                     Context.SetActiveSite("website");
                 }
 

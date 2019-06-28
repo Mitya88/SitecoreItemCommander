@@ -37,6 +37,11 @@ export class GetItemRequest{
     RawValue:string;
 }
 
+export class RenameRequest{
+    Items:Array<string>;
+    NameOrPattern: string;
+}
+
 export class DownloadResponse{
     FileName:string;
 }

@@ -40,6 +40,10 @@ export class ItemCommanderService {
     return this.httpClient.post(this.baseUrl + '-/folder?db='+database, body);
   }
 
+  rename(body: any, database:string) {
+    return this.httpClient.post(this.baseUrl + '-/rename?db='+database, body);
+  }
+
   packageItems(body: any, database:string) {
     return this.httpClient.post(this.baseUrl + '-/package?db='+database, body);
   }

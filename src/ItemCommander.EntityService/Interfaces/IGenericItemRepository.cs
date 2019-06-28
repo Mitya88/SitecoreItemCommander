@@ -96,5 +96,12 @@
         /// <param name="db">The database.</param>
         /// <returns>The media url by id and database</returns>
         string GetMediaUrl(string id, string db);
+
+        /// <summary>
+        /// Renames the specified request.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="db">The database.</param>
+        void Rename(RenameRequest request, string db);
     }
 }
