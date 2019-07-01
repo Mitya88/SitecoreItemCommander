@@ -10,6 +10,7 @@
     using Sitecore.Data.Fields;
     using Sitecore.Data.Items;
     using Sitecore.Data.Managers;
+    using Sitecore.Exceptions;
     using Sitecore.Resources.Media;
     using Sitecore.SecurityModel;
     using System;
@@ -223,12 +224,9 @@
                     string itemId;
                     while (queue.TryDequeue(out itemId))
                     {
-                        using (new SecurityDisabler())
-                        {
-                            var sourceItem = this.database.GetItem(new ID(itemId));
+                        var sourceItem = this.database.GetItem(new ID(itemId));
 
-                            sourceItem.Delete();
-                        }
+                        sourceItem.Delete();
                     }
                 };
 

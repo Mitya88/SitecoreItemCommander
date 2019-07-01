@@ -273,6 +273,9 @@ export class StartPageComponent implements OnInit {
         this.leftLoading = false;
         this.dialogService.close();
       },
+      error: response =>{        
+        this.handleError(response);
+      }
     })
   }
 
@@ -289,6 +292,9 @@ export class StartPageComponent implements OnInit {
         this.loadRightItems(this.rightData.CurrentId);
         this.dialogService.close();
       },
+      error: response =>{        
+        this.handleError(response);
+      }
     })
   }
 
@@ -303,6 +309,9 @@ export class StartPageComponent implements OnInit {
           this.loadLeftItems(this.leftData.CurrentId);
           this.loadRightItems(this.rightData.CurrentId);
           this.dialogService.close();
+        },
+        error: response =>{        
+          this.handleError(response);
         }
       }
     );
@@ -326,6 +335,9 @@ export class StartPageComponent implements OnInit {
       next: fileName => {
         let theFile = '/sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/download?fileName=' + (fileName as DownloadResponse).FileName;
         window.open(theFile);
+      },
+      error: response =>{        
+        this.handleError(response);
       }
     });
   }
@@ -351,6 +363,9 @@ export class StartPageComponent implements OnInit {
         next: response => {
           this.loadLeftItems(this.leftData.CurrentId);
           this.loadRightItems(this.rightData.CurrentId);
+        },
+        error: response =>{        
+          this.handleError(response);
         }
       }
     );
@@ -366,6 +381,9 @@ export class StartPageComponent implements OnInit {
         this.loadLeftItems(this.leftData.CurrentId);
         this.loadRightItems(this.rightData.CurrentId);
         this.dialogService.close();
+      },
+      error: response =>{        
+        this.handleError(response);
       }
     });
   }
@@ -390,6 +408,9 @@ export class StartPageComponent implements OnInit {
         this.loadLeftItems(this.leftData.CurrentId);
         this.loadRightItems(this.rightData.CurrentId);
         this.dialogService.close();
+      },
+      error: response =>{        
+        this.handleError(response);
       }
     });
   }
@@ -416,6 +437,9 @@ export class StartPageComponent implements OnInit {
         this.loadLeftItems(this.leftData.CurrentId);
         this.loadRightItems(this.rightData.CurrentId);
         this.dialogService.close();
+      },
+      error: response =>{        
+        this.handleError(response);
       }
     });
   }
@@ -433,7 +457,9 @@ export class StartPageComponent implements OnInit {
         this.leftPath = this.leftData.CurrentPath;
         this.leftLoading = false;
       },
-      error: error => { }
+      error: response =>{        
+        this.handleError(response);
+      }
     });
   }
 
@@ -445,7 +471,9 @@ export class StartPageComponent implements OnInit {
         this.rightPath = this.rightData.CurrentPath;
         this.rightLoading = false;
       },
-      error: error => { }
+      error: response =>{        
+        this.handleError(response);
+      }
     });
   }
 
@@ -550,6 +578,9 @@ export class StartPageComponent implements OnInit {
         this.insertOptions = response as Array<Item>;
         console.log(this.insertOptions);
     this.dialogService.open(this.insertOptionRef);
+      },
+      error: response =>{        
+        this.handleError(response);
       }
     });
   }
@@ -565,7 +596,28 @@ export class StartPageComponent implements OnInit {
         this.loadLeftItems(this.leftData.CurrentId);
         this.loadRightItems(this.rightData.CurrentId);
         this.dialogService.close();
+      },
+      error: response =>{        
+        this.handleError(response);
       }
     });
+  }
+
+  handleError(response: any){
+    console.log(response);
+
+    if(response.error && response.error.InnerException){
+      console.log('hasinnerexception');
+      this.dialogService.close();
+      this.warningText = response.error.InnerException.ExceptionMessage;
+      this.dialogService.open(this.warningRef);
+      return;
+    }
+
+    if(response.error && response.error.ExceptionMessage){
+      this.dialogService.close();
+      this.warningText = response.error.ExceptionMessage;
+      this.dialogService.open(this.warningRef);
+    }
   }
 }
