@@ -36,6 +36,7 @@ export class StartPageComponent implements OnInit {
   confirmAction: string;
   inputAction: string;
   warningText: string;
+  warningTitle:string;
 
   isNavigationShown: boolean;
   databases: string[] = ['master', 'core', 'web'];
@@ -150,13 +151,20 @@ export class StartPageComponent implements OnInit {
     else{
       this.selectText = 'Select';
       selectValue = false;
+      this.selectedItem = null;
     }
 
     if (this.selectedTable == "left") {
       this.leftData.Children.forEach(function (it) { it.IsSelected = selectValue; });
+      if(selectValue){
+        this.selectedItem = this.leftData.Children[0];
+      }
     }
     else {
       this.rightData.Children.forEach(function (it) { it.IsSelected = selectValue; });
+      if(selectValue){
+        this.selectedItem = this.rightData.Children[0];
+      }
     }
   }
 
@@ -181,6 +189,7 @@ export class StartPageComponent implements OnInit {
   openConfirmDialog(dialogAction: string) {
     if (this.hasSelectedItem()) {
       this.warningText = 'There is no selected item';
+      this.warningTitle = 'Invalid selected item';
       this.dialogService.open(this.warningRef);
       return;
     }
@@ -190,6 +199,7 @@ export class StartPageComponent implements OnInit {
     console.log(this.targetPath);
     if (dialogAction == 'move' && this.selectedItem.Path == this.targetPath) {
       this.warningText = 'You cannot move item into itself';
+      this.warningTitle = 'Move error';
       this.dialogService.open(this.warningRef);
       return;
     }
@@ -416,15 +426,6 @@ export class StartPageComponent implements OnInit {
   }
 
   fastViewEnabled = false;
-  fastView(){
-
-    if(this.fastViewEnabled){
-      this.fastViewEnabled = false;
-    }
-    else{
-      this.fastViewEnabled = true;
-    }
-  }
 
   lock(lock: boolean) {
 
@@ -603,6 +604,13 @@ export class StartPageComponent implements OnInit {
     });
   }
 
+  openContentEditor(){
+    let url ='/sitecore/shell/Applications/Content%20Editor.aspx?fo='+this.selectedItem.Id;
+
+    var win = window.open(url, '_blank');
+  win.focus();
+  }
+
   handleError(response: any){
     console.log(response);
 
@@ -610,6 +618,7 @@ export class StartPageComponent implements OnInit {
       console.log('hasinnerexception');
       this.dialogService.close();
       this.warningText = response.error.InnerException.ExceptionMessage;
+      this.warningTitle = response.statusText;
       this.dialogService.open(this.warningRef);
       return;
     }
@@ -617,6 +626,7 @@ export class StartPageComponent implements OnInit {
     if(response.error && response.error.ExceptionMessage){
       this.dialogService.close();
       this.warningText = response.error.ExceptionMessage;
+      this.warningTitle = response.statusText;
       this.dialogService.open(this.warningRef);
     }
   }
