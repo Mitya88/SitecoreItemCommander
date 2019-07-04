@@ -14,7 +14,6 @@ export class ImageViewComponent implements OnInit {
 
   mediaUrl:any;
   constructor(private itemCommanderService:ItemCommanderService) { 
-    console.log('image');
     this.mediaUrl = '#';
   }
 
@@ -26,9 +25,7 @@ let value = xmlDoc.getElementsByTagName('image')[0].getAttribute('mediaid');
     this.itemCommanderService.mediaUrl(value, 'master').subscribe({
       next: response =>{
         this.mediaUrl = response ;
-        console.log(this.mediaUrl);
       }
     });
-    console.log(value);
   }
 }

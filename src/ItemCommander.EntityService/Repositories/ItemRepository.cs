@@ -270,6 +270,7 @@
         public List<Item> GetItems(List<string> ids, string db)
         {
             this.database = Sitecore.Configuration.Factory.GetDatabase(db);
+            
             return ids.Select(t => this.database.GetItem(new ID(t))).ToList();
         }
 

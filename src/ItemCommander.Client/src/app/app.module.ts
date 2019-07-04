@@ -28,7 +28,6 @@ import { ScProgressIndicatorPanelModule} from '@speak/ng-bcl/progress-indicator-
 import { SciLogoutService } from '@speak/ng-sc/logout';
 import { AppComponent } from './app.component';
 import { StartPageComponent } from './start-page/start-page.component';
-import { ServiceSamplePageComponent } from './service-sample-page/service-sample-page.component';
 import { ItemCommanderService } from './item-commander.service';
 import { FastViewPageComponent } from './fast-view-page/fast-view-page.component';
 import { ImageViewComponent } from './fast-view/image-view/image-view.component';
@@ -42,7 +41,6 @@ import { FastViewService } from './fast-view/fastview.service';
   declarations: [
     AppComponent,
     StartPageComponent,
-    ServiceSamplePageComponent,
     FastViewPageComponent,
     ImageViewComponent,
     TextComponent,
@@ -57,7 +55,6 @@ import { FastViewService } from './fast-view/fastview.service';
     HttpClientModule,
     RouterModule.forRoot([
       { path: '', component: StartPageComponent, pathMatch: 'full' },
-      { path: 'servicesample', component: ServiceSamplePageComponent },
       { path: 'fastview', component: FastViewPageComponent }
     ]),
     ScAccountInformationModule,

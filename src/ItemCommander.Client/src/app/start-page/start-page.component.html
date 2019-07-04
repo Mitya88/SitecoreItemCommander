@@ -12,7 +12,7 @@
     <sc-action-bar>
       <sc-action-bar-left>
         <sc-dropdown class="bookmarkTools">
-          <button scDropdownToggle scIconButton [disabled]="getSelectedItems().length == 0">
+          <button scDropdownToggle scIconButton>
             <sc-icon icon="edit"></sc-icon>
             Edit
           </button>
@@ -20,27 +20,27 @@
               <a scDropdownItem (click)="openContentEditor()">Content Editor</a>
           </sc-dropdown-menu>
         </sc-dropdown>
-        <button scIconButton (click)="fastView()" [(scToggle)]="fastViewEnabled">
+        <button scIconButton [(scToggle)]="fastViewEnabled" (click)="fastViewSearch()">
             <sc-icon icon="eye"></sc-icon>
             View
         </button>
-        <button scIconButton (click)="openInputDialog('rename')" [disabled]="getSelectedItems().length == 0">
+        <button scIconButton (click)="openInputDialog('rename')">
             <sc-icon icon="ballpen"></sc-icon>
             Rename
           </button>
-        <button scIconButton (click)="openConfirmDialog('copy')" [disabled]="getSelectedItems().length == 0">
+        <button scIconButton (click)="openConfirmDialog('copy')">
           <sc-icon icon="copy"></sc-icon>
           Copy
         </button>
-        <button scIconButton (click)="openConfirmDialog('move')" [disabled]="getSelectedItems().length == 0">
+        <button scIconButton (click)="openConfirmDialog('move')">
           <sc-icon icon="arrow_cross"></sc-icon>
           Move
         </button>
-        <button scIconButton (click)="downloadAsPackage()" [disabled]="getSelectedItems().length == 0"> 
+        <button scIconButton (click)="downloadAsPackage()">
           <sc-icon icon="arrow_down"></sc-icon>
           Download as Package
         </button>
-        <button scIconButton (click)="openConfirmDialog('delete')" [disabled]="getSelectedItems().length == 0">
+        <button scIconButton (click)="openConfirmDialog('delete')">
           <sc-icon icon="delete"></sc-icon>
           Delete
         </button>
@@ -56,7 +56,7 @@
           <sc-icon icon="arrow_circle2"></sc-icon>
           {{selectText}} all in active tab
         </button>
-        <sc-dropdown> <button scButton scDropdownToggle [disabled]="getSelectedItems().length == 0">
+        <sc-dropdown> <button scButton scDropdownToggle>
             <sc-icon icon="lock"></sc-icon>
             Lock/UnLock<sc-icon icon="lock_open"></sc-icon>
           </button>

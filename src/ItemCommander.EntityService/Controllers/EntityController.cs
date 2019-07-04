@@ -263,10 +263,10 @@
 
             if (!string.IsNullOrEmpty(request.RawValue) && ids.Any())
             {
-                items = this._customRepositoryActions.GetItems(ids.ToList(), db);
+                items.AddRange(this._customRepositoryActions.GetItems(ids.ToList(), db));
             }
-
-            return items.Select(t => new ItemResponse
+            var result = new List<ItemResponse>();
+            result.AddRange(items.Where(t => t != null).Select(t => new ItemResponse
             {
                 Name = t.Name,
                 Id = t.ID.ToString(),
@@ -280,7 +280,19 @@
                 Icon = ItemRepository.GetIcon(t),
                 IsLocked = t.Locking.IsLocked(),
                 IsHidden = t["__Hidden"] == "1"
-            }).ToList();
+            }).ToList());           
+
+            foreach(var itemId in ids)
+            {
+                if (items == null || items.Where(t=> t!= null).FirstOrDefault(t=>t.ID == new ID(itemId)) == null)
+                {
+                    result.Add(new ItemResponse
+                    {
+                        Name = string.Format("{0} cannot be found in {1} database", itemId, db)
+                    });
+                } 
+            }
+            return result;
         }
 
         /// <summary>

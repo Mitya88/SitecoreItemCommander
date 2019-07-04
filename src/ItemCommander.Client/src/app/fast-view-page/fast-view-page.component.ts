@@ -27,7 +27,6 @@ export class FastViewPageComponent implements OnInit {
 
     this.showStandardFields = this.storage.get('standardfields');    
     this.fastviewService.search.subscribe(value => {
-      console.log(value);
       this.load(value);
     });
   }
@@ -81,7 +80,6 @@ export class FastViewPageComponent implements OnInit {
   }
 
   changeStandardFields(){
-    console.log('change');
     this.storage.set('standardfields',this.showStandardFields);
   }
 }

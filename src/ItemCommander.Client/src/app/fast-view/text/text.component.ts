@@ -13,7 +13,6 @@ export class TextComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
-    // console.log(this.context);
   }
 
 }

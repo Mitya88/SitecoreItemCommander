@@ -117,6 +117,17 @@ export class StartPageComponent implements OnInit {
     this.loadRightItems('11111111-1111-1111-1111-111111111111');
   }
 
+  fastViewSearch(){
+    if (this.getSelectedItems().length > 0){
+      if(this.fastViewEnabled){      
+        var id = this.getSelectedItems()[0].Id
+        this.fastviewService.search.emit(id);
+        return;
+        }
+     
+    }
+  }
+
   singleSelect(item: Item) {
     if (item.IsSelected) {
       item.IsSelected = false;
@@ -194,9 +205,6 @@ export class StartPageComponent implements OnInit {
       return;
     }
      this.getSelectedItems();
-    console.log(dialogAction);
-    console.log(this.selectedItem.Path);
-    console.log(this.targetPath);
     if (dialogAction == 'move' && this.selectedItem.Path == this.targetPath) {
       this.warningText = 'You cannot move item into itself';
       this.warningTitle = 'Move error';
@@ -257,6 +265,15 @@ export class StartPageComponent implements OnInit {
     }
     else if(this.inputAction == 'rename'){
       this.rename();
+    }
+  }
+  fastView(){
+
+    if(this.fastViewEnabled){
+      this.fastViewEnabled = false;
+    }
+    else{
+      this.fastViewEnabled = true;
     }
   }
 
@@ -357,7 +374,7 @@ export class StartPageComponent implements OnInit {
     this.copyRequest = new CopyRequest();
     this.copyRequest.Items = this.getSelectedItems().map(function (it) { return it.Id });
     this.copyRequest.TargetPath = this.targetPath;
-
+    this.dialogService.close();
     if (this.copyRequest.Items.length == 1) {
       this.inputDialogValue = this.selectedItem.Name;
       this.openInputDialog('singleCopy');
@@ -577,7 +594,6 @@ export class StartPageComponent implements OnInit {
     this.itemCommanderService.insertOptions(id, this.selectedDatabase).subscribe({
       next: response =>{
         this.insertOptions = response as Array<Item>;
-        console.log(this.insertOptions);
     this.dialogService.open(this.insertOptionRef);
       },
       error: response =>{        
@@ -591,7 +607,6 @@ export class StartPageComponent implements OnInit {
     contract.TargetPath = this.getTargetPathForFolder();
     contract.Name = this.parent.inputDialogValue;
     contract.TemplateId = this.selectedInsertOptions;
-    console.log(contract);
     this.itemCommanderService.addFolder(contract, this.selectedDatabase).subscribe({
       next: response => {
         this.loadLeftItems(this.leftData.CurrentId);
@@ -612,10 +627,8 @@ export class StartPageComponent implements OnInit {
   }
 
   handleError(response: any){
-    console.log(response);
 
     if(response.error && response.error.InnerException){
-      console.log('hasinnerexception');
       this.dialogService.close();
       this.warningText = response.error.InnerException.ExceptionMessage;
       this.warningTitle = response.statusText;
