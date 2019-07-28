@@ -250,6 +250,11 @@
 
                 if (scItem.Locking.IsLocked() && !lockRequest.Lock)
                 {
+                    if (!scItem.Locking.CanUnlock())
+                    {
+                        throw new Exception("Item cannot be unlocked with the current user");
+                    }
+
                     scItem.Locking.Unlock();
                 }
                 else if (!scItem.Locking.IsLocked() && lockRequest.Lock)
