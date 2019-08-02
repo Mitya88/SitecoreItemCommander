@@ -205,7 +205,7 @@ export class StartPageComponent implements OnInit {
       return;
     }
      this.getSelectedItems();
-    if (dialogAction == 'move' && this.selectedItem.Path == this.targetPath) {
+    if (dialogAction == 'move' && (this.selectedItem.Path == this.targetPath || this.targetPath.startsWith(this.selectedItem.Path))) {
       this.warningText = 'You cannot move item into itself';
       this.warningTitle = 'Move error';
       this.dialogService.open(this.warningRef);
@@ -354,6 +354,12 @@ export class StartPageComponent implements OnInit {
   }
 
   downloadAsPackage() {
+    if (this.hasSelectedItem()) {
+      this.warningText = 'There is no selected item';
+      this.warningTitle = 'Invalid selected item';
+      this.dialogService.open(this.warningRef);
+      return;
+    }
     let moveRequest = new PackageRequest();
 
     moveRequest.Items = this.getSelectedItems().map(function (it) { return it.Id });
@@ -380,6 +386,8 @@ export class StartPageComponent implements OnInit {
       this.openInputDialog('singleCopy');
     }
     else {
+      this.warningTitle = 'Copy';
+      this.warningText = 'Are you sure?';
       this.openConfirmDialog('multipleCopy');
     }
   }
