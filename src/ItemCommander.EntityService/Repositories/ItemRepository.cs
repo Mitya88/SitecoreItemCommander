@@ -69,7 +69,7 @@
                 queue = new ConcurrentQueue<string>();
             }
 
-            var maxNumberOfThreads = Settings.GetIntSetting(maxNumberOfThreadsSettingsKey, 5);
+            this.MaximumNumberOfThreads = Settings.GetIntSetting(maxNumberOfThreadsSettingsKey, 5);
         }
 
         #region Sitecore Entity Service implementations
