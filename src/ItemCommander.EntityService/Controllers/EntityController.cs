@@ -45,7 +45,7 @@
         public EntityController(IGenericItemRepository<ItemResponse> repository)
             : base(repository)
         {
-            _customRepositoryActions = repository;
+            this._customRepositoryActions = repository;
         }
 
         //SampleUR: /sitecore/api/ssc/ItemCommander-EntityService-Controllers/Entity/{id}/{actionName}?{queryStrings}
@@ -104,14 +104,14 @@
         /// Copies the single.
         /// </summary>
         /// <param name="id">The identifier.</param>
-        /// <param name="query">The query.</param>
+        /// <param name="copySingleRequest">The query.</param>
         /// <param name="db">The database.</param>
         /// <returns></returns>
         [HttpPost]
         [ActionName("copysingle")]
-        public IHttpActionResult CopySingle(string id, CopySingle query, string db)
+        public IHttpActionResult CopySingle(string id, CopySingle copySingleRequest, string db)
         {
-            this._customRepositoryActions.CopySingle(query, db);
+            this._customRepositoryActions.CopySingle(copySingleRequest, db);
             return this.Ok();
         }
 
@@ -119,14 +119,14 @@
         /// Moves the specified identifier.
         /// </summary>
         /// <param name="id">The identifier.</param>
-        /// <param name="query">The query.</param>
+        /// <param name="moveRequest">The query.</param>
         /// <param name="db">The database.</param>
         /// <returns></returns>
         [HttpPost]
         [ActionName("move")]
-        public IHttpActionResult Move(string id, MoveRequest query, string db)
+        public IHttpActionResult Move(string id, MoveRequest moveRequest, string db)
         {
-            this._customRepositoryActions.Move(query, db);
+            this._customRepositoryActions.Move(moveRequest, db);
             return this.Ok();
         }
 
@@ -134,14 +134,14 @@
         /// Renames the specified identifier.
         /// </summary>
         /// <param name="id">The identifier.</param>
-        /// <param name="query">The query.</param>
+        /// <param name="renameRequest">The query.</param>
         /// <param name="db">The database.</param>
         /// <returns></returns>
         [HttpPost]
         [ActionName("rename")]
-        public IHttpActionResult Rename(string id, RenameRequest query, string db)
+        public IHttpActionResult Rename(string id, RenameRequest renameRequest, string db)
         {
-            this._customRepositoryActions.Rename(query, db);
+            this._customRepositoryActions.Rename(renameRequest, db);
             return this.Ok();
         }
 
@@ -149,14 +149,14 @@
         /// Deletes the specified identifier.
         /// </summary>
         /// <param name="id">The identifier.</param>
-        /// <param name="query">The query.</param>
+        /// <param name="deleteRequest">The query.</param>
         /// <param name="db">The database.</param>
         /// <returns></returns>
         [HttpPost]
         [ActionName("delete")]
-        public IHttpActionResult Delete(string id, DeleteRequest query, string db)
+        public IHttpActionResult Delete(string id, DeleteRequest deleteRequest, string db)
         {
-            this._customRepositoryActions.Delete(query, db);
+            this._customRepositoryActions.Delete(deleteRequest, db);
             return this.Ok();
         }
 
@@ -164,14 +164,14 @@
         /// Locks the specified identifier.
         /// </summary>
         /// <param name="id">The identifier.</param>
-        /// <param name="query">The query.</param>
+        /// <param name="lockRequest">The query.</param>
         /// <param name="db">The database.</param>
         /// <returns></returns>
         [HttpPost]
         [ActionName("lock")]
-        public IHttpActionResult Lock(string id, LockRequest query, string db)
+        public IHttpActionResult Lock(string id, LockRequest lockRequest, string db)
         {
-            this._customRepositoryActions.Lock(query, db);
+            this._customRepositoryActions.Lock(lockRequest, db);
             return this.Ok();
         }
 
@@ -179,14 +179,14 @@
         /// Folders the specified identifier.
         /// </summary>
         /// <param name="id">The identifier.</param>
-        /// <param name="query">The query.</param>
+        /// <param name="createRequest">The query.</param>
         /// <param name="db">The database.</param>
         /// <returns></returns>
         [HttpPost]
         [ActionName("folder")]
-        public IHttpActionResult folder(string id, CreateItemRequest query, string db)
+        public IHttpActionResult folder(string id, CreateItemRequest createRequest, string db)
         {
-            this._customRepositoryActions.CreateItem(query, db);
+            this._customRepositoryActions.CreateItem(createRequest, db);
             return this.Ok();
         }
 
@@ -199,7 +199,7 @@
         /// <returns></returns>
         [HttpGet]
         [ActionName("search")]
-        public ItemCommanderResponse search(string id, string keyword, string db)
+        public ItemCommanderResponse Search(string id, string keyword, string db)
         {
             return this._customRepositoryActions.Search(keyword, db);
         }
@@ -280,17 +280,17 @@
                 Icon = ItemRepository.GetIcon(t),
                 IsLocked = t.Locking.IsLocked(),
                 IsHidden = t["__Hidden"] == "1"
-            }).ToList());           
+            }).ToList());
 
-            foreach(var itemId in ids)
+            foreach (var itemId in ids)
             {
-                if (items == null || items.Where(t=> t!= null).FirstOrDefault(t=>t.ID == new ID(itemId)) == null)
+                if (items == null || items.Where(t => t != null).FirstOrDefault(t => t.ID == new ID(itemId)) == null)
                 {
                     result.Add(new ItemResponse
                     {
                         Name = string.Format("{0} cannot be found in {1} database", itemId, db)
                     });
-                } 
+                }
             }
             return result;
         }

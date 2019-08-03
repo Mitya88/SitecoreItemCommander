@@ -2,17 +2,16 @@
 {
     using ItemCommander.EntityService.Interfaces;
     using ItemCommander.EntityService.Models;
+    using ItemCommander.EntityService.Search;
+    using Sitecore.Configuration;
     using Sitecore.ContentSearch;
     using Sitecore.ContentSearch.Linq;
     using Sitecore.ContentSearch.Linq.Utilities;
-    using Sitecore.ContentSearch.SearchTypes;
     using Sitecore.Data;
     using Sitecore.Data.Fields;
     using Sitecore.Data.Items;
     using Sitecore.Data.Managers;
-    using Sitecore.Exceptions;
     using Sitecore.Resources.Media;
-    using Sitecore.SecurityModel;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -36,14 +35,24 @@
         private List<string> standardFields = new List<string>() { "Statistics", "Lifetime", "Security", "Help", "Appearance", "Insert Options", "Workflow", "Publishing", "Tasks", "Validation Rules" };
 
         /// <summary>
-        /// The queue
+        /// The queue, is going to be used to display the number of proccessed/remaings items in V2
         /// </summary>
         private static ConcurrentQueue<string> queue;
 
         /// <summary>
-        /// The folder template
+        /// The maximum number of threads settings key
         /// </summary>
-        private string FolderTemplate = "{A87A00B1-E6DB-45AB-8B54-636FEC3B5523}";
+        private string maxNumberOfThreadsSettingsKey = "ItemCommander.MaxNumberOfThreads";
+
+        /// <summary>
+        /// The folder template identifier
+        /// </summary>
+        private string FolderTemplateId = "{A87A00B1-E6DB-45AB-8B54-636FEC3B5523}";
+
+        /// <summary>
+        /// The maximum number of threads
+        /// </summary>
+        private readonly int MaximumNumberOfThreads;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ItemRepository"/> class.
@@ -59,12 +68,13 @@
             {
                 queue = new ConcurrentQueue<string>();
             }
+
+            var maxNumberOfThreads = Settings.GetIntSetting(maxNumberOfThreadsSettingsKey, 5);
         }
 
         #region Sitecore Entity Service implementations
 
         //GET
-        ///sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/{80FDC514-CD6A-4EEF-B9C2-6CFA82B0F37A}
         public ItemResponse FindById(string id)
         {
             throw new NotImplementedException();
@@ -86,7 +96,6 @@
             throw new NotImplementedException();
         }
 
-        // ????
         public bool Exists(ItemResponse entity)
         {
             if (string.IsNullOrEmpty(entity.Id))
@@ -116,30 +125,31 @@
         /// <summary>
         /// Creates the item.
         /// </summary>
-        /// <param name="folder">The folder.</param>
+        /// <param name="createItemRequest">The folder.</param>
         /// <param name="db">The database.</param>
-        public void CreateItem(CreateItemRequest folder, string db)
+        public void CreateItem(CreateItemRequest createItemRequest, string db)
         {
-            this.database = Sitecore.Configuration.Factory.GetDatabase(db);
-            var targetItem = database.GetItem(folder.TargetPath);
-            targetItem.Add(folder.Name, new TemplateID(new ID(folder.TemplateId)));
+            this.SetDatabase(db);
+
+            var targetItem = database.GetItem(createItemRequest.TargetPath);
+            targetItem.Add(createItemRequest.Name, new TemplateID(new ID(createItemRequest.TemplateId)));
         }
 
         /// <summary>
         /// Copies the specified query.
         /// </summary>
-        /// <param name="query">The query.</param>
+        /// <param name="copyRequest">The query.</param>
         /// <param name="db">The database.</param>
-        public void Copy(CopyRequest query, string db)
+        public void Copy(CopyRequest copyRequest, string db)
         {
-            this.database = Sitecore.Configuration.Factory.GetDatabase(db);
+            this.SetDatabase(db);
 
-            var targetItem = this.database.GetItem(query.TargetPath);
-            query.Items.ForEach(t => queue.Enqueue(t));
+            var targetItem = this.database.GetItem(copyRequest.TargetPath);
+            copyRequest.Items.ForEach(t => queue.Enqueue(t));
 
             List<Action> actions = new List<Action>();
 
-            for (int i = 0; i < query.Items.Count; i++)
+            for (int i = 0; i < this.MaximumNumberOfThreads; i++)
             {
                 Action action = () =>
                 {
@@ -147,7 +157,6 @@
                     while (queue.TryDequeue(out itemId))
                     {
                         var sourceItem = database.GetItem(new ID(itemId));
-
                         sourceItem.CopyTo(targetItem, sourceItem.Name, new ID(Guid.NewGuid()), false);
                     }
                 };
@@ -161,32 +170,33 @@
         /// <summary>
         /// Copies the single.
         /// </summary>
-        /// <param name="query">The query.</param>
+        /// <param name="copySingleRequest">The query.</param>
         /// <param name="db">The database.</param>
-        public void CopySingle(CopySingle query, string db)
+        public void CopySingle(CopySingle copySingleRequest, string db)
         {
-            this.database = Sitecore.Configuration.Factory.GetDatabase(db);
-            var targetItem = this.database.GetItem(query.TargetPath);
+            this.SetDatabase(db);
 
-            var sourceItem = this.database.GetItem(new ID(query.Item));
+            var targetItem = this.database.GetItem(copySingleRequest.TargetPath);
+            var sourceItem = this.database.GetItem(new ID(copySingleRequest.Item));
 
-            sourceItem.CopyTo(targetItem, query.Name, new ID(Guid.NewGuid()), false);
+            sourceItem.CopyTo(targetItem, copySingleRequest.Name, new ID(Guid.NewGuid()), false);
         }
 
         /// <summary>
         /// Moves the specified query.
         /// </summary>
-        /// <param name="query">The query.</param>
+        /// <param name="moveRequest">The query.</param>
         /// <param name="db">The database.</param>
-        public void Move(MoveRequest query, string db)
+        public void Move(MoveRequest moveRequest, string db)
         {
-            this.database = Sitecore.Configuration.Factory.GetDatabase(db);
-            var targetItem = this.database.GetItem(query.TargetPath);
-            query.Items.ForEach(t => queue.Enqueue(t));
+            this.SetDatabase(db);
+
+            var targetItem = this.database.GetItem(moveRequest.TargetPath);
+            moveRequest.Items.ForEach(t => queue.Enqueue(t));
 
             List<Action> actions = new List<Action>();
 
-            for (int i = 0; i < query.Items.Count; i++)
+            for (int i = 0; i < this.MaximumNumberOfThreads; i++)
             {
                 Action action = () =>
                 {
@@ -194,7 +204,6 @@
                     while (queue.TryDequeue(out itemId))
                     {
                         var sourceItem = database.GetItem(new ID(itemId));
-
                         sourceItem.MoveTo(targetItem);
                     }
                 };
@@ -208,16 +217,17 @@
         /// <summary>
         /// Deletes the specified query.
         /// </summary>
-        /// <param name="query">The query.</param>
+        /// <param name="deleteRequest">The query.</param>
         /// <param name="db">The database.</param>
-        public void Delete(DeleteRequest query, string db)
+        public void Delete(DeleteRequest deleteRequest, string db)
         {
-            this.database = Sitecore.Configuration.Factory.GetDatabase(db);
-            query.Items.ForEach(t => queue.Enqueue(t));
+            this.SetDatabase(db);
+
+            deleteRequest.Items.ForEach(t => queue.Enqueue(t));
 
             List<Action> actions = new List<Action>();
 
-            for (int i = 0; i < query.Items.Count; i++)
+            for (int i = 0; i < this.MaximumNumberOfThreads; i++)
             {
                 Action action = () =>
                 {
@@ -225,7 +235,6 @@
                     while (queue.TryDequeue(out itemId))
                     {
                         var sourceItem = this.database.GetItem(new ID(itemId));
-
                         sourceItem.Delete();
                     }
                 };
@@ -243,24 +252,38 @@
         /// <param name="db">The database.</param>
         public void Lock(LockRequest lockRequest, string db)
         {
-            this.database = Sitecore.Configuration.Factory.GetDatabase(db);
-            foreach (var item in lockRequest.Items)
+            this.SetDatabase(db);
+
+            lockRequest.Items.ForEach(t => queue.Enqueue(t));
+
+            List<Action> actions = new List<Action>();
+
+            for (int i = 0; i < this.MaximumNumberOfThreads; i++)
             {
-                var scItem = this.database.GetItem(new ID(item));
-
-                if (scItem.Locking.IsLocked() && !lockRequest.Lock)
+                Action action = () =>
                 {
-                    if (!scItem.Locking.CanUnlock())
+                    string itemId;
+                    while (queue.TryDequeue(out itemId))
                     {
-                        throw new Exception("Item cannot be unlocked with the current user");
-                    }
+                        var scItem = this.database.GetItem(new ID(itemId));
 
-                    scItem.Locking.Unlock();
-                }
-                else if (!scItem.Locking.IsLocked() && lockRequest.Lock)
-                {
-                    scItem.Locking.Lock();
-                }
+                        if (scItem.Locking.IsLocked() && !lockRequest.Lock)
+                        {
+                            if (!scItem.Locking.CanUnlock())
+                            {
+                                throw new Exception("Item cannot be unlocked with the current user");
+                            }
+
+                            scItem.Locking.Unlock();
+                        }
+                        else if (!scItem.Locking.IsLocked() && lockRequest.Lock)
+                        {
+                            scItem.Locking.Lock();
+                        }
+                    }
+                };
+
+                actions.Add(action);
             }
         }
 
@@ -274,8 +297,8 @@
         /// </returns>
         public List<Item> GetItems(List<string> ids, string db)
         {
-            this.database = Sitecore.Configuration.Factory.GetDatabase(db);
-            
+            this.SetDatabase(db);
+
             return ids.Select(t => this.database.GetItem(new ID(t))).ToList();
         }
 
@@ -289,7 +312,7 @@
         /// </returns>
         public List<ItemResponse> GetInsertOptions(string id, string db)
         {
-            this.database = Sitecore.Configuration.Factory.GetDatabase(db);
+            this.SetDatabase(db);
 
             var item = this.database.GetItem(new ID(id));
 
@@ -319,7 +342,7 @@
                 }
             }
 
-            var folderItem = this.database.GetItem(new ID("{A87A00B1-E6DB-45AB-8B54-636FEC3B5523}"));
+            var folderItem = this.database.GetItem(new ID(this.FolderTemplateId));
 
             if (result.FirstOrDefault(t => t.Name == "Folder") == null)
             {
@@ -351,7 +374,7 @@
         /// </returns>
         public string GetMediaUrl(string id, string db)
         {
-            this.database = Sitecore.Configuration.Factory.GetDatabase(db);
+            this.SetDatabase(db);
 
             var item = this.database.GetItem(new ID(id));
 
@@ -373,7 +396,8 @@
         /// </returns>
         public FastViewResponse GetFastView(string id, string db)
         {
-            this.database = Sitecore.Configuration.Factory.GetDatabase(db);
+            this.SetDatabase(db);
+
             var item = database.GetItem(new ID(id));
             FastViewResponse vr = new FastViewResponse();
             vr.Item = new ItemResponse
@@ -436,9 +460,9 @@
         /// <param name="db">The database.</param>
         public void Rename(RenameRequest request, string db)
         {
-            this.database = Sitecore.Configuration.Factory.GetDatabase(db);
+            this.SetDatabase(db);
 
-            foreach(var itemId in request.Items)
+            foreach (var itemId in request.Items)
             {
                 var item = this.database.GetItem(new ID(itemId));
 
@@ -459,7 +483,8 @@
         /// </returns>
         public ItemCommanderResponse GetChildren(string id, string db)
         {
-            this.database = Sitecore.Configuration.Factory.GetDatabase(db);
+            this.SetDatabase(db);
+
             var itemCommanderResponse = new ItemCommanderResponse();
             var sitecoreItem = this.database.GetItem(new Sitecore.Data.ID(id));
 
@@ -496,16 +521,17 @@
         /// </returns>
         public ItemCommanderResponse Search(string keyword, string db)
         {
-            this.database = Sitecore.Configuration.Factory.GetDatabase(db);
+            this.SetDatabase(db);
             var itemCommanderResponse = new ItemCommanderResponse();
 
             using (var searchContext = this.GetSearchIndex().CreateSearchContext())
             {
-                var queryable = searchContext.GetQueryable<SearchResultItem>();
-                var predicate = PredicateBuilder.True<SearchResultItem>();
-                var subPredicate = PredicateBuilder.True<SearchResultItem>();
+                var queryable = searchContext.GetQueryable<ItemCommanderSearchResult>();
+                var predicate = PredicateBuilder.True<ItemCommanderSearchResult>();
+                var subPredicate = PredicateBuilder.True<ItemCommanderSearchResult>();
 
                 predicate = predicate.And(t => t.Path.StartsWith("/sitecore/content"));
+                predicate = predicate.And(t => t.IsLatestVersion == true);
                 subPredicate = subPredicate.Or(t => t.Name.Contains(keyword));
                 subPredicate = subPredicate.Or(t => t.Content.Contains(keyword));
                 predicate = predicate.And(subPredicate);
@@ -525,17 +551,24 @@
                     Created = t.Document.CreatedDate,
                     Icon = GetIcon(t.Document.GetItem())
                 }).ToList();
-                itemCommanderResponse.CurrentId = "";
+                itemCommanderResponse.CurrentId = ""; // it should be empty string for the frontend
             }
             return itemCommanderResponse;
         }
 
         #endregion Custom Repository implementations
 
+        /// <summary>
+        /// Gets the name.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="pattern">The pattern.</param>
+        /// <param name="count">The count.</param>
+        /// <returns>The calculated item name</returns>
         private string GetName(string name, string pattern, int count)
         {
             return pattern.Replace("{C}", count.ToString())
-                .Replace("{OldName}",name)
+                .Replace("{OldName}", name)
                 .Replace("{yyyy}", DateTime.Now.ToString("yyyy"))
                 .Replace("{MM}", DateTime.Now.ToString("MM"))
                 .Replace("{dd}", DateTime.Now.ToString("dd"))
@@ -593,6 +626,15 @@
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Sets the database.
+        /// </summary>
+        /// <param name="db">The database.</param>
+        private void SetDatabase(string db)
+        {
+            this.database = Factory.GetDatabase(db);
         }
     }
 }

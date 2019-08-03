@@ -228,6 +228,7 @@
     <Compile Include="Models\MoveRequest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\ItemRepository.cs" />
+    <Compile Include="Search\ItemCommanderSearchResult.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App_Config\Include\Rainbow.config" />
