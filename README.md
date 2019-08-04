@@ -1,8 +1,11 @@
 # Documentation
 
-The documentation for Item Commander Application
+The repository contains source code and documentation for Item Commander Application
 
 The purpose of the module is speeding up item manipulation in Sitecore.
+
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.2.7.
+
 
 ### Features
 The module has the following built in features
@@ -37,22 +40,50 @@ Fast view allows you to check the selected item's fields. If multiple language i
 - Hide standard fields from UI
 - Copy values to clipboard
 
-## Pre-requisites
+## Supported Sitecore Versions
 
-- Sitecore 9.1
+- Sitecore 9.0
+- Sitecore 9.0 Update-1
+- Sitecore 9.0 Update-2
+- Sitecore 9.1 
+- Sitecore 9.1 Update-1
+- Sitecore 9.2
 
 ## Installation
 
 Provide detailed instructions on how to install the module, and include screenshots where necessary.
 
-1. Use the Sitecore Installation wizard to install the [package](sc.package/ContentEditorToolbox.zip)
+1. Use the Sitecore Installation wizard to install the [package](sc.package/ItemCommander-0.8.zip)
 2. Make sure if your search indexes are working correctly
 3. Go the LaunchPad and open the Item Commander.
 
 ## Configuration
 
-The module does not require any configuration, configuration files are using the proper Server Roles. (Standalone or Content Management)
 The package contains a configuration patch, which   sets the "Sitecore.Services.SecurityPolicy" to "ServicesOnPolicy" - it is required for the Speak application.
 
+Settings in the Sitecore.ItemCommander.config
 
 
+| Key        | Value           |
+| ------------- |:-------------:| 
+| ItemCommander.MaxNumberOfThreads      | Sets the maximum number of threads which will be used during multiple item manipulation. e.g copy, delete, move, etc | 
+
+## Development server
+
+Run `npm run start` for a disconnected mode. Navigate to `http://localhost:4123/`. The app will automatically reload if you change any of the source files.
+
+## Run within Sitecore
+
+1. Run `npm run build` command. 
+2. Copy `dist` folder's content to your c:\{sitecoreRoot}\sitecore\shell\client\applications\itemcommander folder
+3. Open your sitecore instance on http://{sitecoreHost}/sitecore/shell/client/applications/itemcommender
+4. Publish Visual Studio Solution into your webroot
+
+## Screenshots
+
+![alt text](documentation/1.PNG "Main")
+![alt text](documentation/2.PNG "Main")
+![alt text](documentation/3.PNG "Main")
+![alt text](documentation/4.PNG "Main")
+![alt text](documentation/5.PNG "Main")
+![alt text](documentation/6.PNG "Main")
