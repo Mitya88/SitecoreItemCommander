@@ -103,5 +103,13 @@
         /// <param name="request">The request.</param>
         /// <param name="db">The database.</param>
         void Rename(RenameRequest request, string db);
+
+        /// <summary>
+        /// Gets the editor options.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <param name="db">The database.</param>
+        /// <returns>Available editor options</returns>
+        EditorResponse GetEditorOptions(string id, string db);
     }
 }

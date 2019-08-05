@@ -556,7 +556,53 @@
             return itemCommanderResponse;
         }
 
+        public EditorResponse GetEditorOptions(string id, string db)
+        {
+            this.SetDatabase(db);
+
+            var item = this.database.GetItem(new ID(id));
+
+            var response = new EditorResponse();
+
+            if (item != null)
+            {
+                var versions = GetLanguageVersions(item);
+                var finalVersion = versions.OrderBy(t => t.Statistics.Updated).Last();
+
+                response.Languages = versions.Select(t => t.Language.Name).ToList();
+                response.HasPresentation = finalVersion.Visualization.Layout != null;
+            }
+
+            return response;
+        }
+
         #endregion Custom Repository implementations
+
+        /// <summary>
+        /// Collect the latest language versions of the item
+        /// </summary>
+        /// <param name="sitecoreItem">The item</param>
+        /// <returns>The language versions</returns>
+        private Sitecore.Data.Items.Item[] GetLanguageVersions(Sitecore.Data.Items.Item sitecoreItem)
+        {
+            var languages = sitecoreItem.Languages;
+            List<Sitecore.Data.Items.Item> versions = new List<Sitecore.Data.Items.Item>();
+            foreach (var language in languages)
+            {
+                var finalVersion = sitecoreItem.Versions.GetLatestVersion(language);
+                if (finalVersion.Statistics.Created > DateTime.MinValue)
+                {
+                    versions.Add(finalVersion);
+                }
+            }
+
+            if (versions.Count == 0)
+            {
+                versions.Add(sitecoreItem);
+            }
+
+            return versions.ToArray();
+        }
 
         /// <summary>
         /// Gets the name.

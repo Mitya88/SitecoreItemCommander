@@ -714,4 +714,23 @@ export class StartPageComponent implements OnInit {
   loadBookmark(item:any){
     this.loadLeftItems(item.Id);
   }
+
+  editorOptions:any;
+  loadEditorOptions(){
+    if (this.hasSelectedItem()) {
+      this.warningText = 'There is no selected item';
+      this.warningTitle = 'Invalid selected item';
+      this.dialogService.open(this.warningRef);
+      return;
+    }
+    
+    this.itemCommanderService.editoroptions(this.selectedItem.Id, this.selectedDatabase).subscribe({
+      next: response => {
+       this.editorOptions = response;
+      },
+      error: response =>{        
+        this.handleError(response);
+      }
+    });
+  }
 }

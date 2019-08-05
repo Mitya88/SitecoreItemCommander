@@ -73,6 +73,19 @@
         }
 
         /// <summary>
+        /// Gets the editor options response
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <param name="db">The database.</param>
+        /// <returns>Available languages and presentations</returns>
+        [HttpGet]
+        [ActionName("editoroptions")]
+        public EditorResponse EditorOptions(string id, string db)
+        {
+            return this._customRepositoryActions.GetEditorOptions(id, db);
+        }
+
+        /// <summary>
         /// Fasts the v iew.
         /// </summary>
         /// <param name="id">The identifier.</param>

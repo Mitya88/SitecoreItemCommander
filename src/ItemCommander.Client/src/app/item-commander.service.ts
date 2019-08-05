@@ -15,6 +15,9 @@ export class ItemCommanderService {
     return this.httpClient.get(this.baseUrl + id + '/children?db='+database);
   }
 
+  editoroptions(id: any, database:string) {
+    return this.httpClient.get(this.baseUrl + id + '/editoroptions?db='+database);
+  }
 
   copyItems(body: any, database:string) {
     return this.httpClient.post(this.baseUrl + '-/copy?db='+database, body);

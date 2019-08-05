@@ -19,13 +19,22 @@
                 <a *ngFor="let item of bookmarks" scDropdownItem (click)="loadBookmark(item)">{{item.Path}}</a>
             </sc-dropdown-menu>
           </sc-dropdown>
-        <sc-dropdown class="bookmarkTools">
-          <button scDropdownToggle scIconButton>
+        <sc-dropdown class="bookmarkTools" >
+          <button scDropdownToggle scIconButton (click)="loadEditorOptions()">
             <sc-icon icon="edit"></sc-icon>
             Edit
           </button>
-          <sc-dropdown-menu class="dropdownMenu">
-              <a scDropdownItem (click)="openContentEditor()">Content Editor</a>
+          <sc-dropdown-menu class="dropdownMenu" *ngIf="editorOptions && selectedItem">
+              <sc-dropdown-header>Content Editor</sc-dropdown-header>
+              <a *ngFor="let lang of editorOptions.Languages" scDropdownItem
+              href="/sitecore/shell/Applications/Content%20Editor.aspx?fo={{selectedItem.Id}}&la={{lang}}&sc_lang=en">{{lang}}</a>
+
+            <div *ngIf="editorOptions.HasPresentation">
+              <sc-dropdown-divider></sc-dropdown-divider>
+              <sc-dropdown-header>Exp Editor</sc-dropdown-header>
+              <a *ngFor="let lang of editorOptions.Languages" scDropdownItem
+                href="/?sc_mode=edit&sc_itemid={{selectedItem.Id}}&sc_lang={{lang}}">{{lang}}</a>
+            </div>
           </sc-dropdown-menu>
         </sc-dropdown>
         <button scIconButton [(scToggle)]="fastViewEnabled" (click)="fastViewSearch()">
