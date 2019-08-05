@@ -14,7 +14,8 @@ export class FastViewPageComponent implements OnInit {
 
   @Input()  
   selectedDatabase: any;
-
+  itemId: any;
+  showOpenPageLink:boolean;
   constructor(@Inject(LOCAL_STORAGE) private storage: WebStorageService,
     private cdRef: ChangeDetectorRef,
     private route: ActivatedRoute,
@@ -22,11 +23,18 @@ export class FastViewPageComponent implements OnInit {
     private itemCommanderService: ItemCommanderService,
     private fastviewService: FastViewService) {
     this.standardFields = ["Statistics", "Lifetime", "Security", "Help", "Appearance", "Insert Options", "Workflow", "Publishing", "Tasks", "Validation Rules"];
-    // this.itemId = this.route.snapshot.queryParamMap.get('itemid');
-    //this.selectedDatabase = this.route.snapshot.queryParamMap.get('database');
+    let itemId = this.route.snapshot.queryParamMap.get('itemid');
+
+    if(itemId != null && itemId!=""){
+      this.load(itemId);
+      this.selectedDatabase = this.route.snapshot.queryParamMap.get('database');
+      this.showOpenPageLink = false;
+    }
 
     this.showStandardFields = this.storage.get('standardfields');    
     this.fastviewService.search.subscribe(value => {
+      this.itemId = value;
+      this.showOpenPageLink = true;
       this.load(value);
     });
   }
@@ -38,16 +46,21 @@ export class FastViewPageComponent implements OnInit {
   languages: any;
 
   isNavigationShown: boolean;
+  fastViewLoading: boolean;
   ngOnInit() {
 
-    
   }
 
   load(itemId){
+    this.fastViewLoading = true;
     this.itemCommanderService.fastView(itemId, this.selectedDatabase).subscribe({
       next: response => {
         this.responseData = response;
+        this.fastViewLoading = false;
         this.cdRef.detectChanges();
+      }, error: response =>{        
+       this.fastViewLoading = false;
+       this.responseData = null;
       }
     });
   }
@@ -55,7 +68,6 @@ export class FastViewPageComponent implements OnInit {
   ngAfterViewChecked() {
   }
   GetSection(language: string) {
-    console.log('getsection1');
     var data = Object.keys(this.responseData.Data[language]);
     if (!this.showStandardFields) {
       this.standardFields.forEach(element => {

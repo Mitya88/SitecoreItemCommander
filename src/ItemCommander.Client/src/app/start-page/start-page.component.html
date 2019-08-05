@@ -114,7 +114,7 @@
           </sc-progress-indicator-panel>
         </div>
         <div class="col-6">
-            <sc-fast-view-page *ngIf="fastViewEnabled" [selectedDatabase] = selectedDatabase></sc-fast-view-page>
+            <sc-fast-view-page [ngClass]="{'hidden_fastview':!fastViewEnabled}" [selectedDatabase] = selectedDatabase></sc-fast-view-page>
           <input type="text" class="form-control" [ngModel]="rightPath" disabled *ngIf="!fastViewEnabled"/>
           <table scTable *ngIf="!rightLoading && !fastViewEnabled" [ngClass]="getTableClass('right')" (click)="tableSelect('right')">
             <thead>

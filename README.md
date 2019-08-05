@@ -53,7 +53,7 @@ Fast view allows you to check the selected item's fields. If multiple language i
 
 Provide detailed instructions on how to install the module, and include screenshots where necessary.
 
-1. Use the Sitecore Installation wizard to install the [package](sc.package/ItemCommander-0.8.zip)
+1. Use the Sitecore Installation wizard to install the [package](sc.package/ItemCommander-0.8.1.zip)
 2. Make sure if your search indexes are working correctly
 3. Go the LaunchPad and open the Item Commander.
 

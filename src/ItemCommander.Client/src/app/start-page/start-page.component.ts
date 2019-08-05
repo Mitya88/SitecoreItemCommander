@@ -118,9 +118,10 @@ export class StartPageComponent implements OnInit {
   }
 
   fastViewSearch(){
+    
     if (this.getSelectedItems().length > 0){
-      if(this.fastViewEnabled){      
-        var id = this.getSelectedItems()[0].Id
+      if(this.fastViewEnabled){    
+        var id = this.getSelectedItems()[0].Id        
         this.fastviewService.search.emit(id);
         return;
         }
