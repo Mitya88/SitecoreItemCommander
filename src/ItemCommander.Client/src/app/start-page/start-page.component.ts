@@ -510,14 +510,44 @@ export class StartPageComponent implements OnInit {
     });
   }
 
+
+  downSelector:boolean;
   mouseDown(ev, item: Item) {
 
     if (ev.buttons == 2) {
+      if (item.IsSelected && !this.downSelector) {
+        item.IsSelected = false;
+      }
+      else if(!item.IsSelected && this.downSelector) {
+        item.IsSelected = true;
+        //Set last selected item
+        this.selectedItem = item;
+      }
+      return false;
+    }
+  }
+
+  mouseUp(ev, item: Item) {
+  
+    if (ev.button == 2) { console.log(item);
+      if (item.IsSelected) {
+        this.selectedItem = item;
+      }
+     
+      return false;
+    }
+  }
+
+  mouseDownSetup(ev, item:Item){
+    if (ev.buttons == 2) {
+   
       if (item.IsSelected) {
         item.IsSelected = false;
+        this.downSelector = false;
       }
       else {
         item.IsSelected = true;
+        this.downSelector = true;
       }
       return false;
     }
@@ -544,15 +574,16 @@ export class StartPageComponent implements OnInit {
   }
 
   onRightClick(item: Item) {
-    if (item.IsSelected) {
-      item.IsSelected = false;
-    }
-    else {
-      item.IsSelected = true;
-      //Last selected item 
-      this.selectedItem = item;
-    }
     return false;
+    // if (item.IsSelected) {
+    //   item.IsSelected = false;
+    // }
+    // else {
+    //   item.IsSelected = true;
+    //   //Last selected item 
+    //   this.selectedItem = item;
+    // }
+    // return false;
   }
 
   leftDoubleClick(item: Item) {

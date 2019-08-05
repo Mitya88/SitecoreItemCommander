@@ -108,7 +108,10 @@
               [ngClass]="getClass(item)" 
               (click)="singleSelect(item)"
                 (dblclick)="leftDoubleClick(item)" 
-                (contextmenu)="onRightClick(item)">
+                (contextmenu)="onRightClick(item)"
+                (mouseup)="mouseUp($event, item)"
+                (mouseover)="mouseDown($event, item)"
+                (mousedown)="mouseDownSetup($event, item)">
                 <td><img src="{{item.Icon}}" width="10" height="10" />
                   &nbsp;{{item.Name}}
                   <sc-icon icon="lock" style="color:red" size="small" *ngIf="item.IsLocked"></sc-icon>
@@ -146,7 +149,11 @@
                 <td></td>
               </tr>
               <tr *ngFor="let item of rightData.Children | filterchildren: hiddenItems" [ngClass]="getClass(item)" (click)="singleSelect(item)"
-                (contextmenu)="onRightClick(item)" (dblclick)="rightDoubleClick(item)">
+                (contextmenu)="onRightClick(item)" 
+                (dblclick)="rightDoubleClick(item)"
+                (mouseup)="mouseUp($event, item)"
+                (mouseover)="mouseDown($event, item)"
+                (mousedown)="mouseDownSetup($event, item)">
                 <td><img src="{{item.Icon}}" width="10" height="10" />
                   &nbsp;{{item.Name}}
                   <sc-icon icon="lock" style="color:red" size="small" *ngIf="item.IsLocked"></sc-icon>
