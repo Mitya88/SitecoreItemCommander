@@ -11,14 +11,7 @@
   <div scPageActionBar>
     <sc-action-bar>
       <sc-action-bar-left>
-          <sc-dropdown class="bookmarkTools">
-            <button scDropdownToggle scIconButton>
-              <sc-icon icon="star"></sc-icon>
-            </button>
-            <sc-dropdown-menu>              
-                <a *ngFor="let item of bookmarks" scDropdownItem (click)="loadBookmark(item)">{{item.Path}}</a>
-            </sc-dropdown-menu>
-          </sc-dropdown>
+         
         <sc-dropdown class="bookmarkTools" >
           <button scDropdownToggle scIconButton (click)="loadEditorOptions()">
             <sc-icon icon="edit"></sc-icon>
@@ -96,6 +89,14 @@
     <div class="card mb-3 extra-padding">
       <div class="row">
         <div class="col-6"><div class="bookmark-row">
+            <sc-dropdown class="bookmarkTools">
+                <button scDropdownToggle scIconButton>
+                 
+                </button>
+                <sc-dropdown-menu>              
+                    <a *ngFor="let item of bookmarks" scDropdownItem (click)="loadBookmark('left',item)">{{item.Path}}</a>
+                </sc-dropdown-menu>
+              </sc-dropdown>
             <sc-icon  class="bookmarked" icon="star" *ngIf="checkBookmark(leftData)" (click)="unbookmark(leftData)" ></sc-icon>
             <sc-icon  class="bookmark-empty" icon="star2" *ngIf="!checkBookmark(leftData)" (click)="bookmark(leftData)"></sc-icon>&nbsp;
           
@@ -139,6 +140,14 @@
         <div class="col-6">
             <sc-fast-view-page [ngClass]="{'hidden_fastview':!fastViewEnabled}" [selectedDatabase] = selectedDatabase></sc-fast-view-page>
         <div class="bookmark-row" *ngIf="!fastViewEnabled">
+            <sc-dropdown class="bookmarkTools">
+                <button scDropdownToggle scIconButton>
+                 
+                </button>
+                <sc-dropdown-menu>              
+                    <a *ngFor="let item of bookmarks" scDropdownItem (click)="loadBookmark('right',item)">{{item.Path}}</a>
+                </sc-dropdown-menu>
+              </sc-dropdown>
             <sc-icon  class="bookmarked" icon="star" *ngIf="checkBookmark(rightData)" (click)="unbookmark(rightData)" ></sc-icon>
             <sc-icon  class="bookmark-empty" icon="star2" *ngIf="!checkBookmark(rightData)" (click)="bookmark(rightData)"></sc-icon>&nbsp;
           

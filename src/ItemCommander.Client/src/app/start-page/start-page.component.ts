@@ -711,8 +711,14 @@ export class StartPageComponent implements OnInit {
     this.storage.set('bookmarks',this.bookmarks)
   }
 
-  loadBookmark(item:any){
-    this.loadLeftItems(item.Id);
+  loadBookmark(side: string, item:any){
+    if(side=='left'){
+      this.loadLeftItems(item.Id);
+    }
+    else{
+      this.loadRightItems(item.Id);
+    }
+    
   }
 
   editorOptions:any;
@@ -723,7 +729,7 @@ export class StartPageComponent implements OnInit {
       this.dialogService.open(this.warningRef);
       return;
     }
-    
+
     this.itemCommanderService.editoroptions(this.selectedItem.Id, this.selectedDatabase).subscribe({
       next: response => {
        this.editorOptions = response;
