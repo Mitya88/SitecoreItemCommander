@@ -39,3 +39,16 @@ tbody{
 .hidden_fastview{
     display:none;
 }
+
+.bookmark-row{
+    display:flex;
+}
+
+.bookmark-empty{
+    padding-top:5px;
+}
+
+.bookmarked{
+    color:burlywood;
+    padding-top:5px;
+}

@@ -41,6 +41,7 @@ export class StartPageComponent implements OnInit {
   isNavigationShown: boolean;
   databases: string[] = ['master', 'core', 'web'];
   selectedDatabase: string = 'master';
+  bookmarks:any[];
 
   constructor(
     @Inject(LOCAL_STORAGE) private storage: WebStorageService,
@@ -73,6 +74,11 @@ export class StartPageComponent implements OnInit {
   ngOnInit() {
     this.hiddenItems = this.storage.get('hiddenitems');
     this.selectedDatabase = this.storage.get('database');
+    this.bookmarks = this.storage.get('bookmarks');
+
+    if(!this.bookmarks){
+      this.bookmarks = [];
+    }
 
     let storedOptions = this.storage.get('options');
     if(storedOptions){
@@ -651,5 +657,30 @@ export class StartPageComponent implements OnInit {
       this.warningTitle = response.statusText;
       this.dialogService.open(this.warningRef);
     }
+  }
+
+  checkBookmark(pathData:any){
+    if (this.bookmarks.length == 0 || !pathData){
+      return false;
+    }
+    let data = this.bookmarks.filter(item => item.Path == pathData.CurrentPath);
+   
+
+    return data.length>0;
+  }
+
+  bookmark(pathData:any){
+    this.bookmarks.push({Path : pathData.CurrentPath, Id : pathData.CurrentId});
+    this.storage.set('bookmarks',this.bookmarks)
+  }
+
+  unbookmark(pathData:any){
+    let filteredItems = this.bookmarks.filter(item => item.Path !== pathData.CurrentPath)
+    this.bookmarks = filteredItems;
+    this.storage.set('bookmarks',this.bookmarks)
+  }
+
+  loadBookmark(item:any){
+    this.loadLeftItems(item.Id);
   }
 }

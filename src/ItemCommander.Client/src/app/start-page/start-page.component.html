@@ -11,6 +11,14 @@
   <div scPageActionBar>
     <sc-action-bar>
       <sc-action-bar-left>
+          <sc-dropdown class="bookmarkTools">
+            <button scDropdownToggle scIconButton>
+              <sc-icon icon="star"></sc-icon>
+            </button>
+            <sc-dropdown-menu>              
+                <a *ngFor="let item of bookmarks" scDropdownItem (click)="loadBookmark(item)">{{item.Path}}</a>
+            </sc-dropdown-menu>
+          </sc-dropdown>
         <sc-dropdown class="bookmarkTools">
           <button scDropdownToggle scIconButton>
             <sc-icon icon="edit"></sc-icon>
@@ -78,8 +86,11 @@
   <article scPageContent class="p-4">
     <div class="card mb-3 extra-padding">
       <div class="row">
-        <div class="col-6">
-          <input type="text" class="form-control" [ngModel]="leftPath" disabled />
+        <div class="col-6"><div class="bookmark-row">
+            <sc-icon  class="bookmarked" icon="star" *ngIf="checkBookmark(leftData)" (click)="unbookmark(leftData)" ></sc-icon>
+            <sc-icon  class="bookmark-empty" icon="star2" *ngIf="!checkBookmark(leftData)" (click)="bookmark(leftData)"></sc-icon>&nbsp;
+          
+          <input type="text" class="form-control" [ngModel]="leftPath" disabled /> </div>
           <table *ngIf="!leftLoading" scTable [ngClass]="getTableClass('left')" (click)="tableSelect('left')">
             <thead>
               <tr>
@@ -115,7 +126,12 @@
         </div>
         <div class="col-6">
             <sc-fast-view-page [ngClass]="{'hidden_fastview':!fastViewEnabled}" [selectedDatabase] = selectedDatabase></sc-fast-view-page>
-          <input type="text" class="form-control" [ngModel]="rightPath" disabled *ngIf="!fastViewEnabled"/>
+        <div class="bookmark-row" *ngIf="!fastViewEnabled">
+            <sc-icon  class="bookmarked" icon="star" *ngIf="checkBookmark(rightData)" (click)="unbookmark(rightData)" ></sc-icon>
+            <sc-icon  class="bookmark-empty" icon="star2" *ngIf="!checkBookmark(rightData)" (click)="bookmark(rightData)"></sc-icon>&nbsp;
+          
+            <input type="text" class="form-control" [ngModel]="rightPath" disabled />
+          </div>  
           <table scTable *ngIf="!rightLoading && !fastViewEnabled" [ngClass]="getTableClass('right')" (click)="tableSelect('right')">
             <thead>
               <tr>
