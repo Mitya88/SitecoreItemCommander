@@ -532,6 +532,7 @@
 
                 predicate = predicate.And(t => t.Path.StartsWith("/sitecore/content"));
                 predicate = predicate.And(t => t.IsLatestVersion == true);
+                predicate = predicate.And(t => t.Language == "en");
                 subPredicate = subPredicate.Or(t => t.Name.Contains(keyword));
                 subPredicate = subPredicate.Or(t => t.Content.Contains(keyword));
                 predicate = predicate.And(subPredicate);

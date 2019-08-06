@@ -9,64 +9,64 @@
     <sc-application-header text="Item Commander"></sc-application-header>
   </div>
   <div scPageActionBar>
-    <sc-action-bar>
+    <sc-action-bar class="custom-action-bar">
       <sc-action-bar-left>
-         
-        <sc-dropdown class="bookmarkTools" >
+         <div class="row">
+        <sc-dropdown class="nav-item" >
           <button scDropdownToggle scIconButton (click)="loadEditorOptions()">
             <sc-icon icon="edit"></sc-icon>
             Edit
           </button>
           <sc-dropdown-menu class="dropdownMenu" *ngIf="editorOptions && selectedItem">
               <sc-dropdown-header>Content Editor</sc-dropdown-header>
-              <a *ngFor="let lang of editorOptions.Languages" scDropdownItem
+              <a *ngFor="let lang of editorOptions.Languages" scDropdownItem target="_blank"
               href="/sitecore/shell/Applications/Content%20Editor.aspx?fo={{selectedItem.Id}}&la={{lang}}&sc_lang=en">{{lang}}</a>
 
             <div *ngIf="editorOptions.HasPresentation">
               <sc-dropdown-divider></sc-dropdown-divider>
               <sc-dropdown-header>Exp Editor</sc-dropdown-header>
-              <a *ngFor="let lang of editorOptions.Languages" scDropdownItem
+              <a *ngFor="let lang of editorOptions.Languages" scDropdownItem target="_blank"
                 href="/?sc_mode=edit&sc_itemid={{selectedItem.Id}}&sc_lang={{lang}}">{{lang}}</a>
             </div>
           </sc-dropdown-menu>
         </sc-dropdown>
-        <button scIconButton [(scToggle)]="fastViewEnabled" (click)="fastViewSearch()">
+        <button class="nav-item"  scIconButton [(scToggle)]="fastViewEnabled" (click)="fastViewSearch()">
             <sc-icon icon="eye"></sc-icon>
             View
         </button>
-        <button scIconButton (click)="openInputDialog('rename')">
+        <button class="nav-item"  scIconButton (click)="openInputDialog('rename')">
             <sc-icon icon="ballpen"></sc-icon>
             Rename
           </button>
-        <button scIconButton (click)="openConfirmDialog('copy')">
+        <button class="nav-item"  scIconButton (click)="openConfirmDialog('copy')">
           <sc-icon icon="copy"></sc-icon>
           Copy
         </button>
-        <button scIconButton (click)="openConfirmDialog('move')">
+        <button class="nav-item"  scIconButton (click)="openConfirmDialog('move')">
           <sc-icon icon="arrow_cross"></sc-icon>
           Move
         </button>
-        <button scIconButton (click)="downloadAsPackage()">
+        <button class="nav-item"  scIconButton (click)="downloadAsPackage()">
           <sc-icon icon="arrow_down"></sc-icon>
           Download as Package
         </button>
-        <button scIconButton (click)="openConfirmDialog('delete')">
+        <button class="nav-item"  scIconButton (click)="openConfirmDialog('delete')">
           <sc-icon icon="delete"></sc-icon>
           Delete
         </button>
-        <button scIconButton (click)="openInsertOptions()">
+        <button class="nav-item"  scIconButton (click)="openInsertOptions()">
           <sc-icon icon="add"></sc-icon>
           Create Item
         </button>
-        <button scIconButton (click)="openInputDialog('search')">
+        <button class="nav-item"  scIconButton (click)="openInputDialog('search')">
           <sc-icon icon="magnifying_glass"></sc-icon>
           Search
         </button>
-        <button scIconButton (click)="selectAll()">
+        <button class="nav-item"  scIconButton (click)="selectAll()">
           <sc-icon icon="arrow_circle2"></sc-icon>
           {{selectText}} all in active tab
         </button>
-        <sc-dropdown> <button scButton scDropdownToggle>
+        <sc-dropdown class="nav-item" > <button scButton scDropdownToggle>
             <sc-icon icon="lock"></sc-icon>
             Lock/UnLock<sc-icon icon="lock_open"></sc-icon>
           </button>
@@ -76,6 +76,7 @@
             <a scDropdownItem (click)="openConfirmDialog('unlock')">Unlock</a>
           </sc-dropdown-menu>
         </sc-dropdown>
+      </div>
       </sc-action-bar-left>
       <sc-action-bar-right>
 
@@ -97,7 +98,7 @@
                     <a *ngFor="let item of bookmarks" scDropdownItem (click)="loadBookmark('left',item)">{{item.Path}}</a>
                 </sc-dropdown-menu>
               </sc-dropdown>
-            <sc-icon  class="bookmarked" icon="star" *ngIf="checkBookmark(leftData)" (click)="unbookmark(leftData)" ></sc-icon>
+            <sc-icon  class="bookmarked" icon="star" *ngIf="checkBookmark(leftData)" (click)="unbookmark(leftData)" ></sc-icon>&nbsp;
             <sc-icon  class="bookmark-empty" icon="star2" *ngIf="!checkBookmark(leftData)" (click)="bookmark(leftData)"></sc-icon>&nbsp;
           
           <input type="text" class="form-control" [ngModel]="leftPath" disabled /> </div>
@@ -148,7 +149,7 @@
                     <a *ngFor="let item of bookmarks" scDropdownItem (click)="loadBookmark('right',item)">{{item.Path}}</a>
                 </sc-dropdown-menu>
               </sc-dropdown>
-            <sc-icon  class="bookmarked" icon="star" *ngIf="checkBookmark(rightData)" (click)="unbookmark(rightData)" ></sc-icon>
+            <sc-icon  class="bookmarked" icon="star" *ngIf="checkBookmark(rightData)" (click)="unbookmark(rightData)" ></sc-icon>&nbsp;
             <sc-icon  class="bookmark-empty" icon="star2" *ngIf="!checkBookmark(rightData)" (click)="bookmark(rightData)"></sc-icon>&nbsp;
           
             <input type="text" class="form-control" [ngModel]="rightPath" disabled />

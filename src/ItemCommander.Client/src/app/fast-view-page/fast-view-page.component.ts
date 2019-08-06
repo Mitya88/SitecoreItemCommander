@@ -22,7 +22,7 @@ export class FastViewPageComponent implements OnInit {
     public logoutService: SciLogoutService,
     private itemCommanderService: ItemCommanderService,
     private fastviewService: FastViewService) {
-    this.standardFields = ["Statistics", "Lifetime", "Security", "Help", "Appearance", "Insert Options", "Workflow", "Publishing", "Tasks", "Validation Rules"];
+    this.standardFields = ["Statistics", "Lifetime", "Security", "Help", "Appearance", "Insert Options", "Workflow", "Publishing", "Tasks", "Validation Rules", "Layout"];
     let itemId = this.route.snapshot.queryParamMap.get('itemid');
 
     if(itemId != null && itemId!=""){
