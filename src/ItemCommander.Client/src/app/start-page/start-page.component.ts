@@ -8,6 +8,9 @@ import { ScDialogService } from '@speak/ng-bcl/dialog';
 import { LOCAL_STORAGE, WebStorageService } from 'angular-webstorage-service'
 import { Router } from '@angular/router';
 import { FastViewService } from '../fast-view/fastview.service';
+import { Constants } from '../constants';
+import { ItemService } from '../services/item.service';
+import { CommanderSettings } from '../model/CommanderSettings';
 
 @Component({
   selector: 'app-start-page',
@@ -38,10 +41,7 @@ export class StartPageComponent implements OnInit {
   warningText: string;
   warningTitle:string;
 
-  isNavigationShown: boolean;
-  databases: string[] = ['master', 'core', 'web'];
-  selectedDatabase: string = 'master';
-  bookmarks:any[];
+  isNavigationShown: boolean; 
 
   constructor(
     @Inject(LOCAL_STORAGE) private storage: WebStorageService,
@@ -49,7 +49,8 @@ export class StartPageComponent implements OnInit {
     public logoutService: SciLogoutService,
     public dialogService: ScDialogService,
     private router: Router,
-    private fastviewService: FastViewService
+    private fastviewService: FastViewService,
+    private itemService:ItemService
   ) { }
 
   leftIdBeforeSearch:string;
@@ -63,56 +64,37 @@ export class StartPageComponent implements OnInit {
   leftPath: string;
   rightPath: string;
 
-  selectedTable: string;
   inputDialogValue: string;
-  selectedItem: any;
   targetPath: any;
   parent: any;
-  hiddenItems:any;
-  insertOptions:Array<Item>;
+
+  commanderSettings:CommanderSettings;
 
   ngOnInit() {
-    this.hiddenItems = this.storage.get('hiddenitems');
-    this.selectedDatabase = this.storage.get('database');
-    this.bookmarks = this.storage.get('bookmarks');
-
-    if(!this.bookmarks){
-      this.bookmarks = [];
-    }
-
-    let storedOptions = this.storage.get('options');
-    if(storedOptions){
-      this.options = storedOptions;
-    }
-
-    if (!this.selectedDatabase) {
-      this.selectedDatabase = 'master';
-    }
-
-    this.selectedTable = "left";
+   this.commanderSettings = this.itemService.getCommanderSettings();
     this.load();
     this.parent = this;
   }
 
   storeOptions(){
-    this.storage.set('options', this.options);
+    this.storage.set('options', this.commanderSettings.options);
   }
 
   showHiddenItems(){
-    this.storage.set('hiddenitems',this.hiddenItems);
+    this.storage.set('hiddenitems',this.commanderSettings.hiddenItems);
   }
   
   getTableClass(table: string) {
-    return this.selectedTable == table ? "table-selected" : "table-not-selected";
+    return this.commanderSettings.selectedTable == table ? "table-selected" : "table-not-selected";
   }
 
   changeDatabase() {
-    this.storage.set('database', this.selectedDatabase);
+    this.storage.set('database', this.commanderSettings.selectedDatabase);
     this.load();
   }
 
   tableSelect(table: string) {
-    this.selectedTable = table;    
+    this.commanderSettings.selectedTable = table;    
   }
 
   load() {
@@ -138,7 +120,7 @@ export class StartPageComponent implements OnInit {
   singleSelect(item: Item) {
     if (item.IsSelected) {
       item.IsSelected = false;
-      this.selectedItem = null;
+      this.commanderSettings.selectedItem = undefined;
       return;
     }
 
@@ -147,7 +129,7 @@ export class StartPageComponent implements OnInit {
     return;
     }
 
-    if (this.selectedTable == "left") {
+    if (this.commanderSettings.selectedTable == "left") {
       this.leftData.Children.forEach(function (it) { it.IsSelected = false; });
     }
     else {
@@ -155,33 +137,33 @@ export class StartPageComponent implements OnInit {
     }
 
     item.IsSelected = true;
-    this.selectedItem = item;
+    this.commanderSettings.selectedItem = item;
   }
 
-  selectText = 'Select';
+  selectText = Constants.SelectText;
   selectAll() {
 
     let selectValue = false;
-    if(this.selectText == 'Select'){
+    if(this.selectText == Constants.SelectText){
       selectValue = true;
-      this.selectText = "Deselect"
+      this.selectText = Constants.DeselectText;
     }
     else{
-      this.selectText = 'Select';
+      this.selectText = Constants.SelectText;
       selectValue = false;
-      this.selectedItem = null;
+      this.commanderSettings.selectedItem = undefined;
     }
 
-    if (this.selectedTable == "left") {
+    if (this.commanderSettings.selectedTable == "left") {
       this.leftData.Children.forEach(function (it) { it.IsSelected = selectValue; });
       if(selectValue){
-        this.selectedItem = this.leftData.Children[0];
+        this.commanderSettings.selectedItem = this.leftData.Children[0];
       }
     }
     else {
       this.rightData.Children.forEach(function (it) { it.IsSelected = selectValue; });
       if(selectValue){
-        this.selectedItem = this.rightData.Children[0];
+        this.commanderSettings.selectedItem = this.rightData.Children[0];
       }
     }
   }
@@ -191,30 +173,30 @@ export class StartPageComponent implements OnInit {
     this.inputAction = dialogAction;
 
     if (dialogAction == 'singleCopy') {
-      this.singleInputTitle = 'Copy';
-      this.singleInputText = 'New item\'s name';
+      this.singleInputTitle = Constants.CopyDialogTitle;
+      this.singleInputText = Constants.NewItemText;
     } 
      else if (dialogAction == 'search') {
-      this.singleInputTitle = 'Search';
-      this.singleInputText = 'Enter a keyword...';
+      this.singleInputTitle = Constants.SearchDialogTitle;
+      this.singleInputText = Constants.SearchInputText;
     }
     else if(dialogAction=='rename'){
-      this.singleInputTitle = 'Rename';
-      this.singleInputText = 'Available patterns {C}, {oldName}, {yyyy}, {MM}';
+      this.singleInputTitle = Constants.RenameDialogTitle;
+      this.singleInputText = Constants.RenameText;
     }
   }
 
   openConfirmDialog(dialogAction: string) {
-    if (this.hasSelectedItem()) {
-      this.warningText = 'There is no selected item';
-      this.warningTitle = 'Invalid selected item';
+    if (this.hasSelectedItem() || !this.commanderSettings.selectedItem) {
+      this.warningText = Constants.NoItemWarningText;
+      this.warningTitle = Constants.NoItemWarningTitle;
       this.dialogService.open(this.warningRef);
       return;
     }
      this.getSelectedItems();
-    if (dialogAction == 'move' && (this.selectedItem.Path == this.targetPath || this.targetPath.startsWith(this.selectedItem.Path))) {
-      this.warningText = 'You cannot move item into itself';
-      this.warningTitle = 'Move error';
+    if (dialogAction == 'move' && (this.commanderSettings.selectedItem.Path == this.targetPath || this.targetPath.startsWith(this.commanderSettings.selectedItem.Path))) {
+      this.warningText = Constants.ItemMovingError;
+      this.warningTitle = Constants.ItemMovingErrorTitle;
       this.dialogService.open(this.warningRef);
       return;
     }
@@ -226,23 +208,23 @@ export class StartPageComponent implements OnInit {
     if (this.confirmAction == 'copy') {
       this.copy();
     } else if (this.confirmAction == 'move') {
-      this.parent.confirmTitle = 'Move';
-      this.parent.confirmText = 'Are you sure to move?'
+      this.parent.confirmTitle = Constants.ItemMovingConfirmationTitle;
+      this.parent.confirmText = Constants.ItemMovingConfirmationText;
     } else if (this.confirmAction == 'delete') {
-      this.parent.confirmTitle = 'Delete';
-      this.parent.confirmText = 'Are you sure to delete?';
+      this.parent.confirmTitle = Constants.ItemDeletingConfirmationTitle;
+      this.parent.confirmText = Constants.ItemDeletingConfirmationText;
 
       var hasChildren = this.getSelectedItems().filter(function(t){return t.HasChildren}).length > 0;
 
       if(hasChildren){
-        this.parent.confirmText+= ' (Child items will aslo be deleted)';
+        this.parent.confirmText+= Constants.ItemDeletingWithChildren;
       }
     } else if (this.confirmAction == 'lock') {
-      this.parent.confirmTitle = 'Lock';
-      this.parent.confirmText = 'Are you sure to lock?';
+      this.parent.confirmTitle = Constants.ItemLockConfirmationTitle;
+      this.parent.confirmText = Constants.ItemLockConfirmationText;
     } else if (this.confirmAction == 'unlock') {
-      this.parent.confirmTitle = 'Unlock';
-      this.parent.confirmText = 'Are you sure to unlock?';
+      this.parent.confirmTitle = Constants.ItemUnlockConfirmationTitle;
+      this.parent.confirmText = Constants.ItemUnlockConfirmationText;
     }
 
   }
@@ -285,7 +267,7 @@ export class StartPageComponent implements OnInit {
   }
 
   getSelectedItems() {
-    if (this.selectedTable == 'left') {
+    if (this.commanderSettings.selectedTable == 'left') {
       //taget a right
       this.targetPath = this.rightData.CurrentPath;
 
@@ -300,7 +282,7 @@ export class StartPageComponent implements OnInit {
   search() {
     this.leftLoading = true;    
     this.leftIdBeforeSearch = this.leftData.CurrentId;
-    this.itemCommanderService.search(this.inputDialogValue, this.selectedDatabase).subscribe({
+    this.itemCommanderService.search(this.inputDialogValue, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
         this.leftData = response as ItemCommanderResponse;
         this.leftPath = this.inputDialogValue;
@@ -320,7 +302,7 @@ export class StartPageComponent implements OnInit {
     
     request.NameOrPattern=this.inputDialogValue
     
-    this.itemCommanderService.rename(request, this.selectedDatabase).subscribe({
+    this.itemCommanderService.rename(request, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
         this.loadLeftItems(this.leftData.CurrentId);
         this.loadRightItems(this.rightData.CurrentId);
@@ -337,7 +319,7 @@ export class StartPageComponent implements OnInit {
     moveRequest.Items = this.getSelectedItems().map(function (it) { return it.Id });
     moveRequest.TargetPath = this.targetPath;
 
-    this.itemCommanderService.moveItems(moveRequest, this.selectedDatabase).subscribe(
+    this.itemCommanderService.moveItems(moveRequest, this.commanderSettings.selectedDatabase).subscribe(
       {
         next: response => {
           this.loadLeftItems(this.leftData.CurrentId);
@@ -352,7 +334,7 @@ export class StartPageComponent implements OnInit {
   }
 
   hasSelectedItem() {
-    if (this.selectedTable == 'left') {
+    if (this.commanderSettings.selectedTable == 'left') {
       return this.leftData.Children.filter(it => it.IsSelected).map(function (it) { return it.Id }).length == 0;
     }
     else {
@@ -362,8 +344,8 @@ export class StartPageComponent implements OnInit {
 
   downloadAsPackage() {
     if (this.hasSelectedItem()) {
-      this.warningText = 'There is no selected item';
-      this.warningTitle = 'Invalid selected item';
+      this.warningText = Constants.NoItemWarningText;
+      this.warningTitle = Constants.NoItemWarningTitle;
       this.dialogService.open(this.warningRef);
       return;
     }
@@ -371,7 +353,7 @@ export class StartPageComponent implements OnInit {
 
     moveRequest.Items = this.getSelectedItems().map(function (it) { return it.Id });
 
-    this.itemCommanderService.packageItems(moveRequest, this.selectedDatabase).subscribe({
+    this.itemCommanderService.packageItems(moveRequest, this.commanderSettings.selectedDatabase).subscribe({
       next: fileName => {
         let theFile = '/sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/download?fileName=' + (fileName as DownloadResponse).FileName;
         window.open(theFile);
@@ -384,23 +366,27 @@ export class StartPageComponent implements OnInit {
 
   copyRequest: CopyRequest;
   copy() {
+
+    if(!this.commanderSettings.selectedItem){
+      return;
+    }
     this.copyRequest = new CopyRequest();
     this.copyRequest.Items = this.getSelectedItems().map(function (it) { return it.Id });
     this.copyRequest.TargetPath = this.targetPath;
     this.dialogService.close();
     if (this.copyRequest.Items.length == 1) {
-      this.inputDialogValue = this.selectedItem.Name;
+      this.inputDialogValue = this.commanderSettings.selectedItem.Name;
       this.openInputDialog('singleCopy');
     }
     else {
-      this.warningTitle = 'Copy';
-      this.warningText = 'Are you sure?';
+      this.warningTitle = Constants.ItemCopyConfirmationTitle
+      this.warningText = Constants.ItemCopyConfirmationText;
       this.openConfirmDialog('multipleCopy');
     }
   }
 
   multipleCopy() {
-    this.itemCommanderService.copyItems(this.copyRequest, this.selectedDatabase).subscribe(
+    this.itemCommanderService.copyItems(this.copyRequest, this.commanderSettings.selectedDatabase).subscribe(
       {
         next: response => {
           this.loadLeftItems(this.leftData.CurrentId);
@@ -418,7 +404,7 @@ export class StartPageComponent implements OnInit {
     contract.Item = this.copyRequest.Items[0];
     contract.TargetPath = this.copyRequest.TargetPath;
     contract.Name = this.parent.inputDialogValue;
-    this.itemCommanderService.copySingleItem(contract, this.selectedDatabase).subscribe({
+    this.itemCommanderService.copySingleItem(contract, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
         this.loadLeftItems(this.leftData.CurrentId);
         this.loadRightItems(this.rightData.CurrentId);
@@ -431,7 +417,7 @@ export class StartPageComponent implements OnInit {
   }
 
   getTargetPathForFolder() {
-    if (this.selectedTable == 'left') {
+    if (this.commanderSettings.selectedTable == 'left') {
       //taget a right
       return this.leftData.CurrentPath;
     }
@@ -445,7 +431,7 @@ export class StartPageComponent implements OnInit {
     let deleteRequest = new DeleteRequest();
     deleteRequest.Items = this.getSelectedItems().map(function (it) { return it.Id });
 
-    this.itemCommanderService.deleteItems(deleteRequest, this.selectedDatabase).subscribe({
+    this.itemCommanderService.deleteItems(deleteRequest, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
         this.loadLeftItems(this.leftData.CurrentId);
         this.loadRightItems(this.rightData.CurrentId);
@@ -465,7 +451,7 @@ export class StartPageComponent implements OnInit {
     lockRequest.Lock = lock;
     lockRequest.Items = this.getSelectedItems().map(function (it) { return it.Id });
 
-    this.itemCommanderService.lockItems(lockRequest, this.selectedDatabase).subscribe({
+    this.itemCommanderService.lockItems(lockRequest, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
         this.loadLeftItems(this.leftData.CurrentId);
         this.loadRightItems(this.rightData.CurrentId);
@@ -484,7 +470,7 @@ export class StartPageComponent implements OnInit {
     }
 
     this.leftLoading = true;
-    this.itemCommanderService.fetchItems(id, this.selectedDatabase).subscribe({
+    this.itemCommanderService.fetchItems(id, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
         this.leftData = response as ItemCommanderResponse;
         this.leftPath = this.leftData.CurrentPath;
@@ -498,7 +484,7 @@ export class StartPageComponent implements OnInit {
 
   loadRightItems(id: string) {
     this.rightLoading = true;
-    this.itemCommanderService.fetchItems(id, this.selectedDatabase).subscribe({
+    this.itemCommanderService.fetchItems(id, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
         this.rightData = response as ItemCommanderResponse;
         this.rightPath = this.rightData.CurrentPath;
@@ -512,8 +498,7 @@ export class StartPageComponent implements OnInit {
 
 
   downSelector:boolean;
-  mouseDown(ev, item: Item) {
-
+  mouseDown(ev: any, item: Item) {
     if (ev.buttons == 2) {
       if (item.IsSelected && !this.downSelector) {
         item.IsSelected = false;
@@ -521,24 +506,25 @@ export class StartPageComponent implements OnInit {
       else if(!item.IsSelected && this.downSelector) {
         item.IsSelected = true;
         //Set last selected item
-        this.selectedItem = item;
+        this.commanderSettings.selectedItem = item;
       }
-      return false;
     }
+    
+    return false;
   }
 
-  mouseUp(ev, item: Item) {
+  mouseUp(ev: any, item: Item) {
   
-    if (ev.button == 2) { console.log(item);
+    if (ev.button == 2) {
       if (item.IsSelected) {
-        this.selectedItem = item;
-      }
-     
-      return false;
+        this.commanderSettings.selectedItem = item;
+      }     
     }
+    
+    return false;
   }
 
-  mouseDownSetup(ev, item:Item){
+  mouseDownSetup(ev: any, item:Item){
     if (ev.buttons == 2) {
    
       if (item.IsSelected) {
@@ -549,8 +535,9 @@ export class StartPageComponent implements OnInit {
         item.IsSelected = true;
         this.downSelector = true;
       }
-      return false;
     }
+    
+    return false;
   }
 
   loadParent(side: string) {
@@ -605,41 +592,32 @@ export class StartPageComponent implements OnInit {
     return "";
   }
 
-  options = [
-    { name: 'Name', value: 'name', checked: true },
-    { name: 'SitecorePath', value: 'sitecorepath', checked: false },
-    { name: 'TemplateName', value: 'templatename', checked: true },
-    { name: 'Created', value: 'created', checked: false },
-    { name: 'LastModified', value: 'lastmodified', checked: true },
-    { name: 'HasChildren', value: 'haschildren', checked: true }
-  ]
-
   selectedOptions() { // right now: ['1','3']
-    return this.options
-      .filter(opt => opt.checked)
-      .map(opt => opt.value)
+    return this.commanderSettings.options
+      .filter((opt: any) => opt.checked)
+      .map((opt: any) => opt.value)
   }
 
   showColumn(columnName: string) {
-    return this.options.filter(opt => opt.value == columnName && opt.checked).length > 0;
+    return this.commanderSettings.options.filter((opt: any) => opt.value == columnName && opt.checked).length > 0;
   }
   getSelectedOptions() {
-    return this.options
-      .filter(opt => opt.checked);
+    return this.commanderSettings.options
+      .filter((opt: any) => opt.checked);
   }
 
   selectedInsertOptions:any;
   openInsertOptions(){
     var id = '';
-    if(this.selectedTable == 'left'){
+    if(this.commanderSettings.selectedTable == 'left'){
       id=this.leftData.CurrentId;
     }
     else{
       id=this.rightData.CurrentId;
     }
-    this.itemCommanderService.insertOptions(id, this.selectedDatabase).subscribe({
+    this.itemCommanderService.insertOptions(id, this.commanderSettings.selectedDatabase).subscribe({
       next: response =>{
-        this.insertOptions = response as Array<Item>;
+        this.commanderSettings.insertOptions = response as Array<Item>;
     this.dialogService.open(this.insertOptionRef);
       },
       error: response =>{        
@@ -653,7 +631,7 @@ export class StartPageComponent implements OnInit {
     contract.TargetPath = this.getTargetPathForFolder();
     contract.Name = this.parent.inputDialogValue;
     contract.TemplateId = this.selectedInsertOptions;
-    this.itemCommanderService.addFolder(contract, this.selectedDatabase).subscribe({
+    this.itemCommanderService.addFolder(contract, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
         this.loadLeftItems(this.leftData.CurrentId);
         this.loadRightItems(this.rightData.CurrentId);
@@ -666,7 +644,10 @@ export class StartPageComponent implements OnInit {
   }
 
   openContentEditor(){
-    let url ='/sitecore/shell/Applications/Content%20Editor.aspx?fo='+this.selectedItem.Id;
+    if(!this.commanderSettings.selectedItem){
+      return;
+    }
+    let url ='/sitecore/shell/Applications/Content%20Editor.aspx?fo='+this.commanderSettings.selectedItem.Id;
 
     var win = window.open(url, '_blank');
   win.focus();
@@ -691,24 +672,24 @@ export class StartPageComponent implements OnInit {
   }
 
   checkBookmark(pathData:any){
-    if (this.bookmarks.length == 0 || !pathData){
+    if (this.commanderSettings.bookmarks.length == 0 || !pathData){
       return false;
     }
-    let data = this.bookmarks.filter(item => item.Path == pathData.CurrentPath);
+    let data = this.commanderSettings.bookmarks.filter(item => item.Path == pathData.CurrentPath);
    
 
     return data.length>0;
   }
 
   bookmark(pathData:any){
-    this.bookmarks.push({Path : pathData.CurrentPath, Id : pathData.CurrentId});
-    this.storage.set('bookmarks',this.bookmarks)
+    this.commanderSettings.bookmarks.push({Path : pathData.CurrentPath, Id : pathData.CurrentId});
+    this.storage.set('bookmarks',this.commanderSettings.bookmarks)
   }
 
   unbookmark(pathData:any){
-    let filteredItems = this.bookmarks.filter(item => item.Path !== pathData.CurrentPath)
-    this.bookmarks = filteredItems;
-    this.storage.set('bookmarks',this.bookmarks)
+    let filteredItems = this.commanderSettings.bookmarks.filter(item => item.Path !== pathData.CurrentPath)
+    this.commanderSettings.bookmarks = filteredItems;
+    this.storage.set('bookmarks',this.commanderSettings.bookmarks)
   }
 
   loadBookmark(side: string, item:any){
@@ -723,14 +704,14 @@ export class StartPageComponent implements OnInit {
 
   editorOptions:any;
   loadEditorOptions(){
-    if (this.hasSelectedItem()) {
+    if (this.hasSelectedItem() || !this.commanderSettings.selectedItem) {
       this.warningText = 'There is no selected item';
       this.warningTitle = 'Invalid selected item';
       this.dialogService.open(this.warningRef);
       return;
     }
 
-    this.itemCommanderService.editoroptions(this.selectedItem.Id, this.selectedDatabase).subscribe({
+    this.itemCommanderService.editoroptions(this.commanderSettings.selectedItem.Id, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
        this.editorOptions = response;
       },

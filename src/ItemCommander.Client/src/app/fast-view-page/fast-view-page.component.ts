@@ -12,10 +12,10 @@ import { FastViewService } from '../fast-view/fastview.service';
 })
 export class FastViewPageComponent implements OnInit {
 
-  @Input()  
+  @Input()
   selectedDatabase: any;
-  itemId: any;
-  showOpenPageLink:boolean;
+  itemId: string;
+  showOpenPageLink: boolean;
   constructor(@Inject(LOCAL_STORAGE) private storage: WebStorageService,
     private cdRef: ChangeDetectorRef,
     private route: ActivatedRoute,
@@ -25,20 +25,20 @@ export class FastViewPageComponent implements OnInit {
     this.standardFields = ["Statistics", "Lifetime", "Security", "Help", "Appearance", "Insert Options", "Workflow", "Publishing", "Tasks", "Validation Rules", "Layout"];
     let itemId = this.route.snapshot.queryParamMap.get('itemid');
 
-    if(itemId != null && itemId!=""){
+    if (itemId != null && itemId != "") {
       this.load(itemId);
       this.selectedDatabase = this.route.snapshot.queryParamMap.get('database');
       this.showOpenPageLink = false;
     }
 
-    this.showStandardFields = this.storage.get('standardfields');    
-    this.fastviewService.search.subscribe(value => {
+    this.showStandardFields = this.storage.get('standardfields');
+    this.fastviewService.search.subscribe((value: string) => {
       this.itemId = value;
       this.showOpenPageLink = true;
       this.load(value);
     });
   }
-  
+
   objectKeys = Object.keys;
   responseData: any;
   showStandardFields: boolean;
@@ -51,16 +51,16 @@ export class FastViewPageComponent implements OnInit {
 
   }
 
-  load(itemId){
+  load(itemId: string) {
     this.fastViewLoading = true;
     this.itemCommanderService.fastView(itemId, this.selectedDatabase).subscribe({
       next: response => {
         this.responseData = response;
         this.fastViewLoading = false;
         this.cdRef.detectChanges();
-      }, error: response =>{        
-       this.fastViewLoading = false;
-       this.responseData = null;
+      }, error: response => {
+        this.fastViewLoading = false;
+        this.responseData = null;
       }
     });
   }
@@ -88,10 +88,10 @@ export class FastViewPageComponent implements OnInit {
   }
 
   GetFields(language: string, section: string) {
-    return this.responseData.Data[language][section].map(function (it) { return it })
+    return this.responseData.Data[language][section].map(function (it : string) { return it })
   }
 
-  changeStandardFields(){
-    this.storage.set('standardfields',this.showStandardFields);
+  changeStandardFields() {
+    this.storage.set('standardfields', this.showStandardFields);
   }
 }

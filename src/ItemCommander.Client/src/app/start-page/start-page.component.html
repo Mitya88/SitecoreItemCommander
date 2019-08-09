@@ -17,16 +17,16 @@
             <sc-icon icon="edit"></sc-icon>
             Edit
           </button>
-          <sc-dropdown-menu class="dropdownMenu" *ngIf="editorOptions && selectedItem">
+          <sc-dropdown-menu class="dropdownMenu" *ngIf="editorOptions && commanderSettings.selectedItem">
               <sc-dropdown-header>Content Editor</sc-dropdown-header>
               <a *ngFor="let lang of editorOptions.Languages" scDropdownItem target="_blank"
-              href="/sitecore/shell/Applications/Content%20Editor.aspx?fo={{selectedItem.Id}}&la={{lang}}&sc_lang=en">{{lang}}</a>
+              href="/sitecore/shell/Applications/Content%20Editor.aspx?fo={{commanderSettings.selectedItem.Id}}&la={{lang}}&sc_lang=en">{{lang}}</a>
 
             <div *ngIf="editorOptions.HasPresentation">
               <sc-dropdown-divider></sc-dropdown-divider>
               <sc-dropdown-header>Exp Editor</sc-dropdown-header>
               <a *ngFor="let lang of editorOptions.Languages" scDropdownItem target="_blank"
-                href="/?sc_mode=edit&sc_itemid={{selectedItem.Id}}&sc_lang={{lang}}">{{lang}}</a>
+                href="/?sc_mode=edit&sc_itemid={{commanderSettings.selectedItem.Id}}&sc_lang={{lang}}">{{lang}}</a>
             </div>
           </sc-dropdown-menu>
         </sc-dropdown>
@@ -95,7 +95,7 @@
                  
                 </button>
                 <sc-dropdown-menu>              
-                    <a *ngFor="let item of bookmarks" scDropdownItem (click)="loadBookmark('left',item)">{{item.Path}}</a>
+                    <a *ngFor="let item of commanderSettings.bookmarks" scDropdownItem (click)="loadBookmark('left',item)">{{item.Path}}</a>
                 </sc-dropdown-menu>
               </sc-dropdown>
             <sc-icon  class="bookmarked" icon="star" *ngIf="checkBookmark(leftData)" (click)="unbookmark(leftData)" ></sc-icon>&nbsp;
@@ -139,14 +139,14 @@
           </sc-progress-indicator-panel>
         </div>
         <div class="col-6">
-            <sc-fast-view-page [ngClass]="{'hidden_fastview':!fastViewEnabled}" [selectedDatabase] = selectedDatabase></sc-fast-view-page>
+            <sc-fast-view-page [ngClass]="{'hidden_fastview':!fastViewEnabled}" [selectedDatabase] = commanderSettings.selectedDatabase></sc-fast-view-page>
         <div class="bookmark-row" *ngIf="!fastViewEnabled">
             <sc-dropdown class="bookmarkTools">
                 <button scDropdownToggle scIconButton>
                  
                 </button>
                 <sc-dropdown-menu>              
-                    <a *ngFor="let item of bookmarks" scDropdownItem (click)="loadBookmark('right',item)">{{item.Path}}</a>
+                    <a *ngFor="let item of commanderSettings.bookmarks" scDropdownItem (click)="loadBookmark('right',item)">{{item.Path}}</a>
                 </sc-dropdown-menu>
               </sc-dropdown>
             <sc-icon  class="bookmarked" icon="star" *ngIf="checkBookmark(rightData)" (click)="unbookmark(rightData)" ></sc-icon>&nbsp;
@@ -194,14 +194,14 @@
   <aside scPageContext [show]="isSearching" class="bg-basic-white">
     <div class="p-3">
       <h4>Database</h4>
-      <select id="database" [(ngModel)]="selectedDatabase" class="form-control" (change)="changeDatabase()">
-        <option *ngFor="let c of databases" [value]="c">{{ c }}</option>
+      <select id="database" [(ngModel)]="commanderSettings.selectedDatabase" class="form-control" (change)="changeDatabase()">
+        <option *ngFor="let c of commanderSettings.databases" [value]="c">{{ c }}</option>
       </select>
     </div>
 
     <div class="p-3">
         <label>Show columns:</label>
-        <div *ngFor="let option of options" >
+        <div *ngFor="let option of commanderSettings.options" >
             <label >
                 <input (change)="storeOptions()" type="checkbox"
                        name="options"
@@ -216,7 +216,7 @@
       <label>Show hidden items:
       <input  type="checkbox"
                      name="hiddenItems"
-                     [(ngModel)]="hiddenItems"
+                     [(ngModel)]="commanderSettings.hiddenItems"
                      (change)="showHiddenItems()"/></label>
   </div>
   </aside>
@@ -290,7 +290,7 @@
           <div class="col-6">
               <h4>Template</h4>
               <select id="insertOptions" [(ngModel)]="parent.selectedInsertOptions" class="form-control" >
-                  <option *ngFor="let c of parent.insertOptions" [value]="c.Id" style="background-image:url({{c.Icon}});">{{ c.Name }}</option>
+                  <option *ngFor="let c of parent.commanderSettings.insertOptions" [value]="c.Id" style="background-image:url({{c.Icon}});">{{ c.Name }}</option>
                 </select>
           </div>
           <div class="col-6" >
