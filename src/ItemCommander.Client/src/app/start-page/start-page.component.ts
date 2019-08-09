@@ -1,16 +1,17 @@
-import { Component, OnInit, TemplateRef, ViewChild, Inject } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ItemCommanderService } from '../item-commander.service';
 import { Item } from '../contract/Item';
 import { CopyRequest, CopySingle, DeleteRequest, FolderRequest, PackageRequest, DownloadResponse, LockRequest, RenameRequest } from '../contract/copyRequest';
 import { ItemCommanderResponse } from '../contract/ItemCommanderResponse';
 import { SciLogoutService } from '@speak/ng-sc/logout';
 import { ScDialogService } from '@speak/ng-bcl/dialog';
-import { LOCAL_STORAGE, WebStorageService } from 'angular-webstorage-service'
 import { Router } from '@angular/router';
 import { FastViewService } from '../fast-view/fastview.service';
 import { Constants } from '../constants';
 import { ItemService } from '../services/item.service';
 import { CommanderSettings } from '../model/CommanderSettings';
+import { BookmarkService } from '../services/bookmark.service';
+import { PopupSettings } from '../model/PopupSettings';
 
 @Component({
   selector: 'app-start-page',
@@ -30,90 +31,66 @@ export class StartPageComponent implements OnInit {
   private warningRef: TemplateRef<any>
 
   @ViewChild('insertOptions')
-  private insertOptionRef: TemplateRef<any>
-
-  confirmText: string = '';
-  confirmTitle: string = '';
-  singleInputTitle: string = '';
-  singleInputText: string = '';
-  confirmAction: string;
-  inputAction: string;
-  warningText: string;
-  warningTitle:string;
-
-  isNavigationShown: boolean; 
+  private insertOptionRef: TemplateRef<any>  
 
   constructor(
-    @Inject(LOCAL_STORAGE) private storage: WebStorageService,
     private itemCommanderService: ItemCommanderService,
     public logoutService: SciLogoutService,
     public dialogService: ScDialogService,
     private router: Router,
     private fastviewService: FastViewService,
-    private itemService:ItemService
+    private itemService: ItemService,
+    private bookmarkService: BookmarkService
   ) { }
 
-  leftIdBeforeSearch:string;
-  leftData: ItemCommanderResponse;
-  rightData: ItemCommanderResponse;
+  leftIdBeforeSearch: string;
 
-  isSearching:boolean;
+  isSearching: boolean;
 
   leftLoading: boolean;
   rightLoading: boolean;
-  leftPath: string;
-  rightPath: string;
+  
 
-  inputDialogValue: string;
   targetPath: any;
   parent: any;
 
-  commanderSettings:CommanderSettings;
+  commanderSettings: CommanderSettings;
+  popupSettings: PopupSettings;
 
   ngOnInit() {
-   this.commanderSettings = this.itemService.getCommanderSettings();
+    this.commanderSettings = this.itemService.getCommanderSettings();
+    this.popupSettings = new PopupSettings();
     this.load();
     this.parent = this;
   }
 
-  storeOptions(){
-    this.storage.set('options', this.commanderSettings.options);
-  }
 
-  showHiddenItems(){
-    this.storage.set('hiddenitems',this.commanderSettings.hiddenItems);
-  }
-  
   getTableClass(table: string) {
     return this.commanderSettings.selectedTable == table ? "table-selected" : "table-not-selected";
   }
 
   changeDatabase() {
-    this.storage.set('database', this.commanderSettings.selectedDatabase);
+    this.itemService.saveCommanderSettings(this.commanderSettings);
     this.load();
   }
 
   tableSelect(table: string) {
-    this.commanderSettings.selectedTable = table;    
+    this.commanderSettings.selectedTable = table;
   }
 
   load() {
-    this.leftPath = '/sitecore';
-    this.rightPath = '/sitecore/content';
-
     this.loadLeftItems('11111111-1111-1111-1111-111111111111');
     this.loadRightItems('11111111-1111-1111-1111-111111111111');
   }
 
-  fastViewSearch(){
-    
-    if (this.getSelectedItems().length > 0){
-      if(this.fastViewEnabled){    
-        var id = this.getSelectedItems()[0].Id        
+  fastViewSearch() {
+
+    if (this.getSelectedItems().length > 0) {
+      if (this.fastViewEnabled) {
+        var id = this.getSelectedItems()[0].Id
         this.fastviewService.search.emit(id);
         return;
-        }
-     
+      }
     }
   }
 
@@ -124,16 +101,16 @@ export class StartPageComponent implements OnInit {
       return;
     }
 
-    if(this.fastViewEnabled){      
-    this.fastviewService.search.emit(item.Id);
-    return;
+    if (this.fastViewEnabled) {
+      this.fastviewService.search.emit(item.Id);
+      return;
     }
 
     if (this.commanderSettings.selectedTable == "left") {
-      this.leftData.Children.forEach(function (it) { it.IsSelected = false; });
+      this.commanderSettings.leftData.Children.forEach(function (it) { it.IsSelected = false; });
     }
     else {
-      this.rightData.Children.forEach(function (it) { it.IsSelected = false; });
+      this.commanderSettings.rightData.Children.forEach(function (it) { it.IsSelected = false; });
     }
 
     item.IsSelected = true;
@@ -142,87 +119,86 @@ export class StartPageComponent implements OnInit {
 
   selectText = Constants.SelectText;
   selectAll() {
-
     let selectValue = false;
-    if(this.selectText == Constants.SelectText){
+    if (this.selectText == Constants.SelectText) {
       selectValue = true;
       this.selectText = Constants.DeselectText;
     }
-    else{
+    else {
       this.selectText = Constants.SelectText;
       selectValue = false;
       this.commanderSettings.selectedItem = undefined;
     }
 
     if (this.commanderSettings.selectedTable == "left") {
-      this.leftData.Children.forEach(function (it) { it.IsSelected = selectValue; });
-      if(selectValue){
-        this.commanderSettings.selectedItem = this.leftData.Children[0];
+      this.commanderSettings.leftData.Children.forEach(function (it) { it.IsSelected = selectValue; });
+      if (selectValue) {
+        this.commanderSettings.selectedItem = this.commanderSettings.leftData.Children[0];
       }
     }
     else {
-      this.rightData.Children.forEach(function (it) { it.IsSelected = selectValue; });
-      if(selectValue){
-        this.commanderSettings.selectedItem = this.rightData.Children[0];
+      this.commanderSettings.rightData.Children.forEach(function (it) { it.IsSelected = selectValue; });
+      if (selectValue) {
+        this.commanderSettings.selectedItem = this.commanderSettings.rightData.Children[0];
       }
     }
   }
 
   openInputDialog(dialogAction: string) {
     this.dialogService.open(this.simpleInputRef);
-    this.inputAction = dialogAction;
+    this.popupSettings.inputAction = dialogAction;
 
     if (dialogAction == 'singleCopy') {
-      this.singleInputTitle = Constants.CopyDialogTitle;
-      this.singleInputText = Constants.NewItemText;
-    } 
-     else if (dialogAction == 'search') {
-      this.singleInputTitle = Constants.SearchDialogTitle;
-      this.singleInputText = Constants.SearchInputText;
+      this.popupSettings.singleInputTitle = Constants.CopyDialogTitle;
+      this.popupSettings.singleInputText = Constants.NewItemText;
     }
-    else if(dialogAction=='rename'){
-      this.singleInputTitle = Constants.RenameDialogTitle;
-      this.singleInputText = Constants.RenameText;
+    else if (dialogAction == 'search') {
+      this.popupSettings.singleInputTitle = Constants.SearchDialogTitle;
+      this.popupSettings.singleInputText = Constants.SearchInputText;
+    }
+    else if (dialogAction == 'rename') {
+      this.popupSettings.singleInputTitle = Constants.RenameDialogTitle;
+      this.popupSettings.singleInputText = Constants.RenameText;
     }
   }
 
   openConfirmDialog(dialogAction: string) {
-    if (this.hasSelectedItem() || !this.commanderSettings.selectedItem) {
-      this.warningText = Constants.NoItemWarningText;
-      this.warningTitle = Constants.NoItemWarningTitle;
+    if (this.itemService.hasSelectedItem(this.commanderSettings) || !this.commanderSettings.selectedItem) {
+      this.popupSettings.warningText = Constants.NoItemWarningText;
+      this.popupSettings.warningTitle = Constants.NoItemWarningTitle;
       this.dialogService.open(this.warningRef);
       return;
     }
-     this.getSelectedItems();
+    this.getSelectedItems();
     if (dialogAction == 'move' && (this.commanderSettings.selectedItem.Path == this.targetPath || this.targetPath.startsWith(this.commanderSettings.selectedItem.Path))) {
-      this.warningText = Constants.ItemMovingError;
-      this.warningTitle = Constants.ItemMovingErrorTitle;
+      this.popupSettings.warningText = Constants.ItemMovingError;
+      this.popupSettings.warningTitle = Constants.ItemMovingErrorTitle;
       this.dialogService.open(this.warningRef);
       return;
     }
 
 
     this.dialogService.open(this.confirmDialog);
-    this.confirmAction = dialogAction;
+    this.popupSettings.confirmAction = dialogAction;
 
-    if (this.confirmAction == 'copy') {
+    if (this.popupSettings.confirmAction == 'copy') {
       this.copy();
-    } else if (this.confirmAction == 'move') {
+    } else if (this.popupSettings.confirmAction == 'move') {
       this.parent.confirmTitle = Constants.ItemMovingConfirmationTitle;
       this.parent.confirmText = Constants.ItemMovingConfirmationText;
-    } else if (this.confirmAction == 'delete') {
+    } else if (this.popupSettings.confirmAction == 'delete') {
       this.parent.confirmTitle = Constants.ItemDeletingConfirmationTitle;
       this.parent.confirmText = Constants.ItemDeletingConfirmationText;
 
-      var hasChildren = this.getSelectedItems().filter(function(t){return t.HasChildren}).length > 0;
+      var hasChildren = this.getSelectedItems().filter(function (t) { return t.HasChildren }).length > 0;
 
-      if(hasChildren){
-        this.parent.confirmText+= Constants.ItemDeletingWithChildren;
+      if (hasChildren) {
+        this.parent.confirmText += Constants.ItemDeletingWithChildren;
       }
-    } else if (this.confirmAction == 'lock') {
+    } else if (this.popupSettings.confirmAction == 'lock') {
       this.parent.confirmTitle = Constants.ItemLockConfirmationTitle;
       this.parent.confirmText = Constants.ItemLockConfirmationText;
-    } else if (this.confirmAction == 'unlock') {
+    } else if (this.popupSettings.confirmAction == 'unlock') {
       this.parent.confirmTitle = Constants.ItemUnlockConfirmationTitle;
       this.parent.confirmText = Constants.ItemUnlockConfirmationText;
     }
@@ -230,38 +206,38 @@ export class StartPageComponent implements OnInit {
   }
 
   Action() {
-    if (this.confirmAction == 'copy') {
+    if (this.popupSettings.confirmAction == 'copy') {
       this.copy();
-    } else if (this.confirmAction == 'move') {
+    } else if (this.popupSettings.confirmAction == 'move') {
       this.move();
-    } else if (this.confirmAction == 'delete') {
+    } else if (this.popupSettings.confirmAction == 'delete') {
       this.delete();
-    } else if (this.confirmAction == 'multipleCopy') {
+    } else if (this.popupSettings.confirmAction == 'multipleCopy') {
       this.multipleCopy();
-    } else if (this.confirmAction == 'lock') {
+    } else if (this.popupSettings.confirmAction == 'lock') {
       this.lock(true);
     }
-    else if (this.confirmAction == 'unlock') {
+    else if (this.popupSettings.confirmAction == 'unlock') {
       this.lock(false);
     }
   }
 
   singleInputAction() {
-     if (this.inputAction == 'singleCopy') {
+    if (this.popupSettings.inputAction == 'singleCopy') {
       this.singleCopy();
-    } else if (this.inputAction == 'search') {
+    } else if (this.popupSettings.inputAction == 'search') {
       this.search();
     }
-    else if(this.inputAction == 'rename'){
+    else if (this.popupSettings.inputAction == 'rename') {
       this.rename();
     }
   }
-  fastView(){
+  fastView() {
 
-    if(this.fastViewEnabled){
+    if (this.fastViewEnabled) {
       this.fastViewEnabled = false;
     }
-    else{
+    else {
       this.fastViewEnabled = true;
     }
   }
@@ -269,27 +245,27 @@ export class StartPageComponent implements OnInit {
   getSelectedItems() {
     if (this.commanderSettings.selectedTable == 'left') {
       //taget a right
-      this.targetPath = this.rightData.CurrentPath;
+      this.targetPath = this.commanderSettings.rightData.CurrentPath;
 
-      return this.leftData.Children.filter(it => it.IsSelected);
+      return this.commanderSettings.leftData.Children.filter(it => it.IsSelected);
     }
     else {
-      this.targetPath = this.leftData.CurrentPath;
-      return this.rightData.Children.filter(it => it.IsSelected);
+      this.targetPath = this.commanderSettings.leftData.CurrentPath;
+      return this.commanderSettings.rightData.Children.filter(it => it.IsSelected);
     }
-  }  
+  }
 
   search() {
-    this.leftLoading = true;    
-    this.leftIdBeforeSearch = this.leftData.CurrentId;
-    this.itemCommanderService.search(this.inputDialogValue, this.commanderSettings.selectedDatabase).subscribe({
+    this.leftLoading = true;
+    this.leftIdBeforeSearch = this.commanderSettings.leftData.CurrentId;
+    this.itemCommanderService.search(this.popupSettings.inputDialogValue, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
-        this.leftData = response as ItemCommanderResponse;
-        this.leftPath = this.inputDialogValue;
+        this.commanderSettings.leftData = response as ItemCommanderResponse;
+        this.commanderSettings.leftPath = this.popupSettings.inputDialogValue;
         this.leftLoading = false;
         this.dialogService.close();
       },
-      error: response =>{        
+      error: response => {
         this.handleError(response);
       }
     })
@@ -299,16 +275,16 @@ export class StartPageComponent implements OnInit {
 
     let request = new RenameRequest();
     request.Items = this.getSelectedItems().map(function (it) { return it.Id });
-    
-    request.NameOrPattern=this.inputDialogValue
-    
+
+    request.NameOrPattern = this.popupSettings.inputDialogValue
+
     this.itemCommanderService.rename(request, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
-        this.loadLeftItems(this.leftData.CurrentId);
-        this.loadRightItems(this.rightData.CurrentId);
+        this.loadLeftItems(this.commanderSettings.leftData.CurrentId);
+        this.loadRightItems(this.commanderSettings.rightData.CurrentId);
         this.dialogService.close();
       },
-      error: response =>{        
+      error: response => {
         this.handleError(response);
       }
     })
@@ -322,30 +298,23 @@ export class StartPageComponent implements OnInit {
     this.itemCommanderService.moveItems(moveRequest, this.commanderSettings.selectedDatabase).subscribe(
       {
         next: response => {
-          this.loadLeftItems(this.leftData.CurrentId);
-          this.loadRightItems(this.rightData.CurrentId);
+          this.loadLeftItems(this.commanderSettings.leftData.CurrentId);
+          this.loadRightItems(this.commanderSettings.rightData.CurrentId);
           this.dialogService.close();
         },
-        error: response =>{        
+        error: response => {
           this.handleError(response);
         }
       }
     );
   }
 
-  hasSelectedItem() {
-    if (this.commanderSettings.selectedTable == 'left') {
-      return this.leftData.Children.filter(it => it.IsSelected).map(function (it) { return it.Id }).length == 0;
-    }
-    else {
-      return this.rightData.Children.filter(it => it.IsSelected).map(function (it) { return it.Id }).length == 0;
-    }
-  }
+ 
 
   downloadAsPackage() {
-    if (this.hasSelectedItem()) {
-      this.warningText = Constants.NoItemWarningText;
-      this.warningTitle = Constants.NoItemWarningTitle;
+    if (this.itemService.hasSelectedItem(this.commanderSettings)) {
+      this.popupSettings.warningText = Constants.NoItemWarningText;
+      this.popupSettings.warningTitle = Constants.NoItemWarningTitle;
       this.dialogService.open(this.warningRef);
       return;
     }
@@ -358,7 +327,7 @@ export class StartPageComponent implements OnInit {
         let theFile = '/sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/download?fileName=' + (fileName as DownloadResponse).FileName;
         window.open(theFile);
       },
-      error: response =>{        
+      error: response => {
         this.handleError(response);
       }
     });
@@ -367,7 +336,7 @@ export class StartPageComponent implements OnInit {
   copyRequest: CopyRequest;
   copy() {
 
-    if(!this.commanderSettings.selectedItem){
+    if (!this.commanderSettings.selectedItem) {
       return;
     }
     this.copyRequest = new CopyRequest();
@@ -375,12 +344,12 @@ export class StartPageComponent implements OnInit {
     this.copyRequest.TargetPath = this.targetPath;
     this.dialogService.close();
     if (this.copyRequest.Items.length == 1) {
-      this.inputDialogValue = this.commanderSettings.selectedItem.Name;
+      this.popupSettings.inputDialogValue = this.commanderSettings.selectedItem.Name;
       this.openInputDialog('singleCopy');
     }
     else {
-      this.warningTitle = Constants.ItemCopyConfirmationTitle
-      this.warningText = Constants.ItemCopyConfirmationText;
+      this.popupSettings.warningTitle = Constants.ItemCopyConfirmationTitle
+      this.popupSettings.warningText = Constants.ItemCopyConfirmationText;
       this.openConfirmDialog('multipleCopy');
     }
   }
@@ -389,10 +358,10 @@ export class StartPageComponent implements OnInit {
     this.itemCommanderService.copyItems(this.copyRequest, this.commanderSettings.selectedDatabase).subscribe(
       {
         next: response => {
-          this.loadLeftItems(this.leftData.CurrentId);
-          this.loadRightItems(this.rightData.CurrentId);
+          this.loadLeftItems(this.commanderSettings.leftData.CurrentId);
+          this.loadRightItems(this.commanderSettings.rightData.CurrentId);
         },
-        error: response =>{        
+        error: response => {
           this.handleError(response);
         }
       }
@@ -406,11 +375,11 @@ export class StartPageComponent implements OnInit {
     contract.Name = this.parent.inputDialogValue;
     this.itemCommanderService.copySingleItem(contract, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
-        this.loadLeftItems(this.leftData.CurrentId);
-        this.loadRightItems(this.rightData.CurrentId);
+        this.loadLeftItems(this.commanderSettings.leftData.CurrentId);
+        this.loadRightItems(this.commanderSettings.rightData.CurrentId);
         this.dialogService.close();
       },
-      error: response =>{        
+      error: response => {
         this.handleError(response);
       }
     });
@@ -419,10 +388,10 @@ export class StartPageComponent implements OnInit {
   getTargetPathForFolder() {
     if (this.commanderSettings.selectedTable == 'left') {
       //taget a right
-      return this.leftData.CurrentPath;
+      return this.commanderSettings.leftData.CurrentPath;
     }
     else {
-      return this.rightData.CurrentPath;
+      return this.commanderSettings.rightData.CurrentPath;
     }
   }
 
@@ -433,11 +402,11 @@ export class StartPageComponent implements OnInit {
 
     this.itemCommanderService.deleteItems(deleteRequest, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
-        this.loadLeftItems(this.leftData.CurrentId);
-        this.loadRightItems(this.rightData.CurrentId);
+        this.loadLeftItems(this.commanderSettings.leftData.CurrentId);
+        this.loadRightItems(this.commanderSettings.rightData.CurrentId);
         this.dialogService.close();
       },
-      error: response =>{        
+      error: response => {
         this.handleError(response);
       }
     });
@@ -453,11 +422,11 @@ export class StartPageComponent implements OnInit {
 
     this.itemCommanderService.lockItems(lockRequest, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
-        this.loadLeftItems(this.leftData.CurrentId);
-        this.loadRightItems(this.rightData.CurrentId);
+        this.loadLeftItems(this.commanderSettings.leftData.CurrentId);
+        this.loadRightItems(this.commanderSettings.rightData.CurrentId);
         this.dialogService.close();
       },
-      error: response =>{        
+      error: response => {
         this.handleError(response);
       }
     });
@@ -472,11 +441,11 @@ export class StartPageComponent implements OnInit {
     this.leftLoading = true;
     this.itemCommanderService.fetchItems(id, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
-        this.leftData = response as ItemCommanderResponse;
-        this.leftPath = this.leftData.CurrentPath;
+        this.commanderSettings.leftData = response as ItemCommanderResponse;
+        this.commanderSettings.leftPath = this.commanderSettings.leftData.CurrentPath;
         this.leftLoading = false;
       },
-      error: response =>{        
+      error: response => {
         this.handleError(response);
       }
     });
@@ -486,47 +455,47 @@ export class StartPageComponent implements OnInit {
     this.rightLoading = true;
     this.itemCommanderService.fetchItems(id, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
-        this.rightData = response as ItemCommanderResponse;
-        this.rightPath = this.rightData.CurrentPath;
+        this.commanderSettings.rightData = response as ItemCommanderResponse;
+        this.commanderSettings.rightPath = this.commanderSettings.rightData.CurrentPath;
         this.rightLoading = false;
       },
-      error: response =>{        
+      error: response => {
         this.handleError(response);
       }
     });
   }
 
 
-  downSelector:boolean;
+  downSelector: boolean;
   mouseDown(ev: any, item: Item) {
     if (ev.buttons == 2) {
       if (item.IsSelected && !this.downSelector) {
         item.IsSelected = false;
       }
-      else if(!item.IsSelected && this.downSelector) {
+      else if (!item.IsSelected && this.downSelector) {
         item.IsSelected = true;
         //Set last selected item
         this.commanderSettings.selectedItem = item;
       }
     }
-    
+
     return false;
   }
 
   mouseUp(ev: any, item: Item) {
-  
+
     if (ev.button == 2) {
       if (item.IsSelected) {
         this.commanderSettings.selectedItem = item;
-      }     
+      }
     }
-    
+
     return false;
   }
 
-  mouseDownSetup(ev: any, item:Item){
+  mouseDownSetup(ev: any, item: Item) {
     if (ev.buttons == 2) {
-   
+
       if (item.IsSelected) {
         item.IsSelected = false;
         this.downSelector = false;
@@ -536,41 +505,32 @@ export class StartPageComponent implements OnInit {
         this.downSelector = true;
       }
     }
-    
+
     return false;
   }
 
   loadParent(side: string) {
     if (side == "left") {
-      if (this.leftData.ParentId == '{00000000-0000-0000-0000-000000000000}') {
+      if (this.commanderSettings.leftData.ParentId == '{00000000-0000-0000-0000-000000000000}') {
         return;
       }
 
-      if (this.leftData.ParentId == null){
+      if (this.commanderSettings.leftData.ParentId == null) {
         this.loadLeftItems(this.leftIdBeforeSearch);
         return;
       }
-      this.loadLeftItems(this.leftData.ParentId);
+      this.loadLeftItems(this.commanderSettings.leftData.ParentId);
     }
     else {
-      if (this.rightData.ParentId == '{00000000-0000-0000-0000-000000000000}') {
+      if (this.commanderSettings.rightData.ParentId == '{00000000-0000-0000-0000-000000000000}') {
         return;
       }
-      this.loadRightItems(this.rightData.ParentId);
+      this.loadRightItems(this.commanderSettings.rightData.ParentId);
     }
   }
 
   onRightClick(item: Item) {
     return false;
-    // if (item.IsSelected) {
-    //   item.IsSelected = false;
-    // }
-    // else {
-    //   item.IsSelected = true;
-    //   //Last selected item 
-    //   this.selectedItem = item;
-    // }
-    // return false;
   }
 
   leftDoubleClick(item: Item) {
@@ -581,8 +541,8 @@ export class StartPageComponent implements OnInit {
     this.loadRightItems(item.Id);
   }
 
-  openFastView(item:Item){
-    this.router.navigateByUrl('/fastview?itemid='+item.Id);
+  openFastView(item: Item) {
+    this.router.navigateByUrl('/fastview?itemid=' + item.Id);
   }
 
   getClass(item: Item) {
@@ -598,6 +558,10 @@ export class StartPageComponent implements OnInit {
       .map((opt: any) => opt.value)
   }
 
+  showHiddenItems(){
+    this.itemService.saveCommanderSettings(this.commanderSettings);
+  }
+
   showColumn(columnName: string) {
     return this.commanderSettings.options.filter((opt: any) => opt.value == columnName && opt.checked).length > 0;
   }
@@ -606,116 +570,106 @@ export class StartPageComponent implements OnInit {
       .filter((opt: any) => opt.checked);
   }
 
-  selectedInsertOptions:any;
-  openInsertOptions(){
+  selectedInsertOptions: any;
+  openInsertOptions() {
     var id = '';
-    if(this.commanderSettings.selectedTable == 'left'){
-      id=this.leftData.CurrentId;
+    if (this.commanderSettings.selectedTable == 'left') {
+      id = this.commanderSettings.leftData.CurrentId;
     }
-    else{
-      id=this.rightData.CurrentId;
+    else {
+      id = this.commanderSettings.rightData.CurrentId;
     }
     this.itemCommanderService.insertOptions(id, this.commanderSettings.selectedDatabase).subscribe({
-      next: response =>{
+      next: response => {
         this.commanderSettings.insertOptions = response as Array<Item>;
-    this.dialogService.open(this.insertOptionRef);
+        this.dialogService.open(this.insertOptionRef);
       },
-      error: response =>{        
+      error: response => {
         this.handleError(response);
       }
     });
   }
 
-  createItem(){
+  createItem() {
     let contract = new FolderRequest();
     contract.TargetPath = this.getTargetPathForFolder();
     contract.Name = this.parent.inputDialogValue;
     contract.TemplateId = this.selectedInsertOptions;
     this.itemCommanderService.addFolder(contract, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
-        this.loadLeftItems(this.leftData.CurrentId);
-        this.loadRightItems(this.rightData.CurrentId);
+        this.loadLeftItems(this.commanderSettings.leftData.CurrentId);
+        this.loadRightItems(this.commanderSettings.rightData.CurrentId);
         this.dialogService.close();
       },
-      error: response =>{        
+      error: response => {
         this.handleError(response);
       }
     });
   }
 
-  openContentEditor(){
-    if(!this.commanderSettings.selectedItem){
+  openContentEditor() {
+    if (!this.commanderSettings.selectedItem) {
       return;
     }
-    let url ='/sitecore/shell/Applications/Content%20Editor.aspx?fo='+this.commanderSettings.selectedItem.Id;
+    let url = '/sitecore/shell/Applications/Content%20Editor.aspx?fo=' + this.commanderSettings.selectedItem.Id;
 
     var win = window.open(url, '_blank');
-  win.focus();
+    win.focus();
   }
 
-  handleError(response: any){
+  handleError(response: any) {
 
-    if(response.error && response.error.InnerException){
+    if (response.error && response.error.InnerException) {
       this.dialogService.close();
-      this.warningText = response.error.InnerException.ExceptionMessage;
-      this.warningTitle = response.statusText;
+      this.popupSettings.warningText = response.error.InnerException.ExceptionMessage;
+      this.popupSettings.warningTitle = response.statusText;
       this.dialogService.open(this.warningRef);
       return;
     }
 
-    if(response.error && response.error.ExceptionMessage){
+    if (response.error && response.error.ExceptionMessage) {
       this.dialogService.close();
-      this.warningText = response.error.ExceptionMessage;
-      this.warningTitle = response.statusText;
+      this.popupSettings.warningText = response.error.ExceptionMessage;
+      this.popupSettings.warningTitle = response.statusText;
       this.dialogService.open(this.warningRef);
     }
   }
 
-  checkBookmark(pathData:any){
-    if (this.commanderSettings.bookmarks.length == 0 || !pathData){
-      return false;
-    }
-    let data = this.commanderSettings.bookmarks.filter(item => item.Path == pathData.CurrentPath);
-   
-
-    return data.length>0;
+  checkBookmark(pathData: any): boolean {
+    return this.bookmarkService.checkBookmark(pathData, this.commanderSettings);
   }
 
-  bookmark(pathData:any){
-    this.commanderSettings.bookmarks.push({Path : pathData.CurrentPath, Id : pathData.CurrentId});
-    this.storage.set('bookmarks',this.commanderSettings.bookmarks)
+  bookmark(pathData: any): void {
+    this.bookmarkService.bookmark(pathData, this.commanderSettings);
   }
 
-  unbookmark(pathData:any){
-    let filteredItems = this.commanderSettings.bookmarks.filter(item => item.Path !== pathData.CurrentPath)
-    this.commanderSettings.bookmarks = filteredItems;
-    this.storage.set('bookmarks',this.commanderSettings.bookmarks)
+  unbookmark(pathData: any): void {
+    this.bookmarkService.unbookmark(pathData, this.commanderSettings);
   }
 
-  loadBookmark(side: string, item:any){
-    if(side=='left'){
+  loadBookmark(side: string, item: any) {
+    if (side == 'left') {
       this.loadLeftItems(item.Id);
     }
-    else{
+    else {
       this.loadRightItems(item.Id);
     }
-    
   }
 
-  editorOptions:any;
-  loadEditorOptions(){
-    if (this.hasSelectedItem() || !this.commanderSettings.selectedItem) {
-      this.warningText = 'There is no selected item';
-      this.warningTitle = 'Invalid selected item';
+  editorOptions: any;
+  loadEditorOptions() {
+    if (this.itemService.hasSelectedItem(this.commanderSettings) || !this.commanderSettings.selectedItem) {
+      this.popupSettings.warningText = 'There is no selected item';
+      this.popupSettings.warningTitle = 'Invalid selected item';
       this.dialogService.open(this.warningRef);
       return;
     }
 
     this.itemCommanderService.editoroptions(this.commanderSettings.selectedItem.Id, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
-       this.editorOptions = response;
+        this.editorOptions = response;
       },
-      error: response =>{        
+      error: response => {
         this.handleError(response);
       }
     });
