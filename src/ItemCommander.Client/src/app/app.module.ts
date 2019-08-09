@@ -36,6 +36,7 @@ import { MultilistComponent } from './fast-view/multilist/multilist.component';
 import { FastViewService } from './fast-view/fastview.service';
 import { ItemService } from './services/item.service';
 import { BookmarkService } from './services/bookmark.service';
+import { PopupService } from './services/popup.service';
 
 @NgModule({
   declarations: [
@@ -80,7 +81,7 @@ import { BookmarkService } from './services/bookmark.service';
     })
   ],
   providers: [
-    ItemCommanderService, SciLogoutService, FastViewService, ItemService, BookmarkService
+    ItemCommanderService, SciLogoutService, FastViewService, ItemService, BookmarkService, PopupService
   ],
   bootstrap: [AppComponent]
 })

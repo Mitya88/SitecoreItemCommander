@@ -12,6 +12,7 @@ import { ItemService } from '../services/item.service';
 import { CommanderSettings } from '../model/CommanderSettings';
 import { BookmarkService } from '../services/bookmark.service';
 import { PopupSettings } from '../model/PopupSettings';
+import { PopupService } from '../services/popup.service';
 
 @Component({
   selector: 'app-start-page',
@@ -40,18 +41,15 @@ export class StartPageComponent implements OnInit {
     private router: Router,
     private fastviewService: FastViewService,
     private itemService: ItemService,
-    private bookmarkService: BookmarkService
+    private bookmarkService: BookmarkService,
+    private popupService: PopupService
   ) { }
 
   leftIdBeforeSearch: string;
-
   isSearching: boolean;
-
   leftLoading: boolean;
-  rightLoading: boolean;
-  
+  rightLoading: boolean;  
 
-  targetPath: any;
   parent: any;
 
   commanderSettings: CommanderSettings;
@@ -63,7 +61,6 @@ export class StartPageComponent implements OnInit {
     this.load();
     this.parent = this;
   }
-
 
   getTableClass(table: string) {
     return this.commanderSettings.selectedTable == table ? "table-selected" : "table-not-selected";
@@ -84,10 +81,10 @@ export class StartPageComponent implements OnInit {
   }
 
   fastViewSearch() {
-
-    if (this.getSelectedItems().length > 0) {
+    let data = this.itemService.getSelectedItems(this.commanderSettings);
+    if (data.length > 0) {
       if (this.fastViewEnabled) {
-        var id = this.getSelectedItems()[0].Id
+        var id = data[0].Id
         this.fastviewService.search.emit(id);
         return;
       }
@@ -118,59 +115,24 @@ export class StartPageComponent implements OnInit {
   }
 
   selectText = Constants.SelectText;
-  selectAll() {
-    let selectValue = false;
-    if (this.selectText == Constants.SelectText) {
-      selectValue = true;
-      this.selectText = Constants.DeselectText;
-    }
-    else {
-      this.selectText = Constants.SelectText;
-      selectValue = false;
-      this.commanderSettings.selectedItem = undefined;
-    }
-
-    if (this.commanderSettings.selectedTable == "left") {
-      this.commanderSettings.leftData.Children.forEach(function (it) { it.IsSelected = selectValue; });
-      if (selectValue) {
-        this.commanderSettings.selectedItem = this.commanderSettings.leftData.Children[0];
-      }
-    }
-    else {
-      this.commanderSettings.rightData.Children.forEach(function (it) { it.IsSelected = selectValue; });
-      if (selectValue) {
-        this.commanderSettings.selectedItem = this.commanderSettings.rightData.Children[0];
-      }
-    }
+  selectAll() {    
+    this.selectText = this.itemService.selectAll(this.selectText, this.commanderSettings);
   }
 
   openInputDialog(dialogAction: string) {
-    this.dialogService.open(this.simpleInputRef);
-    this.popupSettings.inputAction = dialogAction;
-
-    if (dialogAction == 'singleCopy') {
-      this.popupSettings.singleInputTitle = Constants.CopyDialogTitle;
-      this.popupSettings.singleInputText = Constants.NewItemText;
-    }
-    else if (dialogAction == 'search') {
-      this.popupSettings.singleInputTitle = Constants.SearchDialogTitle;
-      this.popupSettings.singleInputText = Constants.SearchInputText;
-    }
-    else if (dialogAction == 'rename') {
-      this.popupSettings.singleInputTitle = Constants.RenameDialogTitle;
-      this.popupSettings.singleInputText = Constants.RenameText;
-    }
+    this.popupService.openInputDialog(dialogAction, this.simpleInputRef, this.popupSettings);
   }
 
   openConfirmDialog(dialogAction: string) {
-    if (this.itemService.hasSelectedItem(this.commanderSettings) || !this.commanderSettings.selectedItem) {
-      this.popupSettings.warningText = Constants.NoItemWarningText;
-      this.popupSettings.warningTitle = Constants.NoItemWarningTitle;
-      this.dialogService.open(this.warningRef);
+    if (this.popupService.checkAndOpenWarning(this.warningRef, this.popupSettings, this.commanderSettings)){
       return;
     }
-    this.getSelectedItems();
-    if (dialogAction == 'move' && (this.commanderSettings.selectedItem.Path == this.targetPath || this.targetPath.startsWith(this.commanderSettings.selectedItem.Path))) {
+
+    this.itemService.getSelectedItems(this.commanderSettings);
+    if(!this.commanderSettings.selectedItem){
+      return;
+    }
+    if (dialogAction == 'move' && (this.commanderSettings.selectedItem.Path == this.commanderSettings.targetPath || this.commanderSettings.targetPath.startsWith(this.commanderSettings.selectedItem.Path))) {
       this.popupSettings.warningText = Constants.ItemMovingError;
       this.popupSettings.warningTitle = Constants.ItemMovingErrorTitle;
       this.dialogService.open(this.warningRef);
@@ -190,7 +152,7 @@ export class StartPageComponent implements OnInit {
       this.parent.confirmTitle = Constants.ItemDeletingConfirmationTitle;
       this.parent.confirmText = Constants.ItemDeletingConfirmationText;
 
-      var hasChildren = this.getSelectedItems().filter(function (t) { return t.HasChildren }).length > 0;
+      var hasChildren = this.itemService.getSelectedItems(this.commanderSettings).filter(function (t) { return t.HasChildren }).length > 0;
 
       if (hasChildren) {
         this.parent.confirmText += Constants.ItemDeletingWithChildren;
@@ -232,6 +194,7 @@ export class StartPageComponent implements OnInit {
       this.rename();
     }
   }
+
   fastView() {
 
     if (this.fastViewEnabled) {
@@ -240,20 +203,7 @@ export class StartPageComponent implements OnInit {
     else {
       this.fastViewEnabled = true;
     }
-  }
-
-  getSelectedItems() {
-    if (this.commanderSettings.selectedTable == 'left') {
-      //taget a right
-      this.targetPath = this.commanderSettings.rightData.CurrentPath;
-
-      return this.commanderSettings.leftData.Children.filter(it => it.IsSelected);
-    }
-    else {
-      this.targetPath = this.commanderSettings.leftData.CurrentPath;
-      return this.commanderSettings.rightData.Children.filter(it => it.IsSelected);
-    }
-  }
+  }  
 
   search() {
     this.leftLoading = true;
@@ -274,7 +224,7 @@ export class StartPageComponent implements OnInit {
   rename() {
 
     let request = new RenameRequest();
-    request.Items = this.getSelectedItems().map(function (it) { return it.Id });
+    request.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
 
     request.NameOrPattern = this.popupSettings.inputDialogValue
 
@@ -292,8 +242,8 @@ export class StartPageComponent implements OnInit {
 
   move() {
     let moveRequest = new CopyRequest();
-    moveRequest.Items = this.getSelectedItems().map(function (it) { return it.Id });
-    moveRequest.TargetPath = this.targetPath;
+    moveRequest.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
+    moveRequest.TargetPath = this.commanderSettings.targetPath;
 
     this.itemCommanderService.moveItems(moveRequest, this.commanderSettings.selectedDatabase).subscribe(
       {
@@ -320,7 +270,7 @@ export class StartPageComponent implements OnInit {
     }
     let moveRequest = new PackageRequest();
 
-    moveRequest.Items = this.getSelectedItems().map(function (it) { return it.Id });
+    moveRequest.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
 
     this.itemCommanderService.packageItems(moveRequest, this.commanderSettings.selectedDatabase).subscribe({
       next: fileName => {
@@ -340,8 +290,8 @@ export class StartPageComponent implements OnInit {
       return;
     }
     this.copyRequest = new CopyRequest();
-    this.copyRequest.Items = this.getSelectedItems().map(function (it) { return it.Id });
-    this.copyRequest.TargetPath = this.targetPath;
+    this.copyRequest.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
+    this.copyRequest.TargetPath = this.commanderSettings.targetPath;
     this.dialogService.close();
     if (this.copyRequest.Items.length == 1) {
       this.popupSettings.inputDialogValue = this.commanderSettings.selectedItem.Name;
@@ -398,7 +348,7 @@ export class StartPageComponent implements OnInit {
   delete() {
 
     let deleteRequest = new DeleteRequest();
-    deleteRequest.Items = this.getSelectedItems().map(function (it) { return it.Id });
+    deleteRequest.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
 
     this.itemCommanderService.deleteItems(deleteRequest, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
@@ -418,7 +368,7 @@ export class StartPageComponent implements OnInit {
 
     let lockRequest = new LockRequest();
     lockRequest.Lock = lock;
-    lockRequest.Items = this.getSelectedItems().map(function (it) { return it.Id });
+    lockRequest.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
 
     this.itemCommanderService.lockItems(lockRequest, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {

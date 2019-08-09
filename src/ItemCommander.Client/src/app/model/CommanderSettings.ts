@@ -14,6 +14,7 @@ export class CommanderSettings {
     rightPath: string;
     leftData: ItemCommanderResponse;
     rightData: ItemCommanderResponse;
+    targetPath:string;
 
     constructor() {
         this.options = [

@@ -1,6 +1,8 @@
 import { Injectable, Inject } from '@angular/core';
 import { CommanderSettings } from '../model/CommanderSettings';
 import { WebStorageService, LOCAL_STORAGE } from 'angular-webstorage-service';
+import { Item } from '../contract/Item';
+import { Constants } from '../constants';
 
 @Injectable()
 export class ItemService {
@@ -50,5 +52,46 @@ export class ItemService {
     else {
       return commanderSettings.rightData.Children.filter(it => it.IsSelected).map(function (it) { return it.Id }).length == 0;
     }
+  }
+
+  getSelectedItems(commanderSettings: CommanderSettings) : Item[] {
+    if (commanderSettings.selectedTable == 'left') {
+      //target a right
+      commanderSettings.targetPath = commanderSettings.rightData.CurrentPath;
+
+      return commanderSettings.leftData.Children.filter(it => it.IsSelected);
+    }
+    else {
+      commanderSettings.targetPath = commanderSettings.leftData.CurrentPath;
+      return commanderSettings.rightData.Children.filter(it => it.IsSelected);
+    }
+  }
+
+  selectAll(selectText:string, commanderSettings:CommanderSettings):string {
+    let selectValue = false;
+    if (selectText == Constants.SelectText) {
+      selectValue = true;
+      selectText = Constants.DeselectText;
+    }
+    else {
+      selectText = Constants.SelectText;
+      selectValue = false;
+      commanderSettings.selectedItem = undefined;
+    }
+
+    if (commanderSettings.selectedTable == "left") {
+      commanderSettings.leftData.Children.forEach(function (it) { it.IsSelected = selectValue; });
+      if (selectValue) {
+        commanderSettings.selectedItem = commanderSettings.leftData.Children[0];
+      }
+    }
+    else {
+      commanderSettings.rightData.Children.forEach(function (it) { it.IsSelected = selectValue; });
+      if (selectValue) {
+        commanderSettings.selectedItem = commanderSettings.rightData.Children[0];
+      }
+    }
+
+    return selectText;
   }
 }

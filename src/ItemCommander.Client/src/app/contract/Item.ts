@@ -2,7 +2,7 @@ export interface Item {
     Id: string;
     Name: string;
     Language:string;
-    Path:string; 
+    Path?:string; 
     Icon: string;
     TemplateId:string;
     TemplateName: string;
