@@ -35,7 +35,7 @@ export class StartPageComponent implements OnInit {
   private insertOptionRef: TemplateRef<any>  
 
   constructor(
-    private itemCommanderService: ItemCommanderService,
+    private itemCommanderApiService: ItemCommanderService,
     public logoutService: SciLogoutService,
     public dialogService: ScDialogService,
     private router: Router,
@@ -54,6 +54,13 @@ export class StartPageComponent implements OnInit {
 
   commanderSettings: CommanderSettings;
   popupSettings: PopupSettings;
+
+  selectText = Constants.SelectText;
+  copyRequest: CopyRequest;
+  fastViewEnabled = false;
+  downSelector: boolean;
+  selectedInsertOptions: any;
+  editorOptions: any;
 
   ngOnInit() {
     this.commanderSettings = this.itemService.getCommanderSettings();
@@ -82,12 +89,9 @@ export class StartPageComponent implements OnInit {
 
   fastViewSearch() {
     let data = this.itemService.getSelectedItems(this.commanderSettings);
-    if (data.length > 0) {
-      if (this.fastViewEnabled) {
-        var id = data[0].Id
-        this.fastviewService.search.emit(id);
-        return;
-      }
+    if (data.length > 0 && this.fastViewEnabled) {     
+        this.fastviewService.search.emit(data[0].Id);
+        return;      
     }
   }
 
@@ -114,7 +118,6 @@ export class StartPageComponent implements OnInit {
     this.commanderSettings.selectedItem = item;
   }
 
-  selectText = Constants.SelectText;
   selectAll() {    
     this.selectText = this.itemService.selectAll(this.selectText, this.commanderSettings);
   }
@@ -139,32 +142,30 @@ export class StartPageComponent implements OnInit {
       return;
     }
 
-
     this.dialogService.open(this.confirmDialog);
     this.popupSettings.confirmAction = dialogAction;
 
     if (this.popupSettings.confirmAction == 'copy') {
       this.copy();
     } else if (this.popupSettings.confirmAction == 'move') {
-      this.parent.confirmTitle = Constants.ItemMovingConfirmationTitle;
-      this.parent.confirmText = Constants.ItemMovingConfirmationText;
+      this.parent.popupSettings.confirmTitle = Constants.ItemMovingConfirmationTitle;
+      this.parent.popupSettings.confirmText = Constants.ItemMovingConfirmationText;
     } else if (this.popupSettings.confirmAction == 'delete') {
-      this.parent.confirmTitle = Constants.ItemDeletingConfirmationTitle;
-      this.parent.confirmText = Constants.ItemDeletingConfirmationText;
+      this.parent.popupSettings.confirmTitle = Constants.ItemDeletingConfirmationTitle;
+      this.parent.popupSettings.confirmText = Constants.ItemDeletingConfirmationText;
 
       var hasChildren = this.itemService.getSelectedItems(this.commanderSettings).filter(function (t) { return t.HasChildren }).length > 0;
 
       if (hasChildren) {
-        this.parent.confirmText += Constants.ItemDeletingWithChildren;
+        this.parent.popupSettings.confirmText += Constants.ItemDeletingWithChildren;
       }
     } else if (this.popupSettings.confirmAction == 'lock') {
-      this.parent.confirmTitle = Constants.ItemLockConfirmationTitle;
-      this.parent.confirmText = Constants.ItemLockConfirmationText;
+      this.parent.popupSettings.confirmTitle = Constants.ItemLockConfirmationTitle;
+      this.parent.popupSettings.confirmText = Constants.ItemLockConfirmationText;
     } else if (this.popupSettings.confirmAction == 'unlock') {
-      this.parent.confirmTitle = Constants.ItemUnlockConfirmationTitle;
-      this.parent.confirmText = Constants.ItemUnlockConfirmationText;
+      this.parent.popupSettings.confirmTitle = Constants.ItemUnlockConfirmationTitle;
+      this.parent.popupSettings.confirmText = Constants.ItemUnlockConfirmationText;
     }
-
   }
 
   Action() {
@@ -178,8 +179,7 @@ export class StartPageComponent implements OnInit {
       this.multipleCopy();
     } else if (this.popupSettings.confirmAction == 'lock') {
       this.lock(true);
-    }
-    else if (this.popupSettings.confirmAction == 'unlock') {
+    } else if (this.popupSettings.confirmAction == 'unlock') {
       this.lock(false);
     }
   }
@@ -195,20 +195,10 @@ export class StartPageComponent implements OnInit {
     }
   }
 
-  fastView() {
-
-    if (this.fastViewEnabled) {
-      this.fastViewEnabled = false;
-    }
-    else {
-      this.fastViewEnabled = true;
-    }
-  }  
-
   search() {
     this.leftLoading = true;
     this.leftIdBeforeSearch = this.commanderSettings.leftData.CurrentId;
-    this.itemCommanderService.search(this.popupSettings.inputDialogValue, this.commanderSettings.selectedDatabase).subscribe({
+    this.itemCommanderApiService.search(this.popupSettings.inputDialogValue, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
         this.commanderSettings.leftData = response as ItemCommanderResponse;
         this.commanderSettings.leftPath = this.popupSettings.inputDialogValue;
@@ -225,10 +215,9 @@ export class StartPageComponent implements OnInit {
 
     let request = new RenameRequest();
     request.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
-
     request.NameOrPattern = this.popupSettings.inputDialogValue
 
-    this.itemCommanderService.rename(request, this.commanderSettings.selectedDatabase).subscribe({
+    this.itemCommanderApiService.rename(request, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
         this.loadLeftItems(this.commanderSettings.leftData.CurrentId);
         this.loadRightItems(this.commanderSettings.rightData.CurrentId);
@@ -245,7 +234,7 @@ export class StartPageComponent implements OnInit {
     moveRequest.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
     moveRequest.TargetPath = this.commanderSettings.targetPath;
 
-    this.itemCommanderService.moveItems(moveRequest, this.commanderSettings.selectedDatabase).subscribe(
+    this.itemCommanderApiService.moveItems(moveRequest, this.commanderSettings.selectedDatabase).subscribe(
       {
         next: response => {
           this.loadLeftItems(this.commanderSettings.leftData.CurrentId);
@@ -259,20 +248,16 @@ export class StartPageComponent implements OnInit {
     );
   }
 
- 
-
   downloadAsPackage() {
-    if (this.itemService.hasSelectedItem(this.commanderSettings)) {
-      this.popupSettings.warningText = Constants.NoItemWarningText;
-      this.popupSettings.warningTitle = Constants.NoItemWarningTitle;
-      this.dialogService.open(this.warningRef);
+    if (this.popupService.checkAndOpenWarning(this.warningRef, this.popupSettings, this.commanderSettings)){
       return;
     }
+
     let moveRequest = new PackageRequest();
 
     moveRequest.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
 
-    this.itemCommanderService.packageItems(moveRequest, this.commanderSettings.selectedDatabase).subscribe({
+    this.itemCommanderApiService.packageItems(moveRequest, this.commanderSettings.selectedDatabase).subscribe({
       next: fileName => {
         let theFile = '/sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/download?fileName=' + (fileName as DownloadResponse).FileName;
         window.open(theFile);
@@ -283,12 +268,7 @@ export class StartPageComponent implements OnInit {
     });
   }
 
-  copyRequest: CopyRequest;
   copy() {
-
-    if (!this.commanderSettings.selectedItem) {
-      return;
-    }
     this.copyRequest = new CopyRequest();
     this.copyRequest.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
     this.copyRequest.TargetPath = this.commanderSettings.targetPath;
@@ -305,7 +285,7 @@ export class StartPageComponent implements OnInit {
   }
 
   multipleCopy() {
-    this.itemCommanderService.copyItems(this.copyRequest, this.commanderSettings.selectedDatabase).subscribe(
+    this.itemCommanderApiService.copyItems(this.copyRequest, this.commanderSettings.selectedDatabase).subscribe(
       {
         next: response => {
           this.loadLeftItems(this.commanderSettings.leftData.CurrentId);
@@ -323,7 +303,7 @@ export class StartPageComponent implements OnInit {
     contract.Item = this.copyRequest.Items[0];
     contract.TargetPath = this.copyRequest.TargetPath;
     contract.Name = this.parent.inputDialogValue;
-    this.itemCommanderService.copySingleItem(contract, this.commanderSettings.selectedDatabase).subscribe({
+    this.itemCommanderApiService.copySingleItem(contract, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
         this.loadLeftItems(this.commanderSettings.leftData.CurrentId);
         this.loadRightItems(this.commanderSettings.rightData.CurrentId);
@@ -333,24 +313,13 @@ export class StartPageComponent implements OnInit {
         this.handleError(response);
       }
     });
-  }
-
-  getTargetPathForFolder() {
-    if (this.commanderSettings.selectedTable == 'left') {
-      //taget a right
-      return this.commanderSettings.leftData.CurrentPath;
-    }
-    else {
-      return this.commanderSettings.rightData.CurrentPath;
-    }
-  }
+  }  
 
   delete() {
-
     let deleteRequest = new DeleteRequest();
     deleteRequest.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
 
-    this.itemCommanderService.deleteItems(deleteRequest, this.commanderSettings.selectedDatabase).subscribe({
+    this.itemCommanderApiService.deleteItems(deleteRequest, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
         this.loadLeftItems(this.commanderSettings.leftData.CurrentId);
         this.loadRightItems(this.commanderSettings.rightData.CurrentId);
@@ -362,15 +331,12 @@ export class StartPageComponent implements OnInit {
     });
   }
 
-  fastViewEnabled = false;
-
   lock(lock: boolean) {
-
     let lockRequest = new LockRequest();
     lockRequest.Lock = lock;
     lockRequest.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
 
-    this.itemCommanderService.lockItems(lockRequest, this.commanderSettings.selectedDatabase).subscribe({
+    this.itemCommanderApiService.lockItems(lockRequest, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
         this.loadLeftItems(this.commanderSettings.leftData.CurrentId);
         this.loadRightItems(this.commanderSettings.rightData.CurrentId);
@@ -389,7 +355,7 @@ export class StartPageComponent implements OnInit {
     }
 
     this.leftLoading = true;
-    this.itemCommanderService.fetchItems(id, this.commanderSettings.selectedDatabase).subscribe({
+    this.itemCommanderApiService.fetchItems(id, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
         this.commanderSettings.leftData = response as ItemCommanderResponse;
         this.commanderSettings.leftPath = this.commanderSettings.leftData.CurrentPath;
@@ -403,7 +369,7 @@ export class StartPageComponent implements OnInit {
 
   loadRightItems(id: string) {
     this.rightLoading = true;
-    this.itemCommanderService.fetchItems(id, this.commanderSettings.selectedDatabase).subscribe({
+    this.itemCommanderApiService.fetchItems(id, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
         this.commanderSettings.rightData = response as ItemCommanderResponse;
         this.commanderSettings.rightPath = this.commanderSettings.rightData.CurrentPath;
@@ -415,8 +381,6 @@ export class StartPageComponent implements OnInit {
     });
   }
 
-
-  downSelector: boolean;
   mouseDown(ev: any, item: Item) {
     if (ev.buttons == 2) {
       if (item.IsSelected && !this.downSelector) {
@@ -502,12 +466,6 @@ export class StartPageComponent implements OnInit {
     return "";
   }
 
-  selectedOptions() { // right now: ['1','3']
-    return this.commanderSettings.options
-      .filter((opt: any) => opt.checked)
-      .map((opt: any) => opt.value)
-  }
-
   showHiddenItems(){
     this.itemService.saveCommanderSettings(this.commanderSettings);
   }
@@ -515,12 +473,12 @@ export class StartPageComponent implements OnInit {
   showColumn(columnName: string) {
     return this.commanderSettings.options.filter((opt: any) => opt.value == columnName && opt.checked).length > 0;
   }
+
   getSelectedOptions() {
     return this.commanderSettings.options
       .filter((opt: any) => opt.checked);
   }
 
-  selectedInsertOptions: any;
   openInsertOptions() {
     var id = '';
     if (this.commanderSettings.selectedTable == 'left') {
@@ -529,7 +487,7 @@ export class StartPageComponent implements OnInit {
     else {
       id = this.commanderSettings.rightData.CurrentId;
     }
-    this.itemCommanderService.insertOptions(id, this.commanderSettings.selectedDatabase).subscribe({
+    this.itemCommanderApiService.insertOptions(id, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
         this.commanderSettings.insertOptions = response as Array<Item>;
         this.dialogService.open(this.insertOptionRef);
@@ -542,10 +500,10 @@ export class StartPageComponent implements OnInit {
 
   createItem() {
     let contract = new FolderRequest();
-    contract.TargetPath = this.getTargetPathForFolder();
-    contract.Name = this.parent.inputDialogValue;
+    contract.TargetPath = this.itemService.getTargetPathForFolder(this.commanderSettings);
+    contract.Name = this.parent.popupSettings.inputDialogValue;
     contract.TemplateId = this.selectedInsertOptions;
-    this.itemCommanderService.addFolder(contract, this.commanderSettings.selectedDatabase).subscribe({
+    this.itemCommanderApiService.addFolder(contract, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
         this.loadLeftItems(this.commanderSettings.leftData.CurrentId);
         this.loadRightItems(this.commanderSettings.rightData.CurrentId);
@@ -606,16 +564,12 @@ export class StartPageComponent implements OnInit {
     }
   }
 
-  editorOptions: any;
   loadEditorOptions() {
-    if (this.itemService.hasSelectedItem(this.commanderSettings) || !this.commanderSettings.selectedItem) {
-      this.popupSettings.warningText = 'There is no selected item';
-      this.popupSettings.warningTitle = 'Invalid selected item';
-      this.dialogService.open(this.warningRef);
+    if (this.popupService.checkAndOpenWarning(this.warningRef, this.popupSettings, this.commanderSettings)){
       return;
-    }
+    } 
 
-    this.itemCommanderService.editoroptions(this.commanderSettings.selectedItem.Id, this.commanderSettings.selectedDatabase).subscribe({
+    this.itemCommanderApiService.editoroptions(this.commanderSettings.selectedItem.Id, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
         this.editorOptions = response;
       },

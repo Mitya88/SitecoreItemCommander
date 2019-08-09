@@ -94,4 +94,14 @@ export class ItemService {
 
     return selectText;
   }
+
+  getTargetPathForFolder(commanderSettings: CommanderSettings):string {
+    if (commanderSettings.selectedTable == 'left') {
+      //taget a right
+      return commanderSettings.leftData.CurrentPath;
+    }
+    else {
+      return commanderSettings.rightData.CurrentPath;
+    }
+  }
 }
