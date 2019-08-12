@@ -187,7 +187,8 @@
       <h4>{{parent.popupSettings.singleInputTitle}}</h4>
     </sc-dialog-header>
     <sc-dialog-body>
-      <h2>{{parent.popupSettings.singleInputText}}</h2>
+      <p [innerHtml]="parent.popupSettings.singleInputDescription"></p>
+      <h4>{{parent.popupSettings.singleInputText}}</h4>
       <input type="text" class="form-control" [(ngModel)]="parent.popupSettings.inputDialogValue" />
 
     </sc-dialog-body>
@@ -225,12 +226,15 @@
 <template #insertOptions>
   <sc-dialog>
     <sc-dialog-header>
-      <h4>New item</h4>
+      <h4>Insert from template</h4>
     </sc-dialog-header>
     <sc-dialog-body>
       <div class="row">
+          <div class="col-12">
+        <p>Select a template you want to use. In the Item Name field, enter a name for the new item.</p>
+          </div>
         <div class="col-6">
-          <h4>Template</h4>
+          <h4>Template</h4>          
           <select id="insertOptions" [(ngModel)]="parent.selectedInsertOptions" class="form-control">
             <option *ngFor="let c of parent.commanderSettings.insertOptions" [value]="c.Id"
               style="background-image:url({{c.Icon}});">{{ c.Name }}</option>

@@ -67,6 +67,7 @@ export class FastViewPageComponent implements OnInit {
 
   ngAfterViewChecked() {
   }
+
   GetSection(language: string) {
     var data = Object.keys(this.responseData.Data[language]);
     if (!this.showStandardFields) {
@@ -88,7 +89,7 @@ export class FastViewPageComponent implements OnInit {
   }
 
   GetFields(language: string, section: string) {
-    return this.responseData.Data[language][section].map(function (it : string) { return it })
+    return this.responseData.Data[language][section].map(function (it: string) { return it })
   }
 
   changeStandardFields() {

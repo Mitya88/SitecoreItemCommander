@@ -18,6 +18,7 @@ export class PopupService {
     if (dialogAction == 'singleCopy') {
       popupSettings.singleInputTitle = Constants.CopyDialogTitle;
       popupSettings.singleInputText = Constants.NewItemText;
+      popupSettings.singleInputDescription = Constants.CopySingleItem;
     }
     else if (dialogAction == 'search') {
       popupSettings.singleInputTitle = Constants.SearchDialogTitle;
@@ -26,6 +27,7 @@ export class PopupService {
     else if (dialogAction == 'rename') {
       popupSettings.singleInputTitle = Constants.RenameDialogTitle;
       popupSettings.singleInputText = Constants.RenameText;
+      popupSettings.singleInputDescription = Constants.RenameDescription;
     }
   }
 

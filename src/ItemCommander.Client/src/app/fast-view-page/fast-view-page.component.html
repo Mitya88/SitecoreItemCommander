@@ -1,80 +1,83 @@
 <div scPageActionBar>
-    <sc-action-bar>
-      <sc-action-bar-left>
-          <label>Show standard fields
-              <input  type="checkbox"
-                             name="standardFields"
-                             [(ngModel)]="showStandardFields"
-                             (change)="changeStandardFields()"/></label>
-          
-       <label><a class="openpage" href="/fastview?itemid={{itemId}}&database={selectedDatabase}" *ngIf="showOpenPageLink" target="_blank">Open in new page</a></label> 
-      </sc-action-bar-left>
-      </sc-action-bar>
-  </div>
-  <sc-progress-indicator-panel *ngIf="fastViewLoading" [show]="fastViewLoading">
-  </sc-progress-indicator-panel>
-  <article scPageContent class="page-nav" *ngIf="responseData">
-      <div class="card mb-3">
-          <div class="card-block">
-            <h4 class="card-title">Headings</h4>
-            <table>
-                <tr>
-                  <td class="display-4">Name</td>
-                  <td>{{responseData.Item.Name}}</td>
-                </tr>
-                <tr>
-                    <td class="display-4">Id</td>
-                    <td>{{responseData.Item.Id}}</td>
-                  </tr>
-                  <tr>
-                      <td class="display-4">Path</td>
-                      <td>{{responseData.Item.Path}}</td>
-                    </tr>
-                    <tr>
-                        <td class="display-4">Template</td>
-                        <td>{{responseData.Item.TemplateName}} ({{responseData.Item.TemplateId}})</td>
-                      </tr>
-                      <tr>
-                          <td class="display-4">ParentId</td>
-                          <td>{{responseData.Item.ParentId}}</td>
-                        </tr>
-                        <tr>
-                            <td class="display-4">Created</td>
-                            <td>{{responseData.Item.Created}}</td>
-                          </tr>
-                          <tr>
-                              <td class="display-4">LastModified</td>
-                              <td>{{responseData.Item.LastModified}}</td>
-                            </tr>
-                            <tr>
-                                <td class="display-4">Icon</td>
-                                <td>{{responseData.Item.Icon}}</td>
-                              </tr>
-                              <tr>
-                                  <td class="display-4">IsLocked</td>
-                                  <td>{{responseData.Item.IsLocked}}</td>
-                                </tr>
-                            
-              </table>
-          </div>
-        </div>
-      <sc-tab-group variant="switch" *ngIf="responseData.Languages">
-          <sc-tab  *ngFor='let language of responseData.Languages'  label="{{language}}">
-            <nav>  
-            <sc-menu> 
-                <sc-menu-category *ngFor='let section of GetSection(language)' icon="cake_slice" text="{{section}}" [open]="true">
-                 
-                   <div *ngFor='let field of GetFields(language, section)' class="field-padding">
-                    
-                        <app-image-view *ngIf="field.Type=='Image'" [context]=field></app-image-view>
-                        <app-text *ngIf="(field.Type!='Image' && field.Type!='Multilist' && field.Type != 'Treelist')" [context]=field></app-text>
-                        <app-multilist *ngIf="(field.Type == 'Treelist' || field.Type=='Multilist' )" [context]=field></app-multilist>
-                     </div>          
-                </sc-menu-category>
-                </sc-menu></nav>
-         
-          </sc-tab>
-        </sc-tab-group>
+  <sc-action-bar>
+    <sc-action-bar-left>
+      <label>Show standard fields
+        <input type="checkbox" name="standardFields" [(ngModel)]="showStandardFields"
+          (change)="changeStandardFields()" /></label>
 
-       
-  </article>
+      <label><a class="openpage" href="/fastview?itemid={{itemId}}&database={selectedDatabase}" *ngIf="showOpenPageLink"
+          target="_blank">Open in new page</a></label>
+    </sc-action-bar-left>
+  </sc-action-bar>
+</div>
+<sc-progress-indicator-panel *ngIf="fastViewLoading" [show]="fastViewLoading">
+</sc-progress-indicator-panel>
+<article scPageContent class="page-nav" *ngIf="responseData">
+  <div class="card mb-3">
+    <div class="card-block">
+      <h4 class="card-title">Headings</h4>
+      <table>
+        <tr>
+          <td class="display-4">Name</td>
+          <td>{{responseData.Item.Name}}</td>
+        </tr>
+        <tr>
+          <td class="display-4">Id</td>
+          <td>{{responseData.Item.Id}}</td>
+        </tr>
+        <tr>
+          <td class="display-4">Path</td>
+          <td>{{responseData.Item.Path}}</td>
+        </tr>
+        <tr>
+          <td class="display-4">Template</td>
+          <td>{{responseData.Item.TemplateName}} ({{responseData.Item.TemplateId}})</td>
+        </tr>
+        <tr>
+          <td class="display-4">ParentId</td>
+          <td>{{responseData.Item.ParentId}}</td>
+        </tr>
+        <tr>
+          <td class="display-4">Created</td>
+          <td>{{responseData.Item.Created}}</td>
+        </tr>
+        <tr>
+          <td class="display-4">LastModified</td>
+          <td>{{responseData.Item.LastModified}}</td>
+        </tr>
+        <tr>
+          <td class="display-4">Icon</td>
+          <td>{{responseData.Item.Icon}}</td>
+        </tr>
+        <tr>
+          <td class="display-4">IsLocked</td>
+          <td>{{responseData.Item.IsLocked}}</td>
+        </tr>
+
+      </table>
+    </div>
+  </div>
+  <sc-tab-group variant="switch" *ngIf="responseData.Languages">
+    <sc-tab *ngFor='let language of responseData.Languages' label="{{language}}">
+      <nav>
+        <sc-menu>
+          <sc-menu-category *ngFor='let section of GetSection(language)' icon="cake_slice" text="{{section}}"
+            [open]="true">
+
+            <div *ngFor='let field of GetFields(language, section)' class="field-padding">
+
+              <app-image-view *ngIf="field.Type=='Image'" [context]=field></app-image-view>
+              <app-text *ngIf="(field.Type!='Image' && field.Type!='Multilist' && field.Type != 'Treelist')"
+                [context]=field></app-text>
+              <app-multilist *ngIf="(field.Type == 'Treelist' || field.Type=='Multilist' )" [context]=field>
+              </app-multilist>
+            </div>
+          </sc-menu-category>
+        </sc-menu>
+      </nav>
+
+    </sc-tab>
+  </sc-tab-group>
+
+
+</article>

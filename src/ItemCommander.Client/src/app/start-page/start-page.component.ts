@@ -1,7 +1,7 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ItemCommanderService } from '../item-commander.service';
 import { Item } from '../contract/Item';
-import { CopyRequest, CopySingle, DeleteRequest, FolderRequest, PackageRequest, DownloadResponse, LockRequest, RenameRequest } from '../contract/copyRequest';
+import { CopyRequest } from '../contract/copyRequest';
 import { ItemCommanderResponse } from '../contract/ItemCommanderResponse';
 import { SciLogoutService } from '@speak/ng-sc/logout';
 import { ScDialogService } from '@speak/ng-bcl/dialog';
@@ -14,6 +14,13 @@ import { BookmarkService } from '../services/bookmark.service';
 import { PopupSettings } from '../model/PopupSettings';
 import { PopupService } from '../services/popup.service';
 import { CommanderViewComponent } from '../components/commander-view/commander-view.component';
+import { RenameRequest } from '../contract/renameRequest';
+import { PackageRequest } from '../contract/packageRequest';
+import { DownloadResponse } from '../contract/downloadResponse';
+import { CopySingle } from '../contract/copysingle';
+import { DeleteRequest } from '../contract/deleteRequest';
+import { LockRequest } from '../contract/lockRequest';
+import { FolderRequest } from '../contract/folderRequest';
 
 @Component({
   selector: 'app-start-page',
@@ -172,6 +179,9 @@ export class StartPageComponent implements OnInit {
     } else if (this.popupSettings.confirmAction == 'unlock') {
       this.parent.popupSettings.confirmTitle = Constants.ItemUnlockConfirmationTitle;
       this.parent.popupSettings.confirmText = Constants.ItemUnlockConfirmationText;
+    } else if (this.popupSettings.confirmAction == 'multipleCopy') {
+      this.parent.popupSettings.confirmTitle = Constants.ItemCopyConfirmationTitle;
+      this.parent.popupSettings.confirmText = Constants.ItemCopyConfirmationText;
     }
   }
 
@@ -297,6 +307,7 @@ export class StartPageComponent implements OnInit {
         next: response => {
           this.leftView.loadLeftItems(this.commanderSettings.leftData.CurrentId);
           this.rightView.loadRightItems(this.commanderSettings.rightData.CurrentId);
+          this.dialogService.close();
         },
         error: response => {
           this.handleError(response);
