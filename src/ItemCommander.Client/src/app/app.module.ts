@@ -37,6 +37,7 @@ import { FastViewService } from './fast-view/fastview.service';
 import { ItemService } from './services/item.service';
 import { BookmarkService } from './services/bookmark.service';
 import { PopupService } from './services/popup.service';
+import { CommanderViewComponent } from './components/commander-view/commander-view.component';
 
 @NgModule({
   declarations: [
@@ -46,7 +47,8 @@ import { PopupService } from './services/popup.service';
     ImageViewComponent,
     TextComponent,
     FilterChildren,
-    MultilistComponent
+    MultilistComponent,
+    CommanderViewComponent
   ],
   imports: [
     BrowserModule,

@@ -30,7 +30,7 @@
               </div>
             </sc-dropdown-menu>
           </sc-dropdown>
-          <button class="nav-item" scIconButton [(scToggle)]="fastViewEnabled" (click)="fastViewSearch()">
+          <button class="nav-item" scIconButton [(scToggle)]="commanderSettings.fastViewEnabled" (click)="fastViewSearch()">
             <sc-icon icon="eye"></sc-icon>
             View
           </button>
@@ -107,42 +107,12 @@
 
             <input type="text" class="form-control" [ngModel]="commanderSettings.leftPath" disabled />
           </div>
-          <table *ngIf="!leftLoading" scTable [ngClass]="getTableClass('left')" (click)="tableSelect('left')">
-            <thead>
-              <tr>
-                <th *ngFor="let item of getSelectedOptions()">{{item.name}}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr (dblclick)="loadParent('left')">
-                <td>...</td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-              <tr *ngFor="let item of commanderSettings.leftData.Children | filterchildren: hiddenItems" [ngClass]="getClass(item)"
-                (click)="singleSelect(item)" (dblclick)="leftDoubleClick(item)" (contextmenu)="onRightClick(item)"
-                (mouseup)="mouseUp($event, item)" (mouseover)="mouseDown($event, item)"
-                (mousedown)="mouseDownSetup($event, item)">
-                <td><img src="{{item.Icon}}" width="10" height="10" />
-                  &nbsp;{{item.Name}}
-                  <sc-icon icon="lock" style="color:red" size="small" *ngIf="item.IsLocked"></sc-icon>
-                </td>
-                <td *ngIf="showColumn('sitecorepath')">{{item.Path}}</td>
-                <td *ngIf="showColumn('templatename')">{{item.TemplateName}}</td>
-                <td *ngIf="showColumn('lastmodified')">{{item.LastModified}}</td>
-                <td *ngIf="showColumn('created')">{{item.Created}}</td>
-                <td *ngIf="showColumn('haschildren')">{{item.HasChildren}}</td>
-              </tr>
-            </tbody>
-          </table>
-          <sc-progress-indicator-panel [show]="leftLoading">
-          </sc-progress-indicator-panel>
+          <sc-app-commander-view #leftview [side]=left [commanderSettings]="commanderSettings" ></sc-app-commander-view>         
         </div>
         <div class="col-6">
-          <sc-fast-view-page [ngClass]="{'hidden_fastview':!fastViewEnabled}"
+          <sc-fast-view-page [ngClass]="{'hidden_fastview':!commanderSettings.fastViewEnabled}"
             [selectedDatabase]=commanderSettings.selectedDatabase></sc-fast-view-page>
-          <div class="bookmark-row" *ngIf="!fastViewEnabled">
+          <div class="bookmark-row" *ngIf="!commanderSettings.fastViewEnabled">
             <sc-dropdown class="bookmarkTools">
               <button scDropdownToggle scIconButton>
 
@@ -159,36 +129,7 @@
 
             <input type="text" class="form-control" [ngModel]="commanderSettings.rightPath" disabled />
           </div>
-          <table scTable *ngIf="!rightLoading && !fastViewEnabled" [ngClass]="getTableClass('right')"
-            (click)="tableSelect('right')">
-            <thead>
-              <tr>
-                <th *ngFor="let item of getSelectedOptions()">{{item.name}}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr (dblclick)="loadParent('right')">
-                <td>...</td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-              <tr *ngFor="let item of commanderSettings.rightData.Children | filterchildren: hiddenItems" [ngClass]="getClass(item)"
-                (click)="singleSelect(item)" (contextmenu)="onRightClick(item)" (dblclick)="rightDoubleClick(item)"
-                (mouseup)="mouseUp($event, item)" (mouseover)="mouseDown($event, item)"
-                (mousedown)="mouseDownSetup($event, item)">
-                <td><img src="{{item.Icon}}" width="10" height="10" />
-                  &nbsp;{{item.Name}}
-                  <sc-icon icon="lock" style="color:red" size="small" *ngIf="item.IsLocked"></sc-icon>
-                </td>
-                <td *ngIf="showColumn('sitecorepath')">{{item.Path}}</td>
-                <td *ngIf="showColumn('templatename')">{{item.TemplateName}}</td>
-                <td *ngIf="showColumn('lastmodified')">{{item.LastModified}}</td>
-                <td *ngIf="showColumn('created')">{{item.Created}}</td>
-                <td *ngIf="showColumn('haschildren')">{{item.HasChildren}}</td>
-              </tr>
-            </tbody>
-          </table>
+          <sc-app-commander-view #rightview [side]=right [commanderSettings]="commanderSettings" (onError) = "handleError($event)"></sc-app-commander-view>        
           <sc-progress-indicator-panel [show]="rightLoading">
           </sc-progress-indicator-panel>
         </div>

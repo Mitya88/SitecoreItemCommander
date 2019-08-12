@@ -15,6 +15,7 @@ export class CommanderSettings {
     leftData: ItemCommanderResponse;
     rightData: ItemCommanderResponse;
     targetPath:string;
+    fastViewEnabled: boolean;
 
     constructor() {
         this.options = [

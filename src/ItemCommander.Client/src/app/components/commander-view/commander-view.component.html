@@ -1,0 +1,53 @@
+<table *ngIf="!isLoading" scTable [ngClass]="getTableClass(side)" (click)="tableSelect(side)">
+  <thead>
+    <tr>
+      <th *ngFor="let item of getSelectedOptions()">{{item.name}}</th>
+    </tr>
+  </thead>
+  <tbody *ngIf="side=='left'">
+    <tr (dblclick)="loadParent(side)">
+      <td>...</td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr *ngFor="let item of commanderSettings.leftData.Children | filterchildren: hiddenItems"
+      [ngClass]="getClass(item)" (click)="singleSelect(item)" (dblclick)="doubleClick(item)"
+      (contextmenu)="onRightClick(item)" (mouseup)="mouseUp($event, item)" (mouseover)="mouseDown($event, item)"
+      (mousedown)="mouseDownSetup($event, item)">
+      <td><img src="{{item.Icon}}" width="10" height="10" />
+        &nbsp;{{item.Name}}
+        <sc-icon icon="lock" style="color:red" size="small" *ngIf="item.IsLocked"></sc-icon>
+      </td>
+      <td *ngIf="showColumn('sitecorepath')">{{item.Path}}</td>
+      <td *ngIf="showColumn('templatename')">{{item.TemplateName}}</td>
+      <td *ngIf="showColumn('lastmodified')">{{item.LastModified}}</td>
+      <td *ngIf="showColumn('created')">{{item.Created}}</td>
+      <td *ngIf="showColumn('haschildren')">{{item.HasChildren}}</td>
+    </tr>
+  </tbody>
+  <tbody *ngIf="side=='right'">
+    <tr (dblclick)="loadParent(side)">
+      <td>...</td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr *ngFor="let item of commanderSettings.rightData.Children | filterchildren: hiddenItems"
+      [ngClass]="getClass(item)" (click)="singleSelect(item)" (dblclick)="doubleClick(item)"
+      (contextmenu)="onRightClick(item)" (mouseup)="mouseUp($event, item)" (mouseover)="mouseDown($event, item)"
+      (mousedown)="mouseDownSetup($event, item)">
+      <td><img src="{{item.Icon}}" width="10" height="10" />
+        &nbsp;{{item.Name}}
+        <sc-icon icon="lock" style="color:red" size="small" *ngIf="item.IsLocked"></sc-icon>
+      </td>
+      <td *ngIf="showColumn('sitecorepath')">{{item.Path}}</td>
+      <td *ngIf="showColumn('templatename')">{{item.TemplateName}}</td>
+      <td *ngIf="showColumn('lastmodified')">{{item.LastModified}}</td>
+      <td *ngIf="showColumn('created')">{{item.Created}}</td>
+      <td *ngIf="showColumn('haschildren')">{{item.HasChildren}}</td>
+    </tr>
+  </tbody>
+</table>
+<sc-progress-indicator-panel [show]="isLoading">
+</sc-progress-indicator-panel>

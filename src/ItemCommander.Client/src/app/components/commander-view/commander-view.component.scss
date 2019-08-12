@@ -1,0 +1,64 @@
+.selectedItem{
+    font-weight: 700;
+    color:red;
+}
+
+.extra-padding{
+    padding:5px;
+}
+
+.scrolled-table{
+    height: 200px;
+    overflow: auto;
+}
+
+
+tbody{
+    tr{
+        td{
+        padding:0;
+        margin:0;
+        height:1.5rem;
+        }
+    }
+}
+
+.table-selected{
+    opacity:1;
+}
+
+.table-not-selected{
+    opacity:0.5;
+}
+
+[type="checkbox"]
+{
+    vertical-align:middle;
+}
+
+.hidden_fastview{
+    display:none;
+}
+
+.bookmark-row{
+    display:flex;
+}
+
+.bookmark-empty{
+    padding-top:5px;
+}
+
+.bookmarked{
+    color:burlywood;
+    padding-top:5px;
+}
+
+.custom-action-bar{
+    height: auto !important;
+}
+
+.nav-item{
+    margin-left:8px;
+    margin-top:5px;
+    margin-bottom: 5px;
+}
