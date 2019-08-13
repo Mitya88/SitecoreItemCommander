@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { ItemCommanderService } from '../../item-commander.service';
-import { GetItemRequest } from '../../contract/copyRequest';
+import { GetItemRequest } from '../../contract/getItemRequest';
 
 @Component({
   selector: 'app-multilist',

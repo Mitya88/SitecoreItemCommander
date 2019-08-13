@@ -1,6 +1,6 @@
-<sc-page [showNav]="isNavigationShown">
+<sc-page >
   <div scPageHeader>
-    <sc-global-header appName="Item Commander v1.0" [(show)]="isNavigationShown">
+    <sc-global-header appName="Item Commander v0.8">
       <a href="/sitecore/shell/sitecore/client/Applications/Launchpad" scGlobalLogo></a>
       <sc-account-information (logout)="logoutService.logout()"></sc-account-information>
     </sc-global-header>
@@ -9,73 +9,74 @@
     <sc-application-header text="Item Commander"></sc-application-header>
   </div>
   <div scPageActionBar>
-    <sc-action-bar>
+    <sc-action-bar class="custom-action-bar">
       <sc-action-bar-left>
-         
-        <sc-dropdown class="bookmarkTools" >
-          <button scDropdownToggle scIconButton (click)="loadEditorOptions()">
-            <sc-icon icon="edit"></sc-icon>
-            Edit
-          </button>
-          <sc-dropdown-menu class="dropdownMenu" *ngIf="editorOptions && selectedItem">
+        <div class="row">
+          <sc-dropdown class="nav-item">
+            <button scDropdownToggle scIconButton (click)="loadEditorOptions()">
+              <sc-icon icon="edit"></sc-icon>
+              Edit
+            </button>
+            <sc-dropdown-menu class="dropdownMenu" *ngIf="editorOptions && commanderSettings.selectedItem">
               <sc-dropdown-header>Content Editor</sc-dropdown-header>
-              <a *ngFor="let lang of editorOptions.Languages" scDropdownItem
-              href="/sitecore/shell/Applications/Content%20Editor.aspx?fo={{selectedItem.Id}}&la={{lang}}&sc_lang=en">{{lang}}</a>
+              <a *ngFor="let lang of editorOptions.Languages" scDropdownItem target="_blank"
+                href="/sitecore/shell/Applications/Content%20Editor.aspx?fo={{commanderSettings.selectedItem.Id}}&la={{lang}}&sc_lang=en">{{lang}}</a>
 
-            <div *ngIf="editorOptions.HasPresentation">
-              <sc-dropdown-divider></sc-dropdown-divider>
-              <sc-dropdown-header>Exp Editor</sc-dropdown-header>
-              <a *ngFor="let lang of editorOptions.Languages" scDropdownItem
-                href="/?sc_mode=edit&sc_itemid={{selectedItem.Id}}&sc_lang={{lang}}">{{lang}}</a>
-            </div>
-          </sc-dropdown-menu>
-        </sc-dropdown>
-        <button scIconButton [(scToggle)]="fastViewEnabled" (click)="fastViewSearch()">
+              <div *ngIf="editorOptions.HasPresentation">
+                <sc-dropdown-divider></sc-dropdown-divider>
+                <sc-dropdown-header>Exp Editor</sc-dropdown-header>
+                <a *ngFor="let lang of editorOptions.Languages" scDropdownItem target="_blank"
+                  href="/?sc_mode=edit&sc_itemid={{commanderSettings.selectedItem.Id}}&sc_lang={{lang}}">{{lang}}</a>
+              </div>
+            </sc-dropdown-menu>
+          </sc-dropdown>
+          <button class="nav-item" scIconButton [(scToggle)]="commanderSettings.fastViewEnabled" (click)="fastViewSearch()">
             <sc-icon icon="eye"></sc-icon>
             View
-        </button>
-        <button scIconButton (click)="openInputDialog('rename')">
+          </button>
+          <button class="nav-item" scIconButton (click)="openInputDialog('rename')">
             <sc-icon icon="ballpen"></sc-icon>
             Rename
           </button>
-        <button scIconButton (click)="openConfirmDialog('copy')">
-          <sc-icon icon="copy"></sc-icon>
-          Copy
-        </button>
-        <button scIconButton (click)="openConfirmDialog('move')">
-          <sc-icon icon="arrow_cross"></sc-icon>
-          Move
-        </button>
-        <button scIconButton (click)="downloadAsPackage()">
-          <sc-icon icon="arrow_down"></sc-icon>
-          Download as Package
-        </button>
-        <button scIconButton (click)="openConfirmDialog('delete')">
-          <sc-icon icon="delete"></sc-icon>
-          Delete
-        </button>
-        <button scIconButton (click)="openInsertOptions()">
-          <sc-icon icon="add"></sc-icon>
-          Create Item
-        </button>
-        <button scIconButton (click)="openInputDialog('search')">
-          <sc-icon icon="magnifying_glass"></sc-icon>
-          Search
-        </button>
-        <button scIconButton (click)="selectAll()">
-          <sc-icon icon="arrow_circle2"></sc-icon>
-          {{selectText}} all in active tab
-        </button>
-        <sc-dropdown> <button scButton scDropdownToggle>
-            <sc-icon icon="lock"></sc-icon>
-            Lock/UnLock<sc-icon icon="lock_open"></sc-icon>
+          <button class="nav-item" scIconButton (click)="openConfirmDialog('copy')">
+            <sc-icon icon="copy"></sc-icon>
+            Copy
           </button>
-          <sc-dropdown-menu class="dropdownMenu">
-            <sc-dropdown-header>Lock/Unlock</sc-dropdown-header>
-            <a scDropdownItem (click)="openConfirmDialog('lock')">Lock</a>
-            <a scDropdownItem (click)="openConfirmDialog('unlock')">Unlock</a>
-          </sc-dropdown-menu>
-        </sc-dropdown>
+          <button class="nav-item" scIconButton (click)="openConfirmDialog('move')">
+            <sc-icon icon="arrow_cross"></sc-icon>
+            Move
+          </button>
+          <button class="nav-item" scIconButton (click)="downloadAsPackage()">
+            <sc-icon icon="arrow_down"></sc-icon>
+            Download as Package
+          </button>
+          <button class="nav-item" scIconButton (click)="openConfirmDialog('delete')">
+            <sc-icon icon="delete"></sc-icon>
+            Delete
+          </button>
+          <button class="nav-item" scIconButton (click)="openInsertOptions()">
+            <sc-icon icon="add"></sc-icon>
+            Create Item
+          </button>
+          <button class="nav-item" scIconButton (click)="openInputDialog('search')">
+            <sc-icon icon="magnifying_glass"></sc-icon>
+            Search
+          </button>
+          <button class="nav-item" scIconButton (click)="selectAll()">
+            <sc-icon icon="arrow_circle2"></sc-icon>
+            {{selectText}} all in active tab
+          </button>
+          <sc-dropdown class="nav-item"> <button scButton scDropdownToggle>
+              <sc-icon icon="lock"></sc-icon>
+              Lock/UnLock<sc-icon icon="lock_open"></sc-icon>
+            </button>
+            <sc-dropdown-menu class="dropdownMenu">
+              <sc-dropdown-header>Lock/Unlock</sc-dropdown-header>
+              <a scDropdownItem (click)="openConfirmDialog('lock')">Lock</a>
+              <a scDropdownItem (click)="openConfirmDialog('unlock')">Unlock</a>
+            </sc-dropdown-menu>
+          </sc-dropdown>
+        </div>
       </sc-action-bar-left>
       <sc-action-bar-right>
 
@@ -88,102 +89,47 @@
   <article scPageContent class="p-4">
     <div class="card mb-3 extra-padding">
       <div class="row">
-        <div class="col-6"><div class="bookmark-row">
+        <div class="col-6">
+          <div class="bookmark-row">
             <sc-dropdown class="bookmarkTools">
-                <button scDropdownToggle scIconButton>
-                 
-                </button>
-                <sc-dropdown-menu>              
-                    <a *ngFor="let item of bookmarks" scDropdownItem (click)="loadBookmark('left',item)">{{item.Path}}</a>
-                </sc-dropdown-menu>
-              </sc-dropdown>
-            <sc-icon  class="bookmarked" icon="star" *ngIf="checkBookmark(leftData)" (click)="unbookmark(leftData)" ></sc-icon>
-            <sc-icon  class="bookmark-empty" icon="star2" *ngIf="!checkBookmark(leftData)" (click)="bookmark(leftData)"></sc-icon>&nbsp;
-          
-          <input type="text" class="form-control" [ngModel]="leftPath" disabled /> </div>
-          <table *ngIf="!leftLoading" scTable [ngClass]="getTableClass('left')" (click)="tableSelect('left')">
-            <thead>
-              <tr>
-                  <th *ngFor="let item of getSelectedOptions()">{{item.name}}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr (dblclick)="loadParent('left')">
-                <td >...</td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-              <tr *ngFor="let item of leftData.Children | filterchildren: hiddenItems" 
-              [ngClass]="getClass(item)" 
-              (click)="singleSelect(item)"
-                (dblclick)="leftDoubleClick(item)" 
-                (contextmenu)="onRightClick(item)"
-                (mouseup)="mouseUp($event, item)"
-                (mouseover)="mouseDown($event, item)"
-                (mousedown)="mouseDownSetup($event, item)">
-                <td><img src="{{item.Icon}}" width="10" height="10" />
-                  &nbsp;{{item.Name}}
-                  <sc-icon icon="lock" style="color:red" size="small" *ngIf="item.IsLocked"></sc-icon>
-                </td>
-                <td *ngIf="showColumn('sitecorepath')">{{item.Path}}</td>
-                <td *ngIf="showColumn('templatename')">{{item.TemplateName}}</td>
-                <td *ngIf="showColumn('lastmodified')">{{item.LastModified}}</td>
-                <td *ngIf="showColumn('created')">{{item.Created}}</td>
-                <td *ngIf="showColumn('haschildren')">{{item.HasChildren}}</td>
-              </tr>
-            </tbody>
-          </table>
-          <sc-progress-indicator-panel [show]="leftLoading">
-          </sc-progress-indicator-panel>
+              <button scDropdownToggle scIconButton>
+
+              </button>
+              <sc-dropdown-menu>
+                <a *ngFor="let item of commanderSettings.bookmarks" scDropdownItem
+                  (click)="loadBookmark('left',item)">{{item.Path}}</a>
+              </sc-dropdown-menu>
+            </sc-dropdown>
+            <sc-icon class="bookmarked" icon="star" *ngIf="checkBookmark(commanderSettings.leftData)" (click)="unbookmark(commanderSettings.leftData)">
+            </sc-icon>&nbsp;
+            <sc-icon class="bookmark-empty" icon="star2" *ngIf="!checkBookmark(commanderSettings.leftData)" (click)="bookmark(commanderSettings.leftData)">
+            </sc-icon>&nbsp;
+
+            <input type="text" class="form-control" [ngModel]="commanderSettings.leftPath" disabled />
+          </div>
+          <sc-app-commander-view #leftview [side]=left [commanderSettings]="commanderSettings" ></sc-app-commander-view>         
         </div>
         <div class="col-6">
-            <sc-fast-view-page [ngClass]="{'hidden_fastview':!fastViewEnabled}" [selectedDatabase] = selectedDatabase></sc-fast-view-page>
-        <div class="bookmark-row" *ngIf="!fastViewEnabled">
+          <sc-fast-view-page [ngClass]="{'hidden_fastview':!commanderSettings.fastViewEnabled}"
+            [selectedDatabase]=commanderSettings.selectedDatabase></sc-fast-view-page>
+          <div class="bookmark-row" *ngIf="!commanderSettings.fastViewEnabled">
             <sc-dropdown class="bookmarkTools">
-                <button scDropdownToggle scIconButton>
-                 
-                </button>
-                <sc-dropdown-menu>              
-                    <a *ngFor="let item of bookmarks" scDropdownItem (click)="loadBookmark('right',item)">{{item.Path}}</a>
-                </sc-dropdown-menu>
-              </sc-dropdown>
-            <sc-icon  class="bookmarked" icon="star" *ngIf="checkBookmark(rightData)" (click)="unbookmark(rightData)" ></sc-icon>
-            <sc-icon  class="bookmark-empty" icon="star2" *ngIf="!checkBookmark(rightData)" (click)="bookmark(rightData)"></sc-icon>&nbsp;
-          
-            <input type="text" class="form-control" [ngModel]="rightPath" disabled />
-          </div>  
-          <table scTable *ngIf="!rightLoading && !fastViewEnabled" [ngClass]="getTableClass('right')" (click)="tableSelect('right')">
-            <thead>
-              <tr>
-                <th *ngFor="let item of getSelectedOptions()">{{item.name}}</th>               
-              </tr>
-            </thead>
-            <tbody>
-              <tr (dblclick)="loadParent('right')" >
-                <td>...</td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-              <tr *ngFor="let item of rightData.Children | filterchildren: hiddenItems" [ngClass]="getClass(item)" (click)="singleSelect(item)"
-                (contextmenu)="onRightClick(item)" 
-                (dblclick)="rightDoubleClick(item)"
-                (mouseup)="mouseUp($event, item)"
-                (mouseover)="mouseDown($event, item)"
-                (mousedown)="mouseDownSetup($event, item)">
-                <td><img src="{{item.Icon}}" width="10" height="10" />
-                  &nbsp;{{item.Name}}
-                  <sc-icon icon="lock" style="color:red" size="small" *ngIf="item.IsLocked"></sc-icon>
-                </td>
-                <td *ngIf="showColumn('sitecorepath')">{{item.Path}}</td>
-                <td *ngIf="showColumn('templatename')">{{item.TemplateName}}</td>
-                <td *ngIf="showColumn('lastmodified')">{{item.LastModified}}</td>
-                <td *ngIf="showColumn('created')">{{item.Created}}</td>
-                <td *ngIf="showColumn('haschildren')">{{item.HasChildren}}</td>
-              </tr>
-            </tbody>
-          </table>
+              <button scDropdownToggle scIconButton>
+
+              </button>
+              <sc-dropdown-menu>
+                <a *ngFor="let item of commanderSettings.bookmarks" scDropdownItem
+                  (click)="loadBookmark('right',item)">{{item.Path}}</a>
+              </sc-dropdown-menu>
+            </sc-dropdown>
+            <sc-icon class="bookmarked" icon="star" *ngIf="checkBookmark(commanderSettings.rightData)" (click)="unbookmark(commanderSettings.rightData)">
+            </sc-icon>&nbsp;
+            <sc-icon class="bookmark-empty" icon="star2" *ngIf="!checkBookmark(commanderSettings.rightData)"
+              (click)="bookmark(commanderSettings.rightData)"></sc-icon>&nbsp;
+
+            <input type="text" class="form-control" [ngModel]="commanderSettings.rightPath" disabled />
+          </div>
+          <sc-app-commander-view #rightview [side]=right [commanderSettings]="commanderSettings" (onError) = "handleError($event)"></sc-app-commander-view>        
           <sc-progress-indicator-panel [show]="rightLoading">
           </sc-progress-indicator-panel>
         </div>
@@ -193,31 +139,28 @@
   <aside scPageContext [show]="isSearching" class="bg-basic-white">
     <div class="p-3">
       <h4>Database</h4>
-      <select id="database" [(ngModel)]="selectedDatabase" class="form-control" (change)="changeDatabase()">
-        <option *ngFor="let c of databases" [value]="c">{{ c }}</option>
+      <select id="database" [(ngModel)]="commanderSettings.selectedDatabase" class="form-control"
+        (change)="changeDatabase()">
+        <option *ngFor="let c of commanderSettings.databases" [value]="c">{{ c }}</option>
       </select>
     </div>
 
     <div class="p-3">
-        <label>Show columns:</label>
-        <div *ngFor="let option of options" >
-            <label >
-                <input (change)="storeOptions()" type="checkbox"
-                       name="options"
-                       value="{{option.value}}"
-                       [(ngModel)]="option.checked"/>
-                {{option.name}}
-            </label>
-        </div>
+      <label>Show columns:</label>
+      <div *ngFor="let option of commanderSettings.options">
+        <label>
+          <input (change)="storeOptions()" type="checkbox" name="options" value="{{option.value}}"
+            [(ngModel)]="option.checked" />
+          {{option.name}}
+        </label>
+      </div>
     </div>
 
     <div class="p-3">
       <label>Show hidden items:
-      <input  type="checkbox"
-                     name="hiddenItems"
-                     [(ngModel)]="hiddenItems"
-                     (change)="showHiddenItems()"/></label>
-  </div>
+        <input type="checkbox" name="hiddenItems" [(ngModel)]="commanderSettings.hiddenItems"
+          (change)="showHiddenItems()" /></label>
+    </div>
   </aside>
 </sc-page>
 
@@ -225,11 +168,11 @@
 <template #confirmDialog>
   <sc-dialog>
     <sc-dialog-header>
-      <h4>{{parent.confirmTitle}}</h4>
+      <h4>{{parent.popupSettings.confirmTitle}}</h4>
     </sc-dialog-header>
     <sc-dialog-body>
       <h2>Are you sure?</h2>
-      <p>{{parent.confirmText}}</p>
+      <p>{{parent.popupSettings.confirmText}}</p>
     </sc-dialog-body>
     <sc-dialog-footer>
       <button scButton scDialogClose>Cancel</button>
@@ -241,11 +184,12 @@
 <template #simpleInput>
   <sc-dialog>
     <sc-dialog-header>
-      <h4>{{parent.singleInputTitle}}</h4>
+      <h4>{{parent.popupSettings.singleInputTitle}}</h4>
     </sc-dialog-header>
     <sc-dialog-body>
-      <h2>{{parent.singleInputText}}</h2>
-      <input type="text" class="form-control" [(ngModel)]="parent.inputDialogValue"  />
+      <p [innerHtml]="parent.popupSettings.singleInputDescription"></p>
+      <h4>{{parent.popupSettings.singleInputText}}</h4>
+      <input type="text" class="form-control" [(ngModel)]="parent.popupSettings.inputDialogValue" />
 
     </sc-dialog-body>
     <sc-dialog-footer>
@@ -266,8 +210,8 @@
           <sc-icon icon="about" size="xxxlarge"></sc-icon>
         </div>
         <div class="col-10" style="padding-top:30px;">
-          <h2>{{parent.warningTitle}}</h2>
-          <p>{{parent.warningText}}</p>
+          <h2>{{parent.popupSettings.warningTitle}}</h2>
+          <p>{{parent.popupSettings.warningText}}</p>
         </div>
       </div>
 
@@ -280,33 +224,37 @@
 </template>
 
 <template #insertOptions>
-    <sc-dialog>
-      <sc-dialog-header>
-        <h4>New item</h4>
-      </sc-dialog-header>
-      <sc-dialog-body>
-        <div class="row">
-          <div class="col-6">
-              <h4>Template</h4>
-              <select id="insertOptions" [(ngModel)]="parent.selectedInsertOptions" class="form-control" >
-                  <option *ngFor="let c of parent.insertOptions" [value]="c.Id" style="background-image:url({{c.Icon}});">{{ c.Name }}</option>
-                </select>
+  <sc-dialog>
+    <sc-dialog-header>
+      <h4>Insert from template</h4>
+    </sc-dialog-header>
+    <sc-dialog-body>
+      <div class="row">
+          <div class="col-12">
+        <p>Select a template you want to use. In the Item Name field, enter a name for the new item.</p>
           </div>
-          <div class="col-6" >
-              <h4>Item name</h4>
-              <input type="text" class="form-control" [(ngModel)]="parent.inputDialogValue"  />
-          </div>
+        <div class="col-6">
+          <h4>Template</h4>          
+          <select id="insertOptions" [(ngModel)]="parent.selectedInsertOptions" class="form-control">
+            <option *ngFor="let c of parent.commanderSettings.insertOptions" [value]="c.Id"
+              style="background-image:url({{c.Icon}});">{{ c.Name }}</option>
+          </select>
         </div>
-        <!-- <select ng-model="choice" *ngIf="insertOptions">
+        <div class="col-6">
+          <h4>Item name</h4>
+          <input type="text" class="form-control" [(ngModel)]="parent.inputDialogValue" />
+        </div>
+      </div>
+      <!-- <select ng-model="choice" *ngIf="insertOptions">
             <option ng-repeat="item in insertOptions" data-image="{{item.Icon}}">{{item.Name}}</option>
         </select> -->
 
-        
-          
-      </sc-dialog-body>
-      <sc-dialog-footer>
-        <button scButton scDialogClose>Close</button>
-        <button scButton="primary" (click)="parent.createItem()">Create</button>
-      </sc-dialog-footer>
-    </sc-dialog>
-  </template>
+
+
+    </sc-dialog-body>
+    <sc-dialog-footer>
+      <button scButton scDialogClose>Close</button>
+      <button scButton="primary" (click)="parent.createItem()">Create</button>
+    </sc-dialog-footer>
+  </sc-dialog>
+</template>

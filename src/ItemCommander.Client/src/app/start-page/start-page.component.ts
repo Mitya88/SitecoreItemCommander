@@ -1,13 +1,26 @@
-import { Component, OnInit, TemplateRef, ViewChild, Inject } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ItemCommanderService } from '../item-commander.service';
 import { Item } from '../contract/Item';
-import { CopyRequest, CopySingle, DeleteRequest, FolderRequest, PackageRequest, DownloadResponse, LockRequest, RenameRequest } from '../contract/copyRequest';
+import { CopyRequest } from '../contract/copyRequest';
 import { ItemCommanderResponse } from '../contract/ItemCommanderResponse';
 import { SciLogoutService } from '@speak/ng-sc/logout';
 import { ScDialogService } from '@speak/ng-bcl/dialog';
-import { LOCAL_STORAGE, WebStorageService } from 'angular-webstorage-service'
 import { Router } from '@angular/router';
 import { FastViewService } from '../fast-view/fastview.service';
+import { Constants } from '../constants';
+import { ItemService } from '../services/item.service';
+import { CommanderSettings } from '../model/CommanderSettings';
+import { BookmarkService } from '../services/bookmark.service';
+import { PopupSettings } from '../model/PopupSettings';
+import { PopupService } from '../services/popup.service';
+import { CommanderViewComponent } from '../components/commander-view/commander-view.component';
+import { RenameRequest } from '../contract/renameRequest';
+import { PackageRequest } from '../contract/packageRequest';
+import { DownloadResponse } from '../contract/downloadResponse';
+import { CopySingle } from '../contract/copysingle';
+import { DeleteRequest } from '../contract/deleteRequest';
+import { LockRequest } from '../contract/lockRequest';
+import { FolderRequest } from '../contract/folderRequest';
 
 @Component({
   selector: 'app-start-page',
@@ -29,285 +42,187 @@ export class StartPageComponent implements OnInit {
   @ViewChild('insertOptions')
   private insertOptionRef: TemplateRef<any>
 
-  confirmText: string = '';
-  confirmTitle: string = '';
-  singleInputTitle: string = '';
-  singleInputText: string = '';
-  confirmAction: string;
-  inputAction: string;
-  warningText: string;
-  warningTitle:string;
+  @ViewChild('leftview')
+  private leftView: CommanderViewComponent;
 
-  isNavigationShown: boolean;
-  databases: string[] = ['master', 'core', 'web'];
-  selectedDatabase: string = 'master';
-  bookmarks:any[];
+  @ViewChild('rightview')
+  private rightView: CommanderViewComponent;
 
   constructor(
-    @Inject(LOCAL_STORAGE) private storage: WebStorageService,
-    private itemCommanderService: ItemCommanderService,
+    private itemCommanderApiService: ItemCommanderService,
     public logoutService: SciLogoutService,
     public dialogService: ScDialogService,
     private router: Router,
-    private fastviewService: FastViewService
+    private fastviewService: FastViewService,
+    private itemService: ItemService,
+    private bookmarkService: BookmarkService,
+    private popupService: PopupService
   ) { }
 
-  leftIdBeforeSearch:string;
-  leftData: ItemCommanderResponse;
-  rightData: ItemCommanderResponse;
-
-  isSearching:boolean;
-
+  leftIdBeforeSearch: string;
+  isSearching: boolean;
   leftLoading: boolean;
   rightLoading: boolean;
-  leftPath: string;
-  rightPath: string;
+  left = 'left';
+  right = 'right';
 
-  selectedTable: string;
-  inputDialogValue: string;
-  selectedItem: any;
-  targetPath: any;
   parent: any;
-  hiddenItems:any;
-  insertOptions:Array<Item>;
+
+  commanderSettings: CommanderSettings;
+  popupSettings: PopupSettings;
+
+  selectText = Constants.SelectText;
+  copyRequest: CopyRequest;
+  downSelector: boolean;
+  selectedInsertOptions: any;
+  editorOptions: any;
 
   ngOnInit() {
-    this.hiddenItems = this.storage.get('hiddenitems');
-    this.selectedDatabase = this.storage.get('database');
-    this.bookmarks = this.storage.get('bookmarks');
-
-    if(!this.bookmarks){
-      this.bookmarks = [];
-    }
-
-    let storedOptions = this.storage.get('options');
-    if(storedOptions){
-      this.options = storedOptions;
-    }
-
-    if (!this.selectedDatabase) {
-      this.selectedDatabase = 'master';
-    }
-
-    this.selectedTable = "left";
-    this.load();
+    this.commanderSettings = this.itemService.getCommanderSettings();
+    this.popupSettings = new PopupSettings();
     this.parent = this;
   }
 
-  storeOptions(){
-    this.storage.set('options', this.options);
-  }
-
-  showHiddenItems(){
-    this.storage.set('hiddenitems',this.hiddenItems);
-  }
-  
   getTableClass(table: string) {
-    return this.selectedTable == table ? "table-selected" : "table-not-selected";
+    return this.commanderSettings.selectedTable == table ? "table-selected" : "table-not-selected";
   }
 
   changeDatabase() {
-    this.storage.set('database', this.selectedDatabase);
+    this.itemService.saveCommanderSettings(this.commanderSettings);
     this.load();
   }
 
   tableSelect(table: string) {
-    this.selectedTable = table;    
+    this.commanderSettings.selectedTable = table;
   }
 
   load() {
-    this.leftPath = '/sitecore';
-    this.rightPath = '/sitecore/content';
-
-    this.loadLeftItems('11111111-1111-1111-1111-111111111111');
-    this.loadRightItems('11111111-1111-1111-1111-111111111111');
+    this.leftView.load();
+    this.rightView.load();
   }
 
-  fastViewSearch(){
-    
-    if (this.getSelectedItems().length > 0){
-      if(this.fastViewEnabled){    
-        var id = this.getSelectedItems()[0].Id        
-        this.fastviewService.search.emit(id);
-        return;
-        }
-     
+  fastViewSearch() {
+    let data = this.itemService.getSelectedItems(this.commanderSettings);
+    if (data.length > 0 && this.commanderSettings.fastViewEnabled) {
+      this.fastviewService.search.emit(data[0].Id);
+      return;
     }
   }
 
   singleSelect(item: Item) {
     if (item.IsSelected) {
       item.IsSelected = false;
-      this.selectedItem = null;
+      this.commanderSettings.selectedItem = undefined;
       return;
     }
 
-    if(this.fastViewEnabled){      
-    this.fastviewService.search.emit(item.Id);
-    return;
+    if (this.commanderSettings.fastViewEnabled) {
+      this.fastviewService.search.emit(item.Id);
+      return;
     }
 
-    if (this.selectedTable == "left") {
-      this.leftData.Children.forEach(function (it) { it.IsSelected = false; });
+    if (this.commanderSettings.selectedTable == "left") {
+      this.commanderSettings.leftData.Children.forEach(function (it) { it.IsSelected = false; });
     }
     else {
-      this.rightData.Children.forEach(function (it) { it.IsSelected = false; });
+      this.commanderSettings.rightData.Children.forEach(function (it) { it.IsSelected = false; });
     }
 
     item.IsSelected = true;
-    this.selectedItem = item;
+    this.commanderSettings.selectedItem = item;
   }
 
-  selectText = 'Select';
   selectAll() {
-
-    let selectValue = false;
-    if(this.selectText == 'Select'){
-      selectValue = true;
-      this.selectText = "Deselect"
-    }
-    else{
-      this.selectText = 'Select';
-      selectValue = false;
-      this.selectedItem = null;
-    }
-
-    if (this.selectedTable == "left") {
-      this.leftData.Children.forEach(function (it) { it.IsSelected = selectValue; });
-      if(selectValue){
-        this.selectedItem = this.leftData.Children[0];
-      }
-    }
-    else {
-      this.rightData.Children.forEach(function (it) { it.IsSelected = selectValue; });
-      if(selectValue){
-        this.selectedItem = this.rightData.Children[0];
-      }
-    }
+    this.selectText = this.itemService.selectAll(this.selectText, this.commanderSettings);
   }
 
   openInputDialog(dialogAction: string) {
-    this.dialogService.open(this.simpleInputRef);
-    this.inputAction = dialogAction;
-
-    if (dialogAction == 'singleCopy') {
-      this.singleInputTitle = 'Copy';
-      this.singleInputText = 'New item\'s name';
-    } 
-     else if (dialogAction == 'search') {
-      this.singleInputTitle = 'Search';
-      this.singleInputText = 'Enter a keyword...';
-    }
-    else if(dialogAction=='rename'){
-      this.singleInputTitle = 'Rename';
-      this.singleInputText = 'Available patterns {C}, {oldName}, {yyyy}, {MM}';
-    }
+    this.popupService.openInputDialog(dialogAction, this.simpleInputRef, this.popupSettings);
   }
 
   openConfirmDialog(dialogAction: string) {
-    if (this.hasSelectedItem()) {
-      this.warningText = 'There is no selected item';
-      this.warningTitle = 'Invalid selected item';
-      this.dialogService.open(this.warningRef);
-      return;
-    }
-     this.getSelectedItems();
-    if (dialogAction == 'move' && (this.selectedItem.Path == this.targetPath || this.targetPath.startsWith(this.selectedItem.Path))) {
-      this.warningText = 'You cannot move item into itself';
-      this.warningTitle = 'Move error';
-      this.dialogService.open(this.warningRef);
+    if (this.popupService.checkAndOpenWarning(this.warningRef, this.popupSettings, this.commanderSettings)) {
       return;
     }
 
+    this.itemService.getSelectedItems(this.commanderSettings);
+    if (!this.commanderSettings.selectedItem) {
+      return;
+    }
+    if (dialogAction == 'move' && (this.commanderSettings.selectedItem.Path == this.commanderSettings.targetPath || this.commanderSettings.targetPath.startsWith(this.commanderSettings.selectedItem.Path))) {
+      this.popupSettings.warningText = Constants.ItemMovingError;
+      this.popupSettings.warningTitle = Constants.ItemMovingErrorTitle;
+      this.dialogService.open(this.warningRef);
+      return;
+    }
 
     this.dialogService.open(this.confirmDialog);
-    this.confirmAction = dialogAction;
+    this.popupSettings.confirmAction = dialogAction;
 
-    if (this.confirmAction == 'copy') {
+    if (this.popupSettings.confirmAction == 'copy') {
       this.copy();
-    } else if (this.confirmAction == 'move') {
-      this.parent.confirmTitle = 'Move';
-      this.parent.confirmText = 'Are you sure to move?'
-    } else if (this.confirmAction == 'delete') {
-      this.parent.confirmTitle = 'Delete';
-      this.parent.confirmText = 'Are you sure to delete?';
+    } else if (this.popupSettings.confirmAction == 'move') {
+      this.parent.popupSettings.confirmTitle = Constants.ItemMovingConfirmationTitle;
+      this.parent.popupSettings.confirmText = Constants.ItemMovingConfirmationText;
+    } else if (this.popupSettings.confirmAction == 'delete') {
+      this.parent.popupSettings.confirmTitle = Constants.ItemDeletingConfirmationTitle;
+      this.parent.popupSettings.confirmText = Constants.ItemDeletingConfirmationText;
 
-      var hasChildren = this.getSelectedItems().filter(function(t){return t.HasChildren}).length > 0;
+      var hasChildren = this.itemService.getSelectedItems(this.commanderSettings).filter(function (t) { return t.HasChildren }).length > 0;
 
-      if(hasChildren){
-        this.parent.confirmText+= ' (Child items will aslo be deleted)';
+      if (hasChildren) {
+        this.parent.popupSettings.confirmText += Constants.ItemDeletingWithChildren;
       }
-    } else if (this.confirmAction == 'lock') {
-      this.parent.confirmTitle = 'Lock';
-      this.parent.confirmText = 'Are you sure to lock?';
-    } else if (this.confirmAction == 'unlock') {
-      this.parent.confirmTitle = 'Unlock';
-      this.parent.confirmText = 'Are you sure to unlock?';
+    } else if (this.popupSettings.confirmAction == 'lock') {
+      this.parent.popupSettings.confirmTitle = Constants.ItemLockConfirmationTitle;
+      this.parent.popupSettings.confirmText = Constants.ItemLockConfirmationText;
+    } else if (this.popupSettings.confirmAction == 'unlock') {
+      this.parent.popupSettings.confirmTitle = Constants.ItemUnlockConfirmationTitle;
+      this.parent.popupSettings.confirmText = Constants.ItemUnlockConfirmationText;
+    } else if (this.popupSettings.confirmAction == 'multipleCopy') {
+      this.parent.popupSettings.confirmTitle = Constants.ItemCopyConfirmationTitle;
+      this.parent.popupSettings.confirmText = Constants.ItemCopyConfirmationText;
     }
-
   }
 
   Action() {
-    if (this.confirmAction == 'copy') {
+    if (this.popupSettings.confirmAction == 'copy') {
       this.copy();
-    } else if (this.confirmAction == 'move') {
+    } else if (this.popupSettings.confirmAction == 'move') {
       this.move();
-    } else if (this.confirmAction == 'delete') {
+    } else if (this.popupSettings.confirmAction == 'delete') {
       this.delete();
-    } else if (this.confirmAction == 'multipleCopy') {
+    } else if (this.popupSettings.confirmAction == 'multipleCopy') {
       this.multipleCopy();
-    } else if (this.confirmAction == 'lock') {
+    } else if (this.popupSettings.confirmAction == 'lock') {
       this.lock(true);
-    }
-    else if (this.confirmAction == 'unlock') {
+    } else if (this.popupSettings.confirmAction == 'unlock') {
       this.lock(false);
     }
   }
 
   singleInputAction() {
-     if (this.inputAction == 'singleCopy') {
+    if (this.popupSettings.inputAction == 'singleCopy') {
       this.singleCopy();
-    } else if (this.inputAction == 'search') {
+    } else if (this.popupSettings.inputAction == 'search') {
       this.search();
     }
-    else if(this.inputAction == 'rename'){
+    else if (this.popupSettings.inputAction == 'rename') {
       this.rename();
     }
   }
-  fastView(){
-
-    if(this.fastViewEnabled){
-      this.fastViewEnabled = false;
-    }
-    else{
-      this.fastViewEnabled = true;
-    }
-  }
-
-  getSelectedItems() {
-    if (this.selectedTable == 'left') {
-      //taget a right
-      this.targetPath = this.rightData.CurrentPath;
-
-      return this.leftData.Children.filter(it => it.IsSelected);
-    }
-    else {
-      this.targetPath = this.leftData.CurrentPath;
-      return this.rightData.Children.filter(it => it.IsSelected);
-    }
-  }  
 
   search() {
-    this.leftLoading = true;    
-    this.leftIdBeforeSearch = this.leftData.CurrentId;
-    this.itemCommanderService.search(this.inputDialogValue, this.selectedDatabase).subscribe({
+    this.leftLoading = true;
+    this.leftIdBeforeSearch = this.commanderSettings.leftData.CurrentId;
+    this.itemCommanderApiService.search(this.popupSettings.inputDialogValue, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
-        this.leftData = response as ItemCommanderResponse;
-        this.leftPath = this.inputDialogValue;
+        this.commanderSettings.leftData = response as ItemCommanderResponse;
+        this.commanderSettings.leftPath = this.popupSettings.inputDialogValue;
         this.leftLoading = false;
         this.dialogService.close();
       },
-      error: response =>{        
+      error: response => {
         this.handleError(response);
       }
     })
@@ -316,17 +231,16 @@ export class StartPageComponent implements OnInit {
   rename() {
 
     let request = new RenameRequest();
-    request.Items = this.getSelectedItems().map(function (it) { return it.Id });
-    
-    request.NameOrPattern=this.inputDialogValue
-    
-    this.itemCommanderService.rename(request, this.selectedDatabase).subscribe({
+    request.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
+    request.NameOrPattern = this.popupSettings.inputDialogValue
+
+    this.itemCommanderApiService.rename(request, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
-        this.loadLeftItems(this.leftData.CurrentId);
-        this.loadRightItems(this.rightData.CurrentId);
+        this.leftView.loadLeftItems(this.commanderSettings.leftData.CurrentId);
+        this.rightView.loadRightItems(this.commanderSettings.rightData.CurrentId);
         this.dialogService.close();
       },
-      error: response =>{        
+      error: response => {
         this.handleError(response);
       }
     })
@@ -334,79 +248,68 @@ export class StartPageComponent implements OnInit {
 
   move() {
     let moveRequest = new CopyRequest();
-    moveRequest.Items = this.getSelectedItems().map(function (it) { return it.Id });
-    moveRequest.TargetPath = this.targetPath;
+    moveRequest.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
+    moveRequest.TargetPath = this.commanderSettings.targetPath;
 
-    this.itemCommanderService.moveItems(moveRequest, this.selectedDatabase).subscribe(
+    this.itemCommanderApiService.moveItems(moveRequest, this.commanderSettings.selectedDatabase).subscribe(
       {
         next: response => {
-          this.loadLeftItems(this.leftData.CurrentId);
-          this.loadRightItems(this.rightData.CurrentId);
+          this.leftView.loadLeftItems(this.commanderSettings.leftData.CurrentId);
+          this.rightView.loadRightItems(this.commanderSettings.rightData.CurrentId);
           this.dialogService.close();
         },
-        error: response =>{        
+        error: response => {
           this.handleError(response);
         }
       }
     );
   }
 
-  hasSelectedItem() {
-    if (this.selectedTable == 'left') {
-      return this.leftData.Children.filter(it => it.IsSelected).map(function (it) { return it.Id }).length == 0;
-    }
-    else {
-      return this.rightData.Children.filter(it => it.IsSelected).map(function (it) { return it.Id }).length == 0;
-    }
-  }
-
   downloadAsPackage() {
-    if (this.hasSelectedItem()) {
-      this.warningText = 'There is no selected item';
-      this.warningTitle = 'Invalid selected item';
-      this.dialogService.open(this.warningRef);
+    if (this.popupService.checkAndOpenWarning(this.warningRef, this.popupSettings, this.commanderSettings)) {
       return;
     }
+
     let moveRequest = new PackageRequest();
 
-    moveRequest.Items = this.getSelectedItems().map(function (it) { return it.Id });
+    moveRequest.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
 
-    this.itemCommanderService.packageItems(moveRequest, this.selectedDatabase).subscribe({
+    this.itemCommanderApiService.packageItems(moveRequest, this.commanderSettings.selectedDatabase).subscribe({
       next: fileName => {
-        let theFile = '/sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/download?fileName=' + (fileName as DownloadResponse).FileName;
+        let theFile = '/sitecore/api/ssc/ItemComander-EntityService-Controllers/Entity/-/download?fileName=' + (fileName as DownloadResponse).FileName;
         window.open(theFile);
       },
-      error: response =>{        
+      error: response => {
         this.handleError(response);
       }
     });
   }
 
-  copyRequest: CopyRequest;
   copy() {
     this.copyRequest = new CopyRequest();
-    this.copyRequest.Items = this.getSelectedItems().map(function (it) { return it.Id });
-    this.copyRequest.TargetPath = this.targetPath;
+    this.copyRequest.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
+    this.copyRequest.TargetPath = this.commanderSettings.targetPath;
     this.dialogService.close();
     if (this.copyRequest.Items.length == 1) {
-      this.inputDialogValue = this.selectedItem.Name;
+      this.popupSettings.inputDialogValue = this.commanderSettings.selectedItem.Name;
       this.openInputDialog('singleCopy');
     }
     else {
-      this.warningTitle = 'Copy';
-      this.warningText = 'Are you sure?';
+      this.popupSettings.warningTitle = Constants.ItemCopyConfirmationTitle
+      this.popupSettings.warningText = Constants.ItemCopyConfirmationText;
       this.openConfirmDialog('multipleCopy');
     }
   }
 
   multipleCopy() {
-    this.itemCommanderService.copyItems(this.copyRequest, this.selectedDatabase).subscribe(
+    this.itemCommanderApiService.copyItems(this.copyRequest, this.commanderSettings.selectedDatabase).subscribe(
       {
         next: response => {
-          this.loadLeftItems(this.leftData.CurrentId);
-          this.loadRightItems(this.rightData.CurrentId);
+          this.leftView.loadLeftItems(this.commanderSettings.leftData.CurrentId);
+          this.rightView.loadRightItems(this.commanderSettings.rightData.CurrentId);
+          this.dialogService.close();
         },
-        error: response =>{        
+        error: response => {
           this.handleError(response);
         }
       }
@@ -418,325 +321,155 @@ export class StartPageComponent implements OnInit {
     contract.Item = this.copyRequest.Items[0];
     contract.TargetPath = this.copyRequest.TargetPath;
     contract.Name = this.parent.inputDialogValue;
-    this.itemCommanderService.copySingleItem(contract, this.selectedDatabase).subscribe({
+    this.itemCommanderApiService.copySingleItem(contract, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
-        this.loadLeftItems(this.leftData.CurrentId);
-        this.loadRightItems(this.rightData.CurrentId);
+        this.leftView.loadLeftItems(this.commanderSettings.leftData.CurrentId);
+        this.rightView.loadRightItems(this.commanderSettings.rightData.CurrentId);
         this.dialogService.close();
       },
-      error: response =>{        
+      error: response => {
         this.handleError(response);
       }
     });
-  }
-
-  getTargetPathForFolder() {
-    if (this.selectedTable == 'left') {
-      //taget a right
-      return this.leftData.CurrentPath;
-    }
-    else {
-      return this.rightData.CurrentPath;
-    }
   }
 
   delete() {
-
     let deleteRequest = new DeleteRequest();
-    deleteRequest.Items = this.getSelectedItems().map(function (it) { return it.Id });
+    deleteRequest.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
 
-    this.itemCommanderService.deleteItems(deleteRequest, this.selectedDatabase).subscribe({
+    this.itemCommanderApiService.deleteItems(deleteRequest, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
-        this.loadLeftItems(this.leftData.CurrentId);
-        this.loadRightItems(this.rightData.CurrentId);
+        this.rightView.loadRightItems(this.commanderSettings.rightData.CurrentId);
+        this.leftView.loadLeftItems(this.commanderSettings.leftData.CurrentId);
         this.dialogService.close();
       },
-      error: response =>{        
+      error: response => {
         this.handleError(response);
       }
     });
   }
-
-  fastViewEnabled = false;
 
   lock(lock: boolean) {
-
     let lockRequest = new LockRequest();
     lockRequest.Lock = lock;
-    lockRequest.Items = this.getSelectedItems().map(function (it) { return it.Id });
+    lockRequest.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
 
-    this.itemCommanderService.lockItems(lockRequest, this.selectedDatabase).subscribe({
+    this.itemCommanderApiService.lockItems(lockRequest, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
-        this.loadLeftItems(this.leftData.CurrentId);
-        this.loadRightItems(this.rightData.CurrentId);
+        this.rightView.loadRightItems(this.commanderSettings.rightData.CurrentId);
+        this.leftView.loadLeftItems(this.commanderSettings.leftData.CurrentId);
         this.dialogService.close();
       },
-      error: response =>{        
+      error: response => {
         this.handleError(response);
       }
     });
   }
 
-  loadLeftItems(id: string) {
-    // Search has no id
-    if (id == '') {
-      return;
-    }
-
-    this.leftLoading = true;
-    this.itemCommanderService.fetchItems(id, this.selectedDatabase).subscribe({
-      next: response => {
-        this.leftData = response as ItemCommanderResponse;
-        this.leftPath = this.leftData.CurrentPath;
-        this.leftLoading = false;
-      },
-      error: response =>{        
-        this.handleError(response);
-      }
-    });
+  openFastView(item: Item) {
+    this.router.navigateByUrl('/fastview?itemid=' + item.Id);
   }
 
-  loadRightItems(id: string) {
-    this.rightLoading = true;
-    this.itemCommanderService.fetchItems(id, this.selectedDatabase).subscribe({
-      next: response => {
-        this.rightData = response as ItemCommanderResponse;
-        this.rightPath = this.rightData.CurrentPath;
-        this.rightLoading = false;
-      },
-      error: response =>{        
-        this.handleError(response);
-      }
-    });
-  }
-
-
-  downSelector:boolean;
-  mouseDown(ev, item: Item) {
-
-    if (ev.buttons == 2) {
-      if (item.IsSelected && !this.downSelector) {
-        item.IsSelected = false;
-      }
-      else if(!item.IsSelected && this.downSelector) {
-        item.IsSelected = true;
-        //Set last selected item
-        this.selectedItem = item;
-      }
-      return false;
-    }
-  }
-
-  mouseUp(ev, item: Item) {
-  
-    if (ev.button == 2) { console.log(item);
-      if (item.IsSelected) {
-        this.selectedItem = item;
-      }
-     
-      return false;
-    }
-  }
-
-  mouseDownSetup(ev, item:Item){
-    if (ev.buttons == 2) {
-   
-      if (item.IsSelected) {
-        item.IsSelected = false;
-        this.downSelector = false;
-      }
-      else {
-        item.IsSelected = true;
-        this.downSelector = true;
-      }
-      return false;
-    }
-  }
-
-  loadParent(side: string) {
-    if (side == "left") {
-      if (this.leftData.ParentId == '{00000000-0000-0000-0000-000000000000}') {
-        return;
-      }
-
-      if (this.leftData.ParentId == null){
-        this.loadLeftItems(this.leftIdBeforeSearch);
-        return;
-      }
-      this.loadLeftItems(this.leftData.ParentId);
+  openInsertOptions() {
+    var id = '';
+    if (this.commanderSettings.selectedTable == 'left') {
+      id = this.commanderSettings.leftData.CurrentId;
     }
     else {
-      if (this.rightData.ParentId == '{00000000-0000-0000-0000-000000000000}') {
-        return;
-      }
-      this.loadRightItems(this.rightData.ParentId);
+      id = this.commanderSettings.rightData.CurrentId;
     }
-  }
-
-  onRightClick(item: Item) {
-    return false;
-    // if (item.IsSelected) {
-    //   item.IsSelected = false;
-    // }
-    // else {
-    //   item.IsSelected = true;
-    //   //Last selected item 
-    //   this.selectedItem = item;
-    // }
-    // return false;
-  }
-
-  leftDoubleClick(item: Item) {
-    this.loadLeftItems(item.Id);
-  }
-
-  rightDoubleClick(item: Item) {
-    this.loadRightItems(item.Id);
-  }
-
-  openFastView(item:Item){
-    this.router.navigateByUrl('/fastview?itemid='+item.Id);
-  }
-
-  getClass(item: Item) {
-    if (item.IsSelected) {
-      return "selectedItem";
-    }
-    return "";
-  }
-
-  options = [
-    { name: 'Name', value: 'name', checked: true },
-    { name: 'SitecorePath', value: 'sitecorepath', checked: false },
-    { name: 'TemplateName', value: 'templatename', checked: true },
-    { name: 'Created', value: 'created', checked: false },
-    { name: 'LastModified', value: 'lastmodified', checked: true },
-    { name: 'HasChildren', value: 'haschildren', checked: true }
-  ]
-
-  selectedOptions() { // right now: ['1','3']
-    return this.options
-      .filter(opt => opt.checked)
-      .map(opt => opt.value)
-  }
-
-  showColumn(columnName: string) {
-    return this.options.filter(opt => opt.value == columnName && opt.checked).length > 0;
-  }
-  getSelectedOptions() {
-    return this.options
-      .filter(opt => opt.checked);
-  }
-
-  selectedInsertOptions:any;
-  openInsertOptions(){
-    var id = '';
-    if(this.selectedTable == 'left'){
-      id=this.leftData.CurrentId;
-    }
-    else{
-      id=this.rightData.CurrentId;
-    }
-    this.itemCommanderService.insertOptions(id, this.selectedDatabase).subscribe({
-      next: response =>{
-        this.insertOptions = response as Array<Item>;
-    this.dialogService.open(this.insertOptionRef);
+    this.itemCommanderApiService.insertOptions(id, this.commanderSettings.selectedDatabase).subscribe({
+      next: response => {
+        this.commanderSettings.insertOptions = response as Array<Item>;
+        this.dialogService.open(this.insertOptionRef);
       },
-      error: response =>{        
+      error: response => {
         this.handleError(response);
       }
     });
   }
 
-  createItem(){
+  createItem() {
     let contract = new FolderRequest();
-    contract.TargetPath = this.getTargetPathForFolder();
-    contract.Name = this.parent.inputDialogValue;
+    contract.TargetPath = this.itemService.getTargetPathForFolder(this.commanderSettings);
+    contract.Name = this.parent.popupSettings.inputDialogValue;
     contract.TemplateId = this.selectedInsertOptions;
-    this.itemCommanderService.addFolder(contract, this.selectedDatabase).subscribe({
+    this.itemCommanderApiService.addFolder(contract, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
-        this.loadLeftItems(this.leftData.CurrentId);
-        this.loadRightItems(this.rightData.CurrentId);
+        this.rightView.loadRightItems(this.commanderSettings.rightData.CurrentId);
+        this.leftView.loadLeftItems(this.commanderSettings.leftData.CurrentId);
         this.dialogService.close();
       },
-      error: response =>{        
+      error: response => {
         this.handleError(response);
       }
     });
   }
 
-  openContentEditor(){
-    let url ='/sitecore/shell/Applications/Content%20Editor.aspx?fo='+this.selectedItem.Id;
+  openContentEditor() {
+    if (!this.commanderSettings.selectedItem) {
+      return;
+    }
+    let url = '/sitecore/shell/Applications/Content%20Editor.aspx?fo=' + this.commanderSettings.selectedItem.Id;
 
     var win = window.open(url, '_blank');
-  win.focus();
+    win.focus();
   }
 
-  handleError(response: any){
-
-    if(response.error && response.error.InnerException){
+  handleError(response: any) {
+    if (response.error && response.error.InnerException) {
       this.dialogService.close();
-      this.warningText = response.error.InnerException.ExceptionMessage;
-      this.warningTitle = response.statusText;
+      this.popupSettings.warningText = response.error.InnerException.ExceptionMessage;
+      this.popupSettings.warningTitle = response.statusText;
       this.dialogService.open(this.warningRef);
       return;
     }
 
-    if(response.error && response.error.ExceptionMessage){
+    if (response.error && response.error.ExceptionMessage) {
       this.dialogService.close();
-      this.warningText = response.error.ExceptionMessage;
-      this.warningTitle = response.statusText;
+      this.popupSettings.warningText = response.error.ExceptionMessage;
+      this.popupSettings.warningTitle = response.statusText;
       this.dialogService.open(this.warningRef);
     }
   }
 
-  checkBookmark(pathData:any){
-    if (this.bookmarks.length == 0 || !pathData){
-      return false;
+  checkBookmark(pathData: any): boolean {
+    return this.bookmarkService.checkBookmark(pathData, this.commanderSettings);
+  }
+
+  bookmark(pathData: any): void {
+    this.bookmarkService.bookmark(pathData, this.commanderSettings);
+  }
+
+  unbookmark(pathData: any): void {
+    this.bookmarkService.unbookmark(pathData, this.commanderSettings);
+  }
+
+  loadBookmark(side: string, item: any) {
+    if (side == 'left') {
+      this.leftView.loadLeftItems(this.commanderSettings.leftData.CurrentId);
     }
-    let data = this.bookmarks.filter(item => item.Path == pathData.CurrentPath);
-   
-
-    return data.length>0;
-  }
-
-  bookmark(pathData:any){
-    this.bookmarks.push({Path : pathData.CurrentPath, Id : pathData.CurrentId});
-    this.storage.set('bookmarks',this.bookmarks)
-  }
-
-  unbookmark(pathData:any){
-    let filteredItems = this.bookmarks.filter(item => item.Path !== pathData.CurrentPath)
-    this.bookmarks = filteredItems;
-    this.storage.set('bookmarks',this.bookmarks)
-  }
-
-  loadBookmark(side: string, item:any){
-    if(side=='left'){
-      this.loadLeftItems(item.Id);
+    else {
+      this.rightView.loadRightItems(this.commanderSettings.rightData.CurrentId);
     }
-    else{
-      this.loadRightItems(item.Id);
-    }
-    
   }
 
-  editorOptions:any;
-  loadEditorOptions(){
-    if (this.hasSelectedItem()) {
-      this.warningText = 'There is no selected item';
-      this.warningTitle = 'Invalid selected item';
-      this.dialogService.open(this.warningRef);
+  loadEditorOptions() {
+    if (this.popupService.checkAndOpenWarning(this.warningRef, this.popupSettings, this.commanderSettings)) {
       return;
     }
 
-    this.itemCommanderService.editoroptions(this.selectedItem.Id, this.selectedDatabase).subscribe({
+    this.itemCommanderApiService.editoroptions(this.commanderSettings.selectedItem.Id, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
-       this.editorOptions = response;
+        this.editorOptions = response;
       },
-      error: response =>{        
+      error: response => {
         this.handleError(response);
       }
     });
+  }
+
+  showHiddenItems() {
+    this.itemService.saveCommanderSettings(this.commanderSettings);
   }
 }

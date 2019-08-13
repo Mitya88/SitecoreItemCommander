@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { NgScService } from '@speak/ng-sc';
-
-import { SciAuthService } from '@speak/ng-sc/auth';
 import { SciLogoutService } from '@speak/ng-sc/logout';
 
 @Component({
