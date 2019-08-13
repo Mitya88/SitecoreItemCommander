@@ -276,7 +276,7 @@ export class StartPageComponent implements OnInit {
 
     this.itemCommanderApiService.packageItems(moveRequest, this.commanderSettings.selectedDatabase).subscribe({
       next: fileName => {
-        let theFile = '/sitecore/api/ssc/Possible-GenericEntityService-Controllers/Entity/-/download?fileName=' + (fileName as DownloadResponse).FileName;
+        let theFile = '/sitecore/api/ssc/ItemComander-EntityService-Controllers/Entity/-/download?fileName=' + (fileName as DownloadResponse).FileName;
         window.open(theFile);
       },
       error: response => {

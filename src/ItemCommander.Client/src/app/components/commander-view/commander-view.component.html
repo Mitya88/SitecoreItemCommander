@@ -11,7 +11,7 @@
       <td></td>
       <td></td>
     </tr>
-    <tr *ngFor="let item of commanderSettings.leftData.Children | filterchildren: hiddenItems"
+    <tr *ngFor="let item of commanderSettings.leftData.Children | filterchildren: commanderSettings.hiddenItems"
       [ngClass]="getClass(item)" (click)="singleSelect(item)" (dblclick)="doubleClick(item)"
       (contextmenu)="onRightClick(item)" (mouseup)="mouseUp($event, item)" (mouseover)="mouseDown($event, item)"
       (mousedown)="mouseDownSetup($event, item)">
@@ -33,7 +33,7 @@
       <td></td>
       <td></td>
     </tr>
-    <tr *ngFor="let item of commanderSettings.rightData.Children | filterchildren: hiddenItems"
+    <tr *ngFor="let item of commanderSettings.rightData.Children | filterchildren: commanderSettings.hiddenItems"
       [ngClass]="getClass(item)" (click)="singleSelect(item)" (dblclick)="doubleClick(item)"
       (contextmenu)="onRightClick(item)" (mouseup)="mouseUp($event, item)" (mouseover)="mouseDown($event, item)"
       (mousedown)="mouseDownSetup($event, item)">

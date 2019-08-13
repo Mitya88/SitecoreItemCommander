@@ -28,7 +28,6 @@ export class CommanderViewComponent implements OnInit {
     private fastViewService: FastViewService) { }
 
   ngOnInit() {
-    console.log(this.side);
     this.load();
   }
 
@@ -69,7 +68,6 @@ export class CommanderViewComponent implements OnInit {
         this.isLoading = false;
       },
       error: response => {
-        console.log('error');
         this.onError.emit(response);
       }
     });
