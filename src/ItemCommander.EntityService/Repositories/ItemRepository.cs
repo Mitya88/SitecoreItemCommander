@@ -285,6 +285,8 @@
 
                 actions.Add(action);
             }
+
+            Parallel.Invoke(actions.ToArray());
         }
 
         /// <summary>

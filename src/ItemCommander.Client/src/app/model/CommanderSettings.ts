@@ -16,6 +16,7 @@ export class CommanderSettings {
     rightData: ItemCommanderResponse;
     targetPath:string;
     fastViewEnabled: boolean;
+    leftIdBeforeSearch:string;
 
     constructor() {
         this.options = [

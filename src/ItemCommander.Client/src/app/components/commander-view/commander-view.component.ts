@@ -159,12 +159,13 @@ export class CommanderViewComponent implements OnInit {
 
   loadParent(side: string) {
     if (side == "left") {
+
       if (this.commanderSettings.leftData.ParentId == '{00000000-0000-0000-0000-000000000000}') {
         return;
       }
 
       if (this.commanderSettings.leftData.ParentId == null) {
-        this.loadLeftItems(this.leftIdBeforeSearch);
+        this.loadLeftItems(this.commanderSettings.leftIdBeforeSearch);
         return;
       }
       this.loadLeftItems(this.commanderSettings.leftData.ParentId);

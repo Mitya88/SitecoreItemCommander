@@ -59,7 +59,6 @@ export class StartPageComponent implements OnInit {
     private popupService: PopupService
   ) { }
 
-  leftIdBeforeSearch: string;
   isSearching: boolean;
   leftLoading: boolean;
   rightLoading: boolean;
@@ -220,7 +219,7 @@ export class StartPageComponent implements OnInit {
 
   search() {
     this.leftLoading = true;
-    this.leftIdBeforeSearch = this.commanderSettings.leftData.CurrentId;
+    this.commanderSettings.leftIdBeforeSearch = this.commanderSettings.leftData.CurrentId;
     this.itemCommanderApiService.search(this.popupSettings.inputDialogValue, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
         this.commanderSettings.leftData = response as ItemCommanderResponse;
@@ -387,6 +386,7 @@ export class StartPageComponent implements OnInit {
     this.itemCommanderApiService.insertOptions(id, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
         this.commanderSettings.insertOptions = response as Array<Item>;
+        this.popupSettings.inputDialogValue = 'New Item';
         this.dialogService.open(this.insertOptionRef);
       },
       error: response => {
