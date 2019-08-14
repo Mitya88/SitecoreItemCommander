@@ -137,6 +137,12 @@ export class StartPageComponent implements OnInit {
   }
 
   openInputDialog(dialogAction: string) {
+    if (dialogAction == 'rename' && !this.commanderSettings.selectedItem){
+      if (this.popupService.checkAndOpenWarning(this.warningRef, this.popupSettings, this.commanderSettings)) {
+        return;
+      }
+    }
+   
     this.popupService.openInputDialog(dialogAction, this.simpleInputRef, this.popupSettings);
   }
 
@@ -232,7 +238,7 @@ export class StartPageComponent implements OnInit {
 
     let request = new RenameRequest();
     request.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
-    request.NameOrPattern = this.popupSettings.inputDialogValue
+    request.NameOrPattern = this.popupSettings.inputDialogValue;
 
     this.itemCommanderApiService.rename(request, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
@@ -291,7 +297,7 @@ export class StartPageComponent implements OnInit {
     this.copyRequest.TargetPath = this.commanderSettings.targetPath;
     this.dialogService.close();
     if (this.copyRequest.Items.length == 1) {
-      this.popupSettings.inputDialogValue = this.commanderSettings.selectedItem.Name;
+      this.popupSettings.inputDialogValue = 'Copy of ' +this.commanderSettings.selectedItem.Name;
       this.openInputDialog('singleCopy');
     }
     else {
@@ -447,10 +453,10 @@ export class StartPageComponent implements OnInit {
 
   loadBookmark(side: string, item: any) {
     if (side == 'left') {
-      this.leftView.loadLeftItems(this.commanderSettings.leftData.CurrentId);
+      this.leftView.loadLeftItems(item.Id);
     }
     else {
-      this.rightView.loadRightItems(this.commanderSettings.rightData.CurrentId);
+      this.rightView.loadRightItems(item.Id);
     }
   }
 

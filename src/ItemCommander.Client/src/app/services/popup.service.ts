@@ -23,11 +23,13 @@ export class PopupService {
     else if (dialogAction == 'search') {
       popupSettings.singleInputTitle = Constants.SearchDialogTitle;
       popupSettings.singleInputText = Constants.SearchInputText;
+      popupSettings.inputDialogValue = '';
     }
     else if (dialogAction == 'rename') {
       popupSettings.singleInputTitle = Constants.RenameDialogTitle;
       popupSettings.singleInputText = Constants.RenameText;
       popupSettings.singleInputDescription = Constants.RenameDescription;
+      popupSettings.inputDialogValue = '';
     }
   }
 

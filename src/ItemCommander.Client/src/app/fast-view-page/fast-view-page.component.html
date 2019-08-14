@@ -5,8 +5,8 @@
         <input type="checkbox" name="standardFields" [(ngModel)]="showStandardFields"
           (change)="changeStandardFields()" /></label>
 
-      <label><a class="openpage" href="/fastview?itemid={{itemId}}&database={selectedDatabase}" *ngIf="showOpenPageLink"
-          target="_blank">Open in new page</a></label>
+      <label><a class="openpage" target="_blank" [routerLink]="['/fastview']" [queryParams]="{itemid: itemId, database:selectedDatabase}" *ngIf="showOpenPageLink"
+          >Open in new page</a></label>
     </sc-action-bar-left>
   </sc-action-bar>
 </div>

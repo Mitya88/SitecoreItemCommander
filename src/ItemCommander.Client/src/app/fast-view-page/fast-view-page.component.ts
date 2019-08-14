@@ -26,8 +26,9 @@ export class FastViewPageComponent implements OnInit {
     let itemId = this.route.snapshot.queryParamMap.get('itemid');
 
     if (itemId != null && itemId != "") {
-      this.load(itemId);
+      
       this.selectedDatabase = this.route.snapshot.queryParamMap.get('database');
+      this.load(itemId);
       this.showOpenPageLink = false;
     }
 
