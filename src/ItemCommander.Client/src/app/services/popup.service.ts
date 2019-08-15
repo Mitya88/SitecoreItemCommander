@@ -24,6 +24,7 @@ export class PopupService {
       popupSettings.singleInputTitle = Constants.SearchDialogTitle;
       popupSettings.singleInputText = Constants.SearchInputText;
       popupSettings.inputDialogValue = '';
+      popupSettings.singleInputDescription = '';
     }
     else if (dialogAction == 'rename') {
       popupSettings.singleInputTitle = Constants.RenameDialogTitle;
