@@ -81,9 +81,9 @@ Run `npm run start` for a disconnected mode. Navigate to `http://localhost:4123/
 
 ## Screenshots
 
-![alt text](documentation/1.PNG "Main")
-![alt text](documentation/2.PNG "Main")
-![alt text](documentation/3.PNG "Main")
-![alt text](documentation/4.PNG "Main")
-![alt text](documentation/5.PNG "Main")
-![alt text](documentation/6.PNG "Main")
+![alt text](documentation/1.png "Main")
+![alt text](documentation/2.png "Main")
+![alt text](documentation/3.png "Main")
+![alt text](documentation/4.png "Main")
+![alt text](documentation/5.png "Main")
+![alt text](documentation/6.png "Main")
