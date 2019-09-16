@@ -258,3 +258,25 @@
     </sc-dialog-footer>
   </sc-dialog>
 </template>
+
+<template #progress>
+  <sc-dialog>
+    <sc-dialog-header>
+      <h4>Warning</h4>
+    </sc-dialog-header>
+    <sc-dialog-body>
+      <div class="row">
+        <div class="wrapper">
+          <div class="progress-bar">
+            <span class="progress-bar-fill" [style.width]="parent.progress + '%'" ></span>
+          </div>
+        </div>
+      </div>
+
+
+    </sc-dialog-body>
+    <sc-dialog-footer>
+      <button scButton scButton="primary" scDialogClose>Close</button>
+    </sc-dialog-footer>
+  </sc-dialog>
+</template>

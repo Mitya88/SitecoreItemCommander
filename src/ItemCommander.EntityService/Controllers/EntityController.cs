@@ -107,10 +107,16 @@
         /// <returns></returns>
         [HttpPost]
         [ActionName("copy")]
-        public IHttpActionResult Query(string id, CopyRequest query, string db)
+        public ProcessResponse Query(string id, CopyRequest query, string db)
         {
-            this._customRepositoryActions.Copy(query, db);
-            return this.Ok();
+            return this._customRepositoryActions.Copy(query, db);            
+        }
+
+        [HttpPost]
+        [ActionName("status")]
+        public ProgressResponse Status(string id, string progressId)
+        {
+            return this._customRepositoryActions.GetRemainingCount(Guid.Parse(progressId));
         }
 
         /// <summary>
@@ -137,10 +143,9 @@
         /// <returns></returns>
         [HttpPost]
         [ActionName("move")]
-        public IHttpActionResult Move(string id, MoveRequest moveRequest, string db)
+        public ProcessResponse Move(string id, MoveRequest moveRequest, string db)
         {
-            this._customRepositoryActions.Move(moveRequest, db);
-            return this.Ok();
+            return this._customRepositoryActions.Move(moveRequest, db);
         }
 
         /// <summary>
@@ -167,10 +172,9 @@
         /// <returns></returns>
         [HttpPost]
         [ActionName("delete")]
-        public IHttpActionResult Delete(string id, DeleteRequest deleteRequest, string db)
+        public ProcessResponse Delete(string id, DeleteRequest deleteRequest, string db)
         {
-            this._customRepositoryActions.Delete(deleteRequest, db);
-            return this.Ok();
+            return this._customRepositoryActions.Delete(deleteRequest, db);
         }
 
         /// <summary>
@@ -182,10 +186,9 @@
         /// <returns></returns>
         [HttpPost]
         [ActionName("lock")]
-        public IHttpActionResult Lock(string id, LockRequest lockRequest, string db)
+        public ProcessResponse Lock(string id, LockRequest lockRequest, string db)
         {
-            this._customRepositoryActions.Lock(lockRequest, db);
-            return this.Ok();
+            return this._customRepositoryActions.Lock(lockRequest, db);
         }
 
         /// <summary>

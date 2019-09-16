@@ -70,4 +70,8 @@ export class ItemCommanderService {
   getItems(body: any, database:string) {
     return this.httpClient.post(this.baseUrl + '-/GetItems?db='+database, body);
   }
+
+  status(body: any, progressId:string) {
+    return this.httpClient.post(this.baseUrl + '-/status?progressid='+progressId, body);
+  }
 }

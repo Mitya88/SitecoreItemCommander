@@ -16,6 +16,7 @@
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -33,11 +34,16 @@
         /// The standard fields
         /// </summary>
         private List<string> standardFields = new List<string>() { "Statistics", "Lifetime", "Security", "Help", "Appearance", "Insert Options", "Workflow", "Publishing", "Tasks", "Validation Rules" };
+        
+        /// <summary>
+        /// The progress status
+        /// </summary>
+        private static ConcurrentDictionary<Guid, ConcurrentQueue<string>> progressStatus;
 
         /// <summary>
-        /// The queue, is going to be used to display the number of proccessed/remaings items in V2
+        /// The result
         /// </summary>
-        private static ConcurrentQueue<string> queue;
+        private static ConcurrentDictionary<Guid, ProcessResponse> result; 
 
         /// <summary>
         /// The maximum number of threads settings key
@@ -64,9 +70,9 @@
                 this.database = Sitecore.Data.Database.GetDatabase("master");
             }
 
-            if (queue == null)
+            if (progressStatus == null)
             {
-                queue = new ConcurrentQueue<string>();
+                progressStatus = new ConcurrentDictionary<Guid, ConcurrentQueue<string>>();
             }
 
             this.MaximumNumberOfThreads = Settings.GetIntSetting(maxNumberOfThreadsSettingsKey, 5);
@@ -135,17 +141,41 @@
             targetItem.Add(createItemRequest.Name, new TemplateID(new ID(createItemRequest.TemplateId)));
         }
 
+        public ProgressResponse GetRemainingCount(Guid processId)
+        {
+            ConcurrentQueue<string> queue;
+            if (progressStatus.Count == 1)
+            {
+               processId = progressStatus.Keys.FirstOrDefault();
+                
+            }
+
+            progressStatus.TryGetValue(processId, out queue);
+
+            if (queue != null && queue.Count > 0)
+            {
+                return new ProgressResponse { RemainingCount = queue.Count };
+            }
+            else
+            {
+                progressStatus.TryRemove(processId, out queue);
+                return new ProgressResponse { RemainingCount = 0 }; ;
+            }
+        }
+
         /// <summary>
         /// Copies the specified query.
         /// </summary>
         /// <param name="copyRequest">The query.</param>
         /// <param name="db">The database.</param>
-        public void Copy(CopyRequest copyRequest, string db)
+        public ProcessResponse Copy(CopyRequest copyRequest, string db)
         {
             this.SetDatabase(db);
 
+            var processId = Guid.NewGuid();
+            progressStatus.TryAdd(processId, new ConcurrentQueue<string>());
             var targetItem = this.database.GetItem(copyRequest.TargetPath);
-            copyRequest.Items.ForEach(t => queue.Enqueue(t));
+            copyRequest.Items.ForEach(t => progressStatus[processId].Enqueue(t));
 
             List<Action> actions = new List<Action>();
 
@@ -154,7 +184,7 @@
                 Action action = () =>
                 {
                     string itemId;
-                    while (queue.TryDequeue(out itemId))
+                    while (progressStatus[processId].TryDequeue(out itemId))
                     {
                         var sourceItem = database.GetItem(new ID(itemId));
                         sourceItem.CopyTo(targetItem, sourceItem.Name, new ID(Guid.NewGuid()), false);
@@ -164,7 +194,9 @@
                 actions.Add(action);
             }
 
-            Parallel.Invoke(actions.ToArray());
+            Task.Run(() =>Parallel.Invoke(actions.ToArray()));
+
+            return new ProcessResponse { StatusId = processId };
         }
 
         /// <summary>
@@ -187,12 +219,15 @@
         /// </summary>
         /// <param name="moveRequest">The query.</param>
         /// <param name="db">The database.</param>
-        public void Move(MoveRequest moveRequest, string db)
+        public ProcessResponse Move(MoveRequest moveRequest, string db)
         {
             this.SetDatabase(db);
 
+            var processId = Guid.NewGuid();
+            progressStatus.TryAdd(processId, new ConcurrentQueue<string>());
+
             var targetItem = this.database.GetItem(moveRequest.TargetPath);
-            moveRequest.Items.ForEach(t => queue.Enqueue(t));
+            moveRequest.Items.ForEach(t => progressStatus[processId].Enqueue(t));
 
             List<Action> actions = new List<Action>();
 
@@ -201,7 +236,7 @@
                 Action action = () =>
                 {
                     string itemId;
-                    while (queue.TryDequeue(out itemId))
+                    while (progressStatus[processId].TryDequeue(out itemId))
                     {
                         var sourceItem = database.GetItem(new ID(itemId));
                         sourceItem.MoveTo(targetItem);
@@ -211,7 +246,9 @@
                 actions.Add(action);
             }
 
-            Parallel.Invoke(actions.ToArray());
+            Task.Run(() => Parallel.Invoke(actions.ToArray()));
+
+            return new ProcessResponse { StatusId = processId };
         }
 
         /// <summary>
@@ -219,11 +256,12 @@
         /// </summary>
         /// <param name="deleteRequest">The query.</param>
         /// <param name="db">The database.</param>
-        public void Delete(DeleteRequest deleteRequest, string db)
+        public ProcessResponse Delete(DeleteRequest deleteRequest, string db)
         {
             this.SetDatabase(db);
-
-            deleteRequest.Items.ForEach(t => queue.Enqueue(t));
+            var processId = Guid.NewGuid();
+            progressStatus.TryAdd(processId, new ConcurrentQueue<string>());
+            deleteRequest.Items.ForEach(t => progressStatus[processId].Enqueue(t));
 
             List<Action> actions = new List<Action>();
 
@@ -232,7 +270,7 @@
                 Action action = () =>
                 {
                     string itemId;
-                    while (queue.TryDequeue(out itemId))
+                    while (progressStatus[processId].TryDequeue(out itemId))
                     {
                         var sourceItem = this.database.GetItem(new ID(itemId));
                         sourceItem.Delete();
@@ -242,7 +280,9 @@
                 actions.Add(action);
             }
 
-            Parallel.Invoke(actions.ToArray());
+            Task.Run(() => Parallel.Invoke(actions.ToArray()));
+
+            return new ProcessResponse { StatusId = processId };
         }
 
         /// <summary>
@@ -250,11 +290,12 @@
         /// </summary>
         /// <param name="lockRequest">The lock request.</param>
         /// <param name="db">The database.</param>
-        public void Lock(LockRequest lockRequest, string db)
+        public ProcessResponse Lock(LockRequest lockRequest, string db)
         {
             this.SetDatabase(db);
-
-            lockRequest.Items.ForEach(t => queue.Enqueue(t));
+            var processId = Guid.NewGuid();
+            progressStatus.TryAdd(processId, new ConcurrentQueue<string>());
+            lockRequest.Items.ForEach(t => progressStatus[processId].Enqueue(t));
 
             List<Action> actions = new List<Action>();
 
@@ -263,7 +304,7 @@
                 Action action = () =>
                 {
                     string itemId;
-                    while (queue.TryDequeue(out itemId))
+                    while (progressStatus[processId].TryDequeue(out itemId))
                     {
                         var scItem = this.database.GetItem(new ID(itemId));
 
@@ -286,7 +327,9 @@
                 actions.Add(action);
             }
 
-            Parallel.Invoke(actions.ToArray());
+            Task.Run(() => Parallel.Invoke(actions.ToArray()));
+
+            return new ProcessResponse { StatusId = processId };
         }
 
         /// <summary>
@@ -460,19 +503,31 @@
         /// </summary>
         /// <param name="request">The request.</param>
         /// <param name="db">The database.</param>
-        public void Rename(RenameRequest request, string db)
+        public ProcessResponse Rename(RenameRequest request, string db)
         {
             this.SetDatabase(db);
+            var processId = Guid.NewGuid();
+            progressStatus.TryAdd(processId, new ConcurrentQueue<string>());
+            request.Items.ForEach(t => progressStatus[processId].Enqueue(t));
 
-            foreach (var itemId in request.Items)
+            Action action = () =>
             {
-                var item = this.database.GetItem(new ID(itemId));
-
-                using (new EditContext(item))
+                string itemId;
+                while (progressStatus[processId].TryDequeue(out itemId))
                 {
-                    item.Name = this.GetName(item.Name, request.NameOrPattern, request.Items.IndexOf(itemId));
+                    var item = this.database.GetItem(new ID(itemId));
+
+                    using (new EditContext(item))
+                    {
+                        item.Name = this.GetName(item.Name, request.NameOrPattern, request.Items.IndexOf(itemId));
+                    }
                 }
-            }
+            };
+           
+
+            Task.Run(() => Parallel.Invoke( new Action[] { action }));
+
+            return new ProcessResponse { StatusId = processId };
         }
 
         /// <summary>

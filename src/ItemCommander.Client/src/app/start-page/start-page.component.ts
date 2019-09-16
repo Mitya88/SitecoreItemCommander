@@ -21,6 +21,9 @@ import { CopySingle } from '../contract/copysingle';
 import { DeleteRequest } from '../contract/deleteRequest';
 import { LockRequest } from '../contract/lockRequest';
 import { FolderRequest } from '../contract/folderRequest';
+import { ProcessResponse } from '../contract/processResponse';
+import { ProgressResponse } from '../contract/progressResponse';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-start-page',
@@ -38,6 +41,9 @@ export class StartPageComponent implements OnInit {
 
   @ViewChild('warning')
   private warningRef: TemplateRef<any>
+
+  @ViewChild('progress')
+  private progressRef: TemplateRef<any>
 
   @ViewChild('insertOptions')
   private insertOptionRef: TemplateRef<any>
@@ -75,6 +81,8 @@ export class StartPageComponent implements OnInit {
   downSelector: boolean;
   selectedInsertOptions: any;
   editorOptions: any;
+  
+  progress: number;
 
   ngOnInit() {
     this.commanderSettings = this.itemService.getCommanderSettings();
@@ -241,9 +249,10 @@ export class StartPageComponent implements OnInit {
 
     this.itemCommanderApiService.rename(request, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
-        this.leftView.loadLeftItems(this.commanderSettings.leftData.CurrentId);
-        this.rightView.loadRightItems(this.commanderSettings.rightData.CurrentId);
         this.dialogService.close();
+        this.dialogService.open(this.progressRef);
+        let data = response as ProcessResponse;
+        this.updateStatus(data);
       },
       error: response => {
         this.handleError(response);
@@ -259,9 +268,10 @@ export class StartPageComponent implements OnInit {
     this.itemCommanderApiService.moveItems(moveRequest, this.commanderSettings.selectedDatabase).subscribe(
       {
         next: response => {
-          this.leftView.loadLeftItems(this.commanderSettings.leftData.CurrentId);
-          this.rightView.loadRightItems(this.commanderSettings.rightData.CurrentId);
           this.dialogService.close();
+          this.dialogService.open(this.progressRef);
+          let data = response as ProcessResponse;
+          this.updateStatus(data);
         },
         error: response => {
           this.handleError(response);
@@ -305,20 +315,42 @@ export class StartPageComponent implements OnInit {
       this.openConfirmDialog('multipleCopy');
     }
   }
-
+ 
   multipleCopy() {
     this.itemCommanderApiService.copyItems(this.copyRequest, this.commanderSettings.selectedDatabase).subscribe(
       {
-        next: response => {
-          this.leftView.loadLeftItems(this.commanderSettings.leftData.CurrentId);
-          this.rightView.loadRightItems(this.commanderSettings.rightData.CurrentId);
+        next: response => {         
           this.dialogService.close();
+          this.dialogService.open(this.progressRef);
+          let data = response as ProcessResponse;
+           this.updateStatus(data);
         },
         error: response => {
           this.handleError(response);
         }
       }
     );
+  }
+
+  updateStatus(data: ProcessResponse){
+    this.progress = 0;
+    var interval = setInterval(()=>{
+      this.itemCommanderApiService.status(data.StatusId, data.StatusId)
+      .subscribe({
+        next:response2 =>{
+          let originalCount = this.copyRequest.Items.length;
+          let remainingCount = (response2 as ProgressResponse).RemainingCount;          
+          this.progress = ((originalCount - remainingCount) / originalCount)*100;
+                    
+          if(remainingCount === 0){             
+             this.leftView.loadLeftItems(this.commanderSettings.leftData.CurrentId);
+             this.rightView.loadRightItems(this.commanderSettings.rightData.CurrentId);
+             this.dialogService.close();
+             clearInterval(interval);
+           }
+        }
+      });;
+    },200);
   }
 
   singleCopy() {
@@ -344,9 +376,10 @@ export class StartPageComponent implements OnInit {
 
     this.itemCommanderApiService.deleteItems(deleteRequest, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
-        this.rightView.loadRightItems(this.commanderSettings.rightData.CurrentId);
-        this.leftView.loadLeftItems(this.commanderSettings.leftData.CurrentId);
         this.dialogService.close();
+        this.dialogService.open(this.progressRef);
+        let data = response as ProcessResponse;
+        this.updateStatus(data);
       },
       error: response => {
         this.handleError(response);
@@ -361,9 +394,10 @@ export class StartPageComponent implements OnInit {
 
     this.itemCommanderApiService.lockItems(lockRequest, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
-        this.rightView.loadRightItems(this.commanderSettings.rightData.CurrentId);
-        this.leftView.loadLeftItems(this.commanderSettings.leftData.CurrentId);
         this.dialogService.close();
+        this.dialogService.open(this.progressRef);
+        let data = response as ProcessResponse;
+        this.updateStatus(data);
       },
       error: response => {
         this.handleError(response);
