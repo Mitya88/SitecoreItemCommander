@@ -77,9 +77,15 @@ tbody{
 
 .progress-bar-fill {
     display: block;
-    height: 22px;
+    height: 18px;
     background-color: #659cef;
     border-radius: 3px;
     
     transition: width 500ms ease-in-out;
+    color:black;
+}
+
+.errormessage{
+    color:black;
+    font-weight: bold;
 }

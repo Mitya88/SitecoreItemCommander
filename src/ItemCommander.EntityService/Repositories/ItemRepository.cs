@@ -41,6 +41,11 @@
         private static ConcurrentDictionary<Guid, ConcurrentQueue<string>> progressStatus;
 
         /// <summary>
+        /// The progress status
+        /// </summary>
+        private static ConcurrentDictionary<Guid, List<string>> errors;
+
+        /// <summary>
         /// The result
         /// </summary>
         private static ConcurrentDictionary<Guid, ProcessResponse> result; 
@@ -159,7 +164,14 @@
             else
             {
                 progressStatus.TryRemove(processId, out queue);
-                return new ProgressResponse { RemainingCount = 0 }; ;
+
+                List<string> errorList = new List<string>();
+                if(errors != null && errors.TryRemove(processId, out errorList))
+                {
+
+                }
+
+                return new ProgressResponse { RemainingCount = 0, ErrorResult = errorList }; ;
             }
         }
 
@@ -237,9 +249,32 @@
                 {
                     string itemId;
                     while (progressStatus[processId].TryDequeue(out itemId))
-                    {
-                        var sourceItem = database.GetItem(new ID(itemId));
-                        sourceItem.MoveTo(targetItem);
+                    {                       
+                        try
+                        {
+                            var sourceItem = database.GetItem(new ID(itemId));
+                            sourceItem.MoveTo(targetItem);
+                        }
+                        catch(Exception ex)
+                        {
+                            List<string> errorMessages = new List<string>();
+                            if (errors == null)
+                            {
+                                errors = new ConcurrentDictionary<Guid, List<string>>();
+                            }
+                             
+                            if(errors.TryGetValue(processId, out errorMessages))
+                            {
+                                var newErrors = new List<string>();
+                                newErrors.AddRange(errorMessages);
+                                newErrors.Add(ex.Message + " Item Id: " + itemId);
+                                errors.TryUpdate(processId, newErrors, errorMessages);
+                            }
+                            else
+                            {
+                                errors.TryAdd(processId, new List<string> { ex.Message + " Item Id: "+itemId });
+                            }
+                        }
                     }
                 };
 
@@ -542,9 +577,8 @@
         {
             this.SetDatabase(db);
 
-            var itemCommanderResponse = new ItemCommanderResponse();
-            var sitecoreItem = this.database.GetItem(new Sitecore.Data.ID(id));
-
+            var itemCommanderResponse = new ItemCommanderResponse();         
+            
             itemCommanderResponse.CurrentPath = sitecoreItem.Paths.FullPath;
             itemCommanderResponse.CurrentId = id;
             itemCommanderResponse.ParentId = sitecoreItem.ParentID.ToString();

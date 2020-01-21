@@ -262,14 +262,19 @@
 <template #progress>
   <sc-dialog>
     <sc-dialog-header>
-      <h4>Warning</h4>
+      <h4>Progress</h4>
     </sc-dialog-header>
     <sc-dialog-body>
       <div class="row">
-        <div class="wrapper">
+        <div class="wrapper" style="width: 100%; margin-left: 10px; margin-right:10px;text-align:right;padding-right:5px">
           <div class="progress-bar">
-            <span class="progress-bar-fill" [style.width]="parent.progress + '%'" ></span>
+            <span class="progress-bar-fill" [style.width]="parent.progress + '%'" >
+            {{parent.progress}}
+            </span>
+          
           </div>
+          <p></p>
+          <p class="errormessage" *ngFor="let item of parent.errors">{{item}}</p>
         </div>
       </div>
 

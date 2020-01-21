@@ -157,10 +157,9 @@
         /// <returns></returns>
         [HttpPost]
         [ActionName("rename")]
-        public IHttpActionResult Rename(string id, RenameRequest renameRequest, string db)
-        {
-            this._customRepositoryActions.Rename(renameRequest, db);
-            return this.Ok();
+        public ProcessResponse Rename(string id, RenameRequest renameRequest, string db)
+        {            
+            return this._customRepositoryActions.Rename(renameRequest, db);            
         }
 
         /// <summary>

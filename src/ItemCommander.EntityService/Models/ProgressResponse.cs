@@ -11,9 +11,6 @@ namespace ItemCommander.EntityService.Models
     {
         public int RemainingCount { get; set; }
 
-        public List<string> Result { get; set; }
-
-        [JsonIgnore]
-        public ConcurrentQueue<string> Queue {get;set;}
+        public List<string> ErrorResult { get; set; }
     }
 }

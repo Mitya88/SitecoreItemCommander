@@ -252,7 +252,7 @@ export class StartPageComponent implements OnInit {
         this.dialogService.close();
         this.dialogService.open(this.progressRef);
         let data = response as ProcessResponse;
-        this.updateStatus(data);
+        this.updateStatus(data, request.Items.length);
       },
       error: response => {
         this.handleError(response);
@@ -271,7 +271,7 @@ export class StartPageComponent implements OnInit {
           this.dialogService.close();
           this.dialogService.open(this.progressRef);
           let data = response as ProcessResponse;
-          this.updateStatus(data);
+          this.updateStatus(data, moveRequest.Items.length);
         },
         error: response => {
           this.handleError(response);
@@ -323,7 +323,7 @@ export class StartPageComponent implements OnInit {
           this.dialogService.close();
           this.dialogService.open(this.progressRef);
           let data = response as ProcessResponse;
-           this.updateStatus(data);
+           this.updateStatus(data, this.copyRequest.Items.length);
         },
         error: response => {
           this.handleError(response);
@@ -332,20 +332,29 @@ export class StartPageComponent implements OnInit {
     );
   }
 
-  updateStatus(data: ProcessResponse){
+  errors: any;
+  updateStatus(data: ProcessResponse, originalCount: number){
     this.progress = 0;
+    this.errors = undefined;
     var interval = setInterval(()=>{
       this.itemCommanderApiService.status(data.StatusId, data.StatusId)
       .subscribe({
         next:response2 =>{
-          let originalCount = this.copyRequest.Items.length;
-          let remainingCount = (response2 as ProgressResponse).RemainingCount;          
-          this.progress = ((originalCount - remainingCount) / originalCount)*100;
+          let progressResponse = (response2 as ProgressResponse);
+          let remainingCount = progressResponse.RemainingCount;          
+          this.progress = Math.floor(((originalCount - remainingCount) / originalCount)*100);
                     
           if(remainingCount === 0){             
              this.leftView.loadLeftItems(this.commanderSettings.leftData.CurrentId);
              this.rightView.loadRightItems(this.commanderSettings.rightData.CurrentId);
-             this.dialogService.close();
+             if(progressResponse.ErrorResult == undefined || progressResponse.ErrorResult.length == 0){
+               this.dialogService.close();
+             }
+             else{
+              this.errors = progressResponse.ErrorResult;
+              console.log(this.errors);
+             }
+             //this.dialogService.close();
              clearInterval(interval);
            }
         }
@@ -379,7 +388,7 @@ export class StartPageComponent implements OnInit {
         this.dialogService.close();
         this.dialogService.open(this.progressRef);
         let data = response as ProcessResponse;
-        this.updateStatus(data);
+        this.updateStatus(data, deleteRequest.Items.length);
       },
       error: response => {
         this.handleError(response);
@@ -397,7 +406,7 @@ export class StartPageComponent implements OnInit {
         this.dialogService.close();
         this.dialogService.open(this.progressRef);
         let data = response as ProcessResponse;
-        this.updateStatus(data);
+        this.updateStatus(data, lockRequest.Items.length);
       },
       error: response => {
         this.handleError(response);
