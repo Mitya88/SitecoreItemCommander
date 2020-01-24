@@ -577,8 +577,8 @@
         {
             this.SetDatabase(db);
 
-            var itemCommanderResponse = new ItemCommanderResponse();         
-            
+            var itemCommanderResponse = new ItemCommanderResponse();
+            var sitecoreItem = this.database.GetItem(new Sitecore.Data.ID(id));
             itemCommanderResponse.CurrentPath = sitecoreItem.Paths.FullPath;
             itemCommanderResponse.CurrentId = id;
             itemCommanderResponse.ParentId = sitecoreItem.ParentID.ToString();
