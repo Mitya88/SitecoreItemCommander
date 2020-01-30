@@ -330,8 +330,31 @@
                     string itemId;
                     while (progressStatus[processId].TryDequeue(out itemId))
                     {
-                        var sourceItem = this.database.GetItem(new ID(itemId));
-                        sourceItem.Delete();
+                        try
+                        {
+                            var sourceItem = this.database.GetItem(new ID(itemId));
+                            sourceItem.Delete();
+                        }
+                        catch (Exception ex)
+                        {
+                            List<string> errorMessages = new List<string>();
+                            if (errors == null)
+                            {
+                                errors = new ConcurrentDictionary<Guid, List<string>>();
+                            }
+
+                            if (errors.TryGetValue(processId, out errorMessages))
+                            {
+                                var newErrors = new List<string>();
+                                newErrors.AddRange(errorMessages);
+                                newErrors.Add(ex.Message + " Item Id: " + itemId);
+                                errors.TryUpdate(processId, newErrors, errorMessages);
+                            }
+                            else
+                            {
+                                errors.TryAdd(processId, new List<string> { ex.Message + " Item Id: " + itemId });
+                            }
+                        }
                     }
                 };
 
@@ -365,19 +388,41 @@
                     while (progressStatus[processId].TryDequeue(out itemId))
                     {
                         var scItem = this.database.GetItem(new ID(itemId));
-
-                        if (scItem.Locking.IsLocked() && !lockRequest.Lock)
+                        try
                         {
-                            if (!scItem.Locking.CanUnlock())
+                            if (scItem.Locking.IsLocked() && !lockRequest.Lock)
                             {
-                                throw new Exception("Item cannot be unlocked with the current user");
+                                if (!scItem.Locking.CanUnlock())
+                                {
+                                    throw new Exception("Item cannot be unlocked with the current user");
+                                }
+
+                                scItem.Locking.Unlock();
+                            }
+                            else if (!scItem.Locking.IsLocked() && lockRequest.Lock)
+                            {
+                                scItem.Locking.Lock();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            List<string> errorMessages = new List<string>();
+                            if (errors == null)
+                            {
+                                errors = new ConcurrentDictionary<Guid, List<string>>();
                             }
 
-                            scItem.Locking.Unlock();
-                        }
-                        else if (!scItem.Locking.IsLocked() && lockRequest.Lock)
-                        {
-                            scItem.Locking.Lock();
+                            if (errors.TryGetValue(processId, out errorMessages))
+                            {
+                                var newErrors = new List<string>();
+                                newErrors.AddRange(errorMessages);
+                                newErrors.Add(ex.Message + " Item Id: " + itemId);
+                                errors.TryUpdate(processId, newErrors, errorMessages);
+                            }
+                            else
+                            {
+                                errors.TryAdd(processId, new List<string> { ex.Message + " Item Id: " + itemId });
+                            }
                         }
                     }
                 };
@@ -573,15 +618,37 @@
                 string itemId;
                 while (progressStatus[processId].TryDequeue(out itemId))
                 {
-                    var item = this.database.GetItem(new ID(itemId));
-
-                    using (new EditContext(item))
+                    try
                     {
-                        item.Name = this.GetName(item.Name, request.NameOrPattern, request.Items.IndexOf(itemId));
+                        var item = this.database.GetItem(new ID(itemId));
+
+                        using (new EditContext(item))
+                        {
+                            item.Name = this.GetName(item.Name, request.NameOrPattern, request.Items.IndexOf(itemId));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        List<string> errorMessages = new List<string>();
+                        if (errors == null)
+                        {
+                            errors = new ConcurrentDictionary<Guid, List<string>>();
+                        }
+
+                        if (errors.TryGetValue(processId, out errorMessages))
+                        {
+                            var newErrors = new List<string>();
+                            newErrors.AddRange(errorMessages);
+                            newErrors.Add(ex.Message + " Item Id: " + itemId);
+                            errors.TryUpdate(processId, newErrors, errorMessages);
+                        }
+                        else
+                        {
+                            errors.TryAdd(processId, new List<string> { ex.Message + " Item Id: " + itemId });
+                        }
                     }
                 }
-            };
-           
+            };           
 
             Task.Run(() => Parallel.Invoke( new Action[] { action }));
 
