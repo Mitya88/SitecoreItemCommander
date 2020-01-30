@@ -18,7 +18,9 @@ export class MultilistComponent implements OnInit {
 
     let request = new GetItemRequest();
     request.RawValue = this.context.Value;
-    this.itemCommanderService.getItems(request, 'master').subscribe({
+    request.Database = 'master';
+    
+    this.itemCommanderService.getItems(request).subscribe({
       next: response=>{
         this.responseData = response;
       }

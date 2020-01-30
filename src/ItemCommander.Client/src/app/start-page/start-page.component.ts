@@ -246,8 +246,9 @@ export class StartPageComponent implements OnInit {
     let request = new RenameRequest();
     request.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
     request.NameOrPattern = this.popupSettings.inputDialogValue;
+    request.Database = this.commanderSettings.selectedDatabase;
 
-    this.itemCommanderApiService.rename(request, this.commanderSettings.selectedDatabase).subscribe({
+    this.itemCommanderApiService.rename(request).subscribe({
       next: response => {
         this.dialogService.close();
         this.dialogService.open(this.progressRef);
@@ -264,8 +265,9 @@ export class StartPageComponent implements OnInit {
     let moveRequest = new CopyRequest();
     moveRequest.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
     moveRequest.TargetPath = this.commanderSettings.targetPath;
+    moveRequest.Database = this.commanderSettings.selectedDatabase;
 
-    this.itemCommanderApiService.moveItems(moveRequest, this.commanderSettings.selectedDatabase).subscribe(
+    this.itemCommanderApiService.moveItems(moveRequest).subscribe(
       {
         next: response => {
           this.dialogService.close();
@@ -288,10 +290,11 @@ export class StartPageComponent implements OnInit {
     let moveRequest = new PackageRequest();
 
     moveRequest.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
+    moveRequest.Database = this.commanderSettings.selectedDatabase;
 
-    this.itemCommanderApiService.packageItems(moveRequest, this.commanderSettings.selectedDatabase).subscribe({
+    this.itemCommanderApiService.packageItems(moveRequest).subscribe({
       next: fileName => {
-        let theFile = '/sitecore/api/ssc/ItemComander-EntityService-Controllers/Entity/-/download?fileName=' + (fileName as DownloadResponse).FileName;
+        let theFile = '/sitecore/api/ssc/itemcommander/download?fileName=' + (fileName as DownloadResponse).FileName;
         window.open(theFile);
       },
       error: response => {
@@ -304,6 +307,7 @@ export class StartPageComponent implements OnInit {
     this.copyRequest = new CopyRequest();
     this.copyRequest.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
     this.copyRequest.TargetPath = this.commanderSettings.targetPath;
+    this.copyRequest.Database = this.commanderSettings.selectedDatabase;
     this.dialogService.close();
     if (this.copyRequest.Items.length == 1) {
       this.popupSettings.inputDialogValue = 'Copy of ' +this.commanderSettings.selectedItem.Name;
@@ -317,7 +321,7 @@ export class StartPageComponent implements OnInit {
   }
  
   multipleCopy() {
-    this.itemCommanderApiService.copyItems(this.copyRequest, this.commanderSettings.selectedDatabase).subscribe(
+    this.itemCommanderApiService.copyItems(this.copyRequest).subscribe(
       {
         next: response => {         
           this.dialogService.close();
@@ -366,8 +370,10 @@ export class StartPageComponent implements OnInit {
     let contract = new CopySingle();
     contract.Item = this.copyRequest.Items[0];
     contract.TargetPath = this.copyRequest.TargetPath;
-    contract.Name = this.parent.inputDialogValue;
-    this.itemCommanderApiService.copySingleItem(contract, this.commanderSettings.selectedDatabase).subscribe({
+    contract.Name = this.parent.popupSettings.inputDialogValue;
+    contract.Database = this.commanderSettings.selectedDatabase;
+
+    this.itemCommanderApiService.copySingleItem(contract).subscribe({
       next: response => {
         this.leftView.loadLeftItems(this.commanderSettings.leftData.CurrentId);
         this.rightView.loadRightItems(this.commanderSettings.rightData.CurrentId);
@@ -382,8 +388,9 @@ export class StartPageComponent implements OnInit {
   delete() {
     let deleteRequest = new DeleteRequest();
     deleteRequest.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
+    deleteRequest.Database = this.commanderSettings.selectedDatabase;
 
-    this.itemCommanderApiService.deleteItems(deleteRequest, this.commanderSettings.selectedDatabase).subscribe({
+    this.itemCommanderApiService.deleteItems(deleteRequest).subscribe({
       next: response => {
         this.dialogService.close();
         this.dialogService.open(this.progressRef);
@@ -400,8 +407,9 @@ export class StartPageComponent implements OnInit {
     let lockRequest = new LockRequest();
     lockRequest.Lock = lock;
     lockRequest.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
+    lockRequest.Database = this.commanderSettings.selectedDatabase;
 
-    this.itemCommanderApiService.lockItems(lockRequest, this.commanderSettings.selectedDatabase).subscribe({
+    this.itemCommanderApiService.lockItems(lockRequest).subscribe({
       next: response => {
         this.dialogService.close();
         this.dialogService.open(this.progressRef);
@@ -443,7 +451,9 @@ export class StartPageComponent implements OnInit {
     contract.TargetPath = this.itemService.getTargetPathForFolder(this.commanderSettings);
     contract.Name = this.parent.popupSettings.inputDialogValue;
     contract.TemplateId = this.selectedInsertOptions;
-    this.itemCommanderApiService.addFolder(contract, this.commanderSettings.selectedDatabase).subscribe({
+    contract.Database = this.commanderSettings.selectedDatabase;
+
+    this.itemCommanderApiService.addFolder(contract).subscribe({
       next: response => {
         this.rightView.loadRightItems(this.commanderSettings.rightData.CurrentId);
         this.leftView.loadLeftItems(this.commanderSettings.leftData.CurrentId);

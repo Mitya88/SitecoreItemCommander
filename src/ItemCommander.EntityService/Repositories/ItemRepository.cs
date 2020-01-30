@@ -198,8 +198,31 @@
                     string itemId;
                     while (progressStatus[processId].TryDequeue(out itemId))
                     {
-                        var sourceItem = database.GetItem(new ID(itemId));
-                        sourceItem.CopyTo(targetItem, sourceItem.Name, new ID(Guid.NewGuid()), false);
+                        try
+                        {
+                            var sourceItem = database.GetItem(new ID(itemId));
+                            sourceItem.CopyTo(targetItem, sourceItem.Name, new ID(Guid.NewGuid()), false);
+                        }
+                        catch (Exception ex)
+                        {
+                            List<string> errorMessages = new List<string>();
+                            if (errors == null)
+                            {
+                                errors = new ConcurrentDictionary<Guid, List<string>>();
+                            }
+
+                            if (errors.TryGetValue(processId, out errorMessages))
+                            {
+                                var newErrors = new List<string>();
+                                newErrors.AddRange(errorMessages);
+                                newErrors.Add(ex.Message + " Item Id: " + itemId);
+                                errors.TryUpdate(processId, newErrors, errorMessages);
+                            }
+                            else
+                            {
+                                errors.TryAdd(processId, new List<string> { ex.Message + " Item Id: " + itemId });
+                            }
+                        }
                     }
                 };
 

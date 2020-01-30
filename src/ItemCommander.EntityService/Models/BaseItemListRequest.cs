@@ -5,7 +5,7 @@
     /// <summary>
     /// Base item list request
     /// </summary>
-    public class BaseItemListRequest
+    public class BaseItemListRequest: BaseRequest
     {
         /// <summary>
         /// Gets or sets the items.
