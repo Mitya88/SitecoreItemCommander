@@ -3,7 +3,7 @@
     /// <summary>
     /// Create item request contract
     /// </summary>
-    public class CreateItemRequest
+    public class CreateItemRequest : BaseRequest
     {
         /// <summary>
         /// Gets or sets the target path.

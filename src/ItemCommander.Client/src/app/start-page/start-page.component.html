@@ -1,6 +1,6 @@
 <sc-page >
   <div scPageHeader>
-    <sc-global-header appName="Item Commander v0.8">
+    <sc-global-header appName="Item Commander v0.9">
       <a href="/sitecore/shell/sitecore/client/Applications/Launchpad" scGlobalLogo></a>
       <sc-account-information (logout)="logoutService.logout()"></sc-account-information>
     </sc-global-header>
@@ -255,6 +255,35 @@
     <sc-dialog-footer>
       <button scButton scDialogClose>Close</button>
       <button scButton="primary" (click)="parent.createItem()">Create</button>
+    </sc-dialog-footer>
+  </sc-dialog>
+</template>
+
+<template #progress>
+  <sc-dialog>
+    <sc-dialog-header>
+      <h4>Progress</h4>
+    </sc-dialog-header>
+    <sc-dialog-body>
+      <div class="row">
+        <div class="wrapper" style="width: 100%; margin-left: 10px; margin-right:10px;text-align:right;padding-right:5px">
+          <div class="progress-bar">
+            <span class="progress-bar-fill" [style.width]="parent.progress + '%'" >
+            
+            </span>
+            <span class="progress-bar-status">
+              {{parent.progress}} %
+            </span>
+          </div>
+          <p></p>
+          <p class="errormessage" *ngFor="let item of parent.errors">{{item}}</p>
+        </div>
+      </div>
+
+
+    </sc-dialog-body>
+    <sc-dialog-footer>
+      <button scButton scButton="primary" scDialogClose>Close</button>
     </sc-dialog-footer>
   </sc-dialog>
 </template>

@@ -33,6 +33,7 @@ Several item manipulations are supported in the Item Commander.
 - Search (you can search for item and apply any of the mentioned item manipulation)
 - Open in Content Editor
 - Open in Fast View
+- Track progress in a progressbar
 
 
 #### Fast View
@@ -48,6 +49,15 @@ Fast view allows you to check the selected item's fields. If multiple language i
 - Sitecore 9.1 
 - Sitecore 9.1 Update-1
 - Sitecore 9.2
+- Sitecore 9.3 
+
+## Releases
+- 0.8  - [package](sc.package/ItemCommander-0.8.zip)
+  - Initial Release
+- 0.9 - [package](sc.package/ItemCommander-0.9.zip)
+  - Added progress bar
+  - support Sitecore 9.3
+  - Added ServicesApiController instead of EntityService
 
 ## Installation
 
@@ -81,9 +91,15 @@ Run `npm run start` for a disconnected mode. Navigate to `http://localhost:4123/
 
 ## Screenshots
 
-![alt text](documentation/1.PNG "Main")
-![alt text](documentation/2.PNG "Main")
-![alt text](documentation/3.PNG "Main")
-![alt text](documentation/4.PNG "Main")
-![alt text](documentation/5.PNG "Main")
-![alt text](documentation/6.PNG "Main")
+![alt text](documentation/1.png "Main")
+![alt text](documentation/2.png "Main")
+![alt text](documentation/3.png "Main")
+![alt text](documentation/4.png "Main")
+![alt text](documentation/5.png "Main")
+![alt text](documentation/6.png "Main")
+![alt text](documentation/7.png "Main")
+![alt text](documentation/8.png "Main")
+![alt text](documentation/9.png "Main")
+![alt text](documentation/10.png "Main")
+
+

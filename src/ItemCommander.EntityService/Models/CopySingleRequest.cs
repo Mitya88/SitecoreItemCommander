@@ -3,7 +3,7 @@
     /// <summary>
     /// Copy single contract
     /// </summary>
-    public class CopySingle
+    public class CopySingle : BaseRequest
     {
         /// <summary>
         /// Gets or sets the target path.

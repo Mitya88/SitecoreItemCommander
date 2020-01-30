@@ -3,6 +3,7 @@
     using ItemCommander.EntityService.Models;
     using Sitecore.Data.Items;
     using Sitecore.Services.Core;
+    using System;
     using System.Collections.Generic;
 
     /// <summary>
@@ -24,7 +25,7 @@
         /// </summary>
         /// <param name="copyRequest">The copy request.</param>
         /// <param name="db">The database.</param>
-        void Copy(CopyRequest copyRequest, string db);
+        ProcessResponse Copy(CopyRequest copyRequest, string db);
 
         void CopySingle(CopySingle copySingleRequest, string db);
 
@@ -33,21 +34,21 @@
         /// </summary>
         /// <param name="moveRequest">The query.</param>
         /// <param name="db">The database.</param>
-        void Move(MoveRequest moveRequest, string db);
+        ProcessResponse Move(MoveRequest moveRequest, string db);
 
         /// <summary>
         /// Deletes the specified items.
         /// </summary>
         /// <param name="deleteRequest">The delete.</param>
         /// <param name="db">The database.</param>
-        void Delete(DeleteRequest deleteRequest, string db);
+        ProcessResponse Delete(DeleteRequest deleteRequest, string db);
 
         /// <summary>
         /// Locks/unlocks the specified item.
         /// </summary>
         /// <param name="lockRequest">The lock request.</param>
         /// <param name="db">The database.</param>
-        void Lock(LockRequest lockRequest, string db);
+        ProcessResponse Lock(LockRequest lockRequest, string db);
 
         /// <summary>
         /// Gets the items.
@@ -102,7 +103,7 @@
         /// </summary>
         /// <param name="request">The request.</param>
         /// <param name="db">The database.</param>
-        void Rename(RenameRequest request, string db);
+        ProcessResponse Rename(RenameRequest request, string db);
 
         /// <summary>
         /// Gets the editor options.
@@ -111,5 +112,12 @@
         /// <param name="db">The database.</param>
         /// <returns>Available editor options</returns>
         EditorResponse GetEditorOptions(string id, string db);
+
+        /// <summary>
+        /// Gets the remaining count.
+        /// </summary>
+        /// <param name="processId">The process identifier.</param>
+        /// <returns></returns>
+        ProgressResponse GetRemainingCount(Guid processId);
     }
 }

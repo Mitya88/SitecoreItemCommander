@@ -70,7 +70,7 @@ module.exports = {
     res.json({});
   },
   'POST /sitecore/api/ssc/ItemComander-EntityService-Controllers/Entity/-/copy': function (req, res) {
-    res.json({});
+    res.json({"StatusId":"asd"});
   },
   'POST /sitecore/api/ssc/ItemComander-EntityService-Controllers/Entity/-/move': function (req, res) {
     res.json({});
@@ -89,5 +89,8 @@ module.exports = {
   },
   'POST /sitecore/api/ssc/ItemComander-EntityService-Controllers/Entity/-/delete': function (req, res) {
     res.json({});
+  },
+  'POST /sitecore/api/ssc/ItemComander-EntityService-Controllers/Entity/-/status': function (req, res) {
+    res.json({"RemainingCount":5});
   }
 };

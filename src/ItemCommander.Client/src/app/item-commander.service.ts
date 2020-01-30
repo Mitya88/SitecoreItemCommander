@@ -9,65 +9,69 @@ export class ItemCommanderService {
 
   }
 
-  baseUrl = "/sitecore/api/ssc/ItemComander-EntityService-Controllers/Entity/";
+  baseUrl = "/sitecore/api/ssc/itemcommander";
 
   fetchItems(id: any, database:string) {
-    return this.httpClient.get(this.baseUrl + id + '/children?db='+database);
+    return this.httpClient.get(this.baseUrl+'/children?db='+database+'&id='+id);
   }
 
   editoroptions(id: any, database:string) {
-    return this.httpClient.get(this.baseUrl + id + '/editoroptions?db='+database);
+    return this.httpClient.get(this.baseUrl + '/editoroptions?db='+database+'&id='+id);
   }
 
-  copyItems(body: any, database:string) {
-    return this.httpClient.post(this.baseUrl + '-/copy?db='+database, body);
+  copyItems(body: any) {
+    return this.httpClient.post(this.baseUrl + '/copy', body);
   }
 
-  moveItems(body: any, database:string) {
-    return this.httpClient.post(this.baseUrl + '-/move?db='+database, body);
+  moveItems(body: any) {
+    return this.httpClient.post(this.baseUrl + '/move', body);
   }
 
-  deleteItems(body: any, database:string) {
-    return this.httpClient.post(this.baseUrl + '-/delete?db='+database, body);
+  deleteItems(body: any) {
+    return this.httpClient.post(this.baseUrl + '/delete', body);
   }
 
-  lockItems(body: any, database:string) {
-    return this.httpClient.post(this.baseUrl + '-/lock?db='+database, body);
+  lockItems(body: any) {
+    return this.httpClient.post(this.baseUrl + '/lock', body);
   }
 
-  copySingleItem(body: any, database:string) {
-    return this.httpClient.post(this.baseUrl + '-/copysingle?db='+database, body);
+  copySingleItem(body: any) {
+    return this.httpClient.post(this.baseUrl + '/copysingle', body);
   }
 
-  addFolder(body: any, database:string) {
-    return this.httpClient.post(this.baseUrl + '-/folder?db='+database, body);
+  addFolder(body: any) {
+    return this.httpClient.post(this.baseUrl + '/folder', body);
   }
 
-  rename(body: any, database:string) {
-    return this.httpClient.post(this.baseUrl + '-/rename?db='+database, body);
+  rename(body: any) {
+    return this.httpClient.post(this.baseUrl + '/rename', body);
   }
 
-  packageItems(body: any, database:string) {
-    return this.httpClient.post(this.baseUrl + '-/package?db='+database, body);
+  packageItems(body: any) {
+    return this.httpClient.post(this.baseUrl + '/package', body);
   }
 
   search(keyword: any, database:string) {
-    return this.httpClient.get(this.baseUrl +'-/search?keyword='+keyword +'&db='+database);
+    return this.httpClient.get(this.baseUrl +'/search?keyword='+keyword +'&db='+database);
   }
   
   fastView(id: any, database:string) {
-    return this.httpClient.get(this.baseUrl + id + '/fastview?db='+database);
+    return this.httpClient.get(this.baseUrl + '/fastview?db='+database+'&id='+id);
   }
 
   insertOptions(id: any, database:string) {
-    return this.httpClient.get(this.baseUrl + id + '/insertoptions?db='+database);
+    return this.httpClient.get(this.baseUrl + '/insertoptions?db='+database+'&id='+id);
   }
 
   mediaUrl(id: any, database:string) {
-    return this.httpClient.get(this.baseUrl + id + '/mediaurl?db='+database);
+    return this.httpClient.get(this.baseUrl + '/mediaurl?db='+database+'&id='+id);
   }
 
-  getItems(body: any, database:string) {
-    return this.httpClient.post(this.baseUrl + '-/GetItems?db='+database, body);
+  getItems(body: any) {
+    return this.httpClient.post(this.baseUrl + '/GetItems', body);
+  }
+
+  status(body: any, progressId:string) {
+    return this.httpClient.post(this.baseUrl + '/status?progressid='+progressId, body);
   }
 }

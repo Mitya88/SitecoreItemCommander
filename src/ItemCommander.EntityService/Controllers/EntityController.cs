@@ -14,6 +14,7 @@
     using Sitecore.Security.Accounts;
     using Sitecore.Services.Core;
     using Sitecore.Services.Infrastructure.Sitecore.Services;
+    using Sitecore.Services.Infrastructure.Web.Http;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -29,9 +30,10 @@
     /// Entity controller for item commander
     /// </summary>
     /// <seealso cref="Sitecore.Services.Infrastructure.Sitecore.Services.EntityService{ItemCommander.EntityService.Models.ItemResponse}" />
-    [ServicesController]
+    [Authorize]
+    [RoutePrefix("sitecore/api/ssc/itemcommander")]
     [EnableCors(origins: "*", headers: "*", methods: "*")]
-    public class EntityController : EntityService<ItemResponse>
+    public class EntityController : ServicesApiController
     {
         /// <summary>
         /// The custom repository actions
@@ -43,13 +45,9 @@
         /// </summary>
         /// <param name="repository">The repository.</param>
         public EntityController(IGenericItemRepository<ItemResponse> repository)
-            : base(repository)
         {
             this._customRepositoryActions = repository;
         }
-
-        //SampleUR: /sitecore/api/ssc/ItemCommander-EntityService-Controllers/Entity/{id}/{actionName}?{queryStrings}
-        //SampleUR: /sitecore/api/ssc/ItemCommander-EntityService-Controllers/Entity/{80FDC514-CD6A-4EEF-B9C2-6CFA82B0F37A}/findbyid?language=en-gb
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityController"/> class.
@@ -66,7 +64,7 @@
         /// <param name="db">The database.</param>
         /// <returns>Children</returns>
         [HttpGet]
-        [ActionName("Children")]
+        [Route("Children")]
         public ItemCommanderResponse GetChildren(string id, string db)
         {
             return this._customRepositoryActions.GetChildren(id, db);
@@ -79,7 +77,7 @@
         /// <param name="db">The database.</param>
         /// <returns>Available languages and presentations</returns>
         [HttpGet]
-        [ActionName("editoroptions")]
+        [Route("editoroptions")]
         public EditorResponse EditorOptions(string id, string db)
         {
             return this._customRepositoryActions.GetEditorOptions(id, db);
@@ -92,7 +90,7 @@
         /// <param name="db">The database.</param>
         /// <returns>fast view contract</returns>
         [HttpGet]
-        [ActionName("fastview")]
+        [Route("fastview")]
         public FastViewResponse FastVIew(string id, string db)
         {
             return this._customRepositoryActions.GetFastView(id, db);
@@ -106,11 +104,17 @@
         /// <param name="db">The database.</param>
         /// <returns></returns>
         [HttpPost]
-        [ActionName("copy")]
-        public IHttpActionResult Query(string id, CopyRequest query, string db)
+        [Route("copy")]
+        public ProcessResponse Query([FromBody]CopyRequest query)
         {
-            this._customRepositoryActions.Copy(query, db);
-            return this.Ok();
+            return this._customRepositoryActions.Copy(query, query.Database);            
+        }
+
+        [HttpPost]
+        [Route("status")]
+        public ProgressResponse Status(string progressId)
+        {
+            return this._customRepositoryActions.GetRemainingCount(Guid.Parse(progressId));
         }
 
         /// <summary>
@@ -121,10 +125,10 @@
         /// <param name="db">The database.</param>
         /// <returns></returns>
         [HttpPost]
-        [ActionName("copysingle")]
-        public IHttpActionResult CopySingle(string id, CopySingle copySingleRequest, string db)
+        [Route("copysingle")]
+        public IHttpActionResult CopySingle([FromBody]CopySingle copySingleRequest)
         {
-            this._customRepositoryActions.CopySingle(copySingleRequest, db);
+            this._customRepositoryActions.CopySingle(copySingleRequest, copySingleRequest.Database);
             return this.Ok();
         }
 
@@ -136,11 +140,10 @@
         /// <param name="db">The database.</param>
         /// <returns></returns>
         [HttpPost]
-        [ActionName("move")]
-        public IHttpActionResult Move(string id, MoveRequest moveRequest, string db)
+        [Route("move")]
+        public ProcessResponse Move([FromBody]MoveRequest moveRequest)
         {
-            this._customRepositoryActions.Move(moveRequest, db);
-            return this.Ok();
+            return this._customRepositoryActions.Move(moveRequest, moveRequest.Database);
         }
 
         /// <summary>
@@ -151,11 +154,10 @@
         /// <param name="db">The database.</param>
         /// <returns></returns>
         [HttpPost]
-        [ActionName("rename")]
-        public IHttpActionResult Rename(string id, RenameRequest renameRequest, string db)
-        {
-            this._customRepositoryActions.Rename(renameRequest, db);
-            return this.Ok();
+        [Route("rename")]
+        public ProcessResponse Rename([FromBody]RenameRequest renameRequest)
+        {            
+            return this._customRepositoryActions.Rename(renameRequest, renameRequest.Database);            
         }
 
         /// <summary>
@@ -166,11 +168,10 @@
         /// <param name="db">The database.</param>
         /// <returns></returns>
         [HttpPost]
-        [ActionName("delete")]
-        public IHttpActionResult Delete(string id, DeleteRequest deleteRequest, string db)
+        [Route("delete")]
+        public ProcessResponse Delete([FromBody]DeleteRequest deleteRequest)
         {
-            this._customRepositoryActions.Delete(deleteRequest, db);
-            return this.Ok();
+            return this._customRepositoryActions.Delete(deleteRequest, deleteRequest.Database);
         }
 
         /// <summary>
@@ -181,11 +182,10 @@
         /// <param name="db">The database.</param>
         /// <returns></returns>
         [HttpPost]
-        [ActionName("lock")]
-        public IHttpActionResult Lock(string id, LockRequest lockRequest, string db)
+        [Route("lock")]
+        public ProcessResponse Lock([FromBody]LockRequest lockRequest)
         {
-            this._customRepositoryActions.Lock(lockRequest, db);
-            return this.Ok();
+            return this._customRepositoryActions.Lock(lockRequest, lockRequest.Database);
         }
 
         /// <summary>
@@ -196,10 +196,10 @@
         /// <param name="db">The database.</param>
         /// <returns></returns>
         [HttpPost]
-        [ActionName("folder")]
-        public IHttpActionResult folder(string id, CreateItemRequest createRequest, string db)
+        [Route("folder")]
+        public IHttpActionResult folder([FromBody]CreateItemRequest createRequest)
         {
-            this._customRepositoryActions.CreateItem(createRequest, db);
+            this._customRepositoryActions.CreateItem(createRequest, createRequest.Database);
             return this.Ok();
         }
 
@@ -211,8 +211,8 @@
         /// <param name="db">The database.</param>
         /// <returns></returns>
         [HttpGet]
-        [ActionName("search")]
-        public ItemCommanderResponse Search(string id, string keyword, string db)
+        [Route("search")]
+        public ItemCommanderResponse Search(string keyword, string db)
         {
             return this._customRepositoryActions.Search(keyword, db);
         }
@@ -224,7 +224,7 @@
         /// <param name="db">The database.</param>
         /// <returns></returns>
         [HttpGet]
-        [ActionName("insertoptions")]
+        [Route("insertoptions")]
         public List<ItemResponse> InsertOptions(string id, string db)
         {
             return this._customRepositoryActions.GetInsertOptions(id, db);
@@ -237,7 +237,7 @@
         /// <param name="db">The database.</param>
         /// <returns></returns>
         [HttpGet]
-        [ActionName("mediaurl")]
+        [Route("mediaurl")]
         public DownloadResponse MediaUrl(string id, string db)
         {
             return new DownloadResponse { FileName = _customRepositoryActions.GetMediaUrl(id, db) };
@@ -251,10 +251,10 @@
         /// <param name="db">The database.</param>
         /// <returns></returns>
         [HttpPost]
-        [ActionName("package")]
-        public DownloadResponse Package(string id, DeleteRequest request, string db)
+        [Route("package")]
+        public DownloadResponse Package([FromBody]DeleteRequest request)
         {
-            var file = this.GeneratePackage(this._customRepositoryActions.GetItems(request.Items, db));
+            var file = this.GeneratePackage(this._customRepositoryActions.GetItems(request.Items, request.Database));
 
             return new DownloadResponse { FileName = Path.GetFileName(file) };
         }
@@ -267,8 +267,8 @@
         /// <param name="db">The database.</param>
         /// <returns></returns>
         [HttpPost]
-        [ActionName("GetItems")]
-        public List<ItemResponse> GetItem(string id, GetItemRequest request, string db)
+        [Route("GetItems")]
+        public List<ItemResponse> GetItem([FromBody]GetItemRequest request)
         {
             var ids = request.RawValue.Split('|');
 
@@ -276,7 +276,7 @@
 
             if (!string.IsNullOrEmpty(request.RawValue) && ids.Any())
             {
-                items.AddRange(this._customRepositoryActions.GetItems(ids.ToList(), db));
+                items.AddRange(this._customRepositoryActions.GetItems(ids.ToList(), request.Database));
             }
             var result = new List<ItemResponse>();
             result.AddRange(items.Where(t => t != null).Select(t => new ItemResponse
@@ -301,7 +301,7 @@
                 {
                     result.Add(new ItemResponse
                     {
-                        Name = string.Format("{0} cannot be found in {1} database", itemId, db)
+                        Name = string.Format("{0} cannot be found in {1} database", itemId, request.Database)
                     });
                 }
             }
@@ -315,8 +315,8 @@
         /// <param name="fileName">Name of the file.</param>
         /// <returns></returns>
         [HttpGet]
-        [ActionName("download")]
-        public HttpResponseMessage Package(string id, string fileName)
+        [Route("download")]
+        public HttpResponseMessage Package(string fileName)
         {
             string file = string.Empty;
             Log.Info("Package Path" + Settings.PackagePath, this);
@@ -350,7 +350,7 @@
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [ActionName("IsOk")]
+        [Route("IsOk")]
         [Obsolete]
         public string IsOk()
         {
