@@ -4,6 +4,8 @@ The repository contains source code and documentation for Item Commander Applica
 
 The purpose of the module is speeding up item manipulation in Sitecore.
 
+You can read more about the module on [Medium](https://medium.com/@mitya_1988/item-commander-1aa157bbbd0)
+
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.2.7.
 
 
