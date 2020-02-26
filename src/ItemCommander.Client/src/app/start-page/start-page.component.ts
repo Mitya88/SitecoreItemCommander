@@ -327,6 +327,7 @@ export class StartPageComponent implements OnInit {
   }
  
   multipleCopy() {
+    this.copyRequest.CopySubItems = this.popupSettings.copySubItems;
     this.itemCommanderApiService.copyItems(this.copyRequest).subscribe(
       {
         next: response => {         
@@ -537,5 +538,9 @@ export class StartPageComponent implements OnInit {
 
   showHiddenItems() {
     this.itemService.saveCommanderSettings(this.commanderSettings);
+  }
+
+  changeTest(){
+    //console.log(this.popupSettings.copySubItems);
   }
 }

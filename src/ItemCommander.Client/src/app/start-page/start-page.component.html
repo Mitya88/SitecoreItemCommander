@@ -174,7 +174,7 @@
       <h2>Are you sure?</h2>
       <p>{{parent.popupSettings.confirmText}}</p>
       <label *ngIf="parent.popupSettings.isCopy">Copy Subitems?
-      <input type="checkbox" name="hiddenItems" [(ngModel)]="parent.popupSettings.copySubItems"/></label>
+      <input type="checkbox" name="hiddenItems" [(ngModel)]="parent.popupSettings.copySubItems" (change)="parent.changeTest()"/></label>
     </sc-dialog-body>
     <sc-dialog-footer>
       <button scButton scDialogClose>Cancel</button>
@@ -194,7 +194,7 @@
       <input type="text" class="form-control" [(ngModel)]="parent.popupSettings.inputDialogValue" />
       <p>&nbsp;</p>
       <label *ngIf="parent.popupSettings.isCopy">Copy Subitems?
-        <input type="checkbox" name="hiddenItems" [(ngModel)]="parent.popupSettings.copySubItems"/></label>
+        <input type="checkbox" name="hiddenItems" [(ngModel)]="parent.popupSettings.copySubItems" (change)="parent.changeTest()"/></label>
     </sc-dialog-body>
     <sc-dialog-footer>
       <button scButton scDialogClose>Cancel</button>
