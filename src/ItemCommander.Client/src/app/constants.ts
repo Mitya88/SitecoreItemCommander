@@ -32,7 +32,7 @@ export class  Constants{
     static ItemLockConfirmationText = "Are you sure you want to lock selected item(s)?";
 
     static ItemCopyConfirmationTitle="Copy Item To";
-    static ItemCopyConfirmationText = "Are you sure you want to copy the selected items? (Children items will not be copied)";
+    static ItemCopyConfirmationText = "Are you sure you want to copy the selected items?";
 
     
     static ItemUnlockConfirmationTitle="Unlock";

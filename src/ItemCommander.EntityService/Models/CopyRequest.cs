@@ -12,5 +12,13 @@
         /// The target path.
         /// </value>
         public string TargetPath { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether [copy sub items].
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if [copy sub items]; otherwise, <c>false</c>.
+        /// </value>
+        public bool CopySubItems { get; set; }
     }
 }

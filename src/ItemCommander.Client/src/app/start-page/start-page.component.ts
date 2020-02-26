@@ -143,7 +143,7 @@ export class StartPageComponent implements OnInit {
     this.selectText = this.itemService.selectAll(this.selectText, this.commanderSettings);
   }
 
-  openInputDialog(dialogAction: string) {
+  openInputDialog(dialogAction: string) {   
     if (dialogAction == 'rename' && !this.commanderSettings.selectedItem){
       if (this.popupService.checkAndOpenWarning(this.warningRef, this.popupSettings, this.commanderSettings)) {
         return;
@@ -154,6 +154,7 @@ export class StartPageComponent implements OnInit {
   }
 
   openConfirmDialog(dialogAction: string) {
+    this.popupSettings.isCopy = false;
     if (this.popupService.checkAndOpenWarning(this.warningRef, this.popupSettings, this.commanderSettings)) {
       return;
     }
@@ -174,6 +175,7 @@ export class StartPageComponent implements OnInit {
 
     if (this.popupSettings.confirmAction == 'copy') {
       this.copy();
+      this.popupSettings.isCopy = true;
     } else if (this.popupSettings.confirmAction == 'move') {
       this.parent.popupSettings.confirmTitle = Constants.ItemMovingConfirmationTitle;
       this.parent.popupSettings.confirmText = Constants.ItemMovingConfirmationText;
@@ -193,6 +195,7 @@ export class StartPageComponent implements OnInit {
       this.parent.popupSettings.confirmTitle = Constants.ItemUnlockConfirmationTitle;
       this.parent.popupSettings.confirmText = Constants.ItemUnlockConfirmationText;
     } else if (this.popupSettings.confirmAction == 'multipleCopy') {
+      this.popupSettings.isCopy = true;
       this.parent.popupSettings.confirmTitle = Constants.ItemCopyConfirmationTitle;
       this.parent.popupSettings.confirmText = Constants.ItemCopyConfirmationText;
     }
@@ -200,12 +203,14 @@ export class StartPageComponent implements OnInit {
 
   Action() {
     if (this.popupSettings.confirmAction == 'copy') {
+      this.popupSettings.isCopy = false;
       this.copy();
     } else if (this.popupSettings.confirmAction == 'move') {
       this.move();
     } else if (this.popupSettings.confirmAction == 'delete') {
       this.delete();
     } else if (this.popupSettings.confirmAction == 'multipleCopy') {
+      this.popupSettings.isCopy = false;
       this.multipleCopy();
     } else if (this.popupSettings.confirmAction == 'lock') {
       this.lock(true);
@@ -305,12 +310,13 @@ export class StartPageComponent implements OnInit {
 
   copy() {
     this.copyRequest = new CopyRequest();
+    this.copyRequest.CopySubItems = this.popupSettings.copySubItems;
     this.copyRequest.Items = this.itemService.getSelectedItems(this.commanderSettings).map(function (it) { return it.Id });
     this.copyRequest.TargetPath = this.commanderSettings.targetPath;
     this.copyRequest.Database = this.commanderSettings.selectedDatabase;
     this.dialogService.close();
     if (this.copyRequest.Items.length == 1) {
-      this.popupSettings.inputDialogValue = 'Copy of ' +this.commanderSettings.selectedItem.Name;
+      this.popupSettings.inputDialogValue = 'Copy of ' +this.commanderSettings.selectedItem.Name;   
       this.openInputDialog('singleCopy');
     }
     else {
@@ -368,6 +374,7 @@ export class StartPageComponent implements OnInit {
 
   singleCopy() {
     let contract = new CopySingle();
+    contract.CopySubItems = this.popupSettings.copySubItems;
     contract.Item = this.copyRequest.Items[0];
     contract.TargetPath = this.copyRequest.TargetPath;
     contract.Name = this.parent.popupSettings.inputDialogValue;
