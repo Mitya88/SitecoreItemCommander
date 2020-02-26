@@ -26,7 +26,7 @@ All of the commander view settings are stored in browser's local storage, so you
 
 #### Item Manipulations
 Several item manipulations are supported in the Item Commander.
-- Copy (single and multiple)
+- Copy (single and multiple with include subitems options)
 - Move (single and multiple)
 - Delete (single and multiple)
 - Insert item (You can select inserted template based on the available insert options)
@@ -60,6 +60,9 @@ Fast view allows you to check the selected item's fields. If multiple language i
   - Added progress bar
   - support Sitecore 9.3
   - Added ServicesApiController instead of EntityService
+- 1.0 - [package](sc.package/ItemCommander-1.0.zip)
+  - Added support to include subitems during copy
+  - Bugfixes
 
 ## Installation
 
