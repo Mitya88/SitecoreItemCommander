@@ -16,7 +16,6 @@
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -34,7 +33,7 @@
         /// The standard fields
         /// </summary>
         private List<string> standardFields = new List<string>() { "Statistics", "Lifetime", "Security", "Help", "Appearance", "Insert Options", "Workflow", "Publishing", "Tasks", "Validation Rules" };
-        
+
         /// <summary>
         /// The progress status
         /// </summary>
@@ -48,7 +47,7 @@
         /// <summary>
         /// The result
         /// </summary>
-        private static ConcurrentDictionary<Guid, ProcessResponse> result; 
+        private static ConcurrentDictionary<Guid, ProcessResponse> result;
 
         /// <summary>
         /// The maximum number of threads settings key
@@ -146,18 +145,20 @@
             targetItem.Add(createItemRequest.Name, new TemplateID(new ID(createItemRequest.TemplateId)));
         }
 
+        /// <summary>
+        /// Gets the remaining count.
+        /// </summary>
+        /// <param name="processId">The process identifier.</param>
+        /// <returns>The progress response</returns>
         public ProgressResponse GetRemainingCount(Guid processId)
         {
             ConcurrentQueue<string> queue;
             if (progressStatus.Count == 1)
             {
-               processId = progressStatus.Keys.FirstOrDefault();
-                
+                processId = progressStatus.Keys.FirstOrDefault();
             }
 
-            progressStatus.TryGetValue(processId, out queue);
-
-            if (queue != null && queue.Count > 0)
+            if (progressStatus.TryGetValue(processId, out queue) && queue.Count > 0)
             {
                 return new ProgressResponse { RemainingCount = queue.Count };
             }
@@ -166,12 +167,12 @@
                 progressStatus.TryRemove(processId, out queue);
 
                 List<string> errorList = new List<string>();
-                if(errors != null && errors.TryRemove(processId, out errorList))
+                if (errors != null && errors.TryRemove(processId, out errorList))
                 {
-
+                    return new ProgressResponse { RemainingCount = 0, ErrorResult = errorList };
                 }
 
-                return new ProgressResponse { RemainingCount = 0, ErrorResult = errorList }; ;
+                return new ProgressResponse { RemainingCount = 0, ErrorResult = null };
             }
         }
 
@@ -201,7 +202,7 @@
                         try
                         {
                             var sourceItem = database.GetItem(new ID(itemId));
-                            sourceItem.CopyTo(targetItem, sourceItem.Name, new ID(Guid.NewGuid()), false);
+                            sourceItem.CopyTo(targetItem, sourceItem.Name, new ID(Guid.NewGuid()), copyRequest.CopySubItems);
                         }
                         catch (Exception ex)
                         {
@@ -229,7 +230,7 @@
                 actions.Add(action);
             }
 
-            Task.Run(() =>Parallel.Invoke(actions.ToArray()));
+            Task.Run(() => Parallel.Invoke(actions.ToArray()));
 
             return new ProcessResponse { StatusId = processId };
         }
@@ -246,7 +247,7 @@
             var targetItem = this.database.GetItem(copySingleRequest.TargetPath);
             var sourceItem = this.database.GetItem(new ID(copySingleRequest.Item));
 
-            sourceItem.CopyTo(targetItem, copySingleRequest.Name, new ID(Guid.NewGuid()), false);
+            sourceItem.CopyTo(targetItem, copySingleRequest.Name, new ID(Guid.NewGuid()), copySingleRequest.CopySubItems);
         }
 
         /// <summary>
@@ -272,21 +273,21 @@
                 {
                     string itemId;
                     while (progressStatus[processId].TryDequeue(out itemId))
-                    {                       
+                    {
                         try
                         {
                             var sourceItem = database.GetItem(new ID(itemId));
                             sourceItem.MoveTo(targetItem);
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             List<string> errorMessages = new List<string>();
                             if (errors == null)
                             {
                                 errors = new ConcurrentDictionary<Guid, List<string>>();
                             }
-                             
-                            if(errors.TryGetValue(processId, out errorMessages))
+
+                            if (errors.TryGetValue(processId, out errorMessages))
                             {
                                 var newErrors = new List<string>();
                                 newErrors.AddRange(errorMessages);
@@ -295,7 +296,7 @@
                             }
                             else
                             {
-                                errors.TryAdd(processId, new List<string> { ex.Message + " Item Id: "+itemId });
+                                errors.TryAdd(processId, new List<string> { ex.Message + " Item Id: " + itemId });
                             }
                         }
                     }
@@ -648,9 +649,9 @@
                         }
                     }
                 }
-            };           
+            };
 
-            Task.Run(() => Parallel.Invoke( new Action[] { action }));
+            Task.Run(() => Parallel.Invoke(new Action[] { action }));
 
             return new ProcessResponse { StatusId = processId };
         }

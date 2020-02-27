@@ -1,4 +1,4 @@
-<table *ngIf="!isLoading" scTable [ngClass]="getTableClass(side)" (click)="tableSelect(side)">
+<table *ngIf="!isLoading" scTable [ngClass]="getTableClass(side)" (click)="tableSelect(side)"  (contextmenu)="tableSelect(side)">
   <thead>
     <tr>
       <th *ngFor="let item of getSelectedOptions()">{{item.name}}</th>

@@ -10,6 +10,8 @@ export class PopupSettings {
     warningText: string;
     warningTitle: string;
     inputDialogValue: string;
+    isCopy:boolean = false;
+    copySubItems:boolean = false;
 
     constructor() {
 

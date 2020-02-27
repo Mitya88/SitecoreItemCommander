@@ -1,6 +1,6 @@
 <sc-page >
   <div scPageHeader>
-    <sc-global-header appName="Item Commander v0.9">
+    <sc-global-header appName="Item Commander v1.0">
       <a href="/sitecore/shell/sitecore/client/Applications/Launchpad" scGlobalLogo></a>
       <sc-account-information (logout)="logoutService.logout()"></sc-account-information>
     </sc-global-header>
@@ -173,6 +173,8 @@
     <sc-dialog-body>
       <h2>Are you sure?</h2>
       <p>{{parent.popupSettings.confirmText}}</p>
+      <label *ngIf="parent.popupSettings.isCopy">Copy Subitems?
+      <input type="checkbox" name="hiddenItems" [(ngModel)]="parent.popupSettings.copySubItems" (change)="parent.changeTest()"/></label>
     </sc-dialog-body>
     <sc-dialog-footer>
       <button scButton scDialogClose>Cancel</button>
@@ -188,9 +190,11 @@
     </sc-dialog-header>
     <sc-dialog-body>
       <p [innerHtml]="parent.popupSettings.singleInputDescription"></p>
-      <h4>{{parent.popupSettings.singleInputText}}</h4>
+      <h4>{{parent.popupSettings.singleInputText}}</h4>     
       <input type="text" class="form-control" [(ngModel)]="parent.popupSettings.inputDialogValue" />
-
+      <p>&nbsp;</p>
+      <label *ngIf="parent.popupSettings.isCopy">Copy Subitems?
+        <input type="checkbox" name="hiddenItems" [(ngModel)]="parent.popupSettings.copySubItems" (change)="parent.changeTest()"/></label>
     </sc-dialog-body>
     <sc-dialog-footer>
       <button scButton scDialogClose>Cancel</button>
