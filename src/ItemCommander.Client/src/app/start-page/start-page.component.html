@@ -2,87 +2,143 @@
   <div scPageHeader>
     <sc-global-header appName="Item Commander v1.0">
       <a href="/sitecore/shell/sitecore/client/Applications/Launchpad" scGlobalLogo></a>
+     
       <sc-account-information (logout)="logoutService.logout()"></sc-account-information>
     </sc-global-header>
   </div>
   <div scPageAppHeader>
     <sc-application-header text="Item Commander"></sc-application-header>
   </div>
-  <div scPageActionBar>
-    <sc-action-bar class="custom-action-bar">
-      <sc-action-bar-left>
-        <div class="row">
-          <sc-dropdown class="nav-item">
-            <button scDropdownToggle scIconButton (click)="loadEditorOptions()">
-              <sc-icon icon="edit"></sc-icon>
-              Edit
-            </button>
-            <sc-dropdown-menu class="dropdownMenu" *ngIf="editorOptions && commanderSettings.selectedItem">
-              <sc-dropdown-header>Content Editor</sc-dropdown-header>
-              <a *ngFor="let lang of editorOptions.Languages" scDropdownItem target="_blank"
-                href="/sitecore/shell/Applications/Content%20Editor.aspx?fo={{commanderSettings.selectedItem.Id}}&la={{lang}}&sc_lang=en">{{lang}}</a>
+  <div scPageActionBar> <sc-tab-group variant="switch">
+    <sc-tab label="Home" class="darkbg">
+      <button class="nav-item min-80" scIconButton (click)="openInputDialog('rename')">
+        <sc-icon icon="ballpen"></sc-icon><br>
+        <span>Rename</span>
+      </button>
+      <button class="nav-item min-80" scIconButton (click)="openConfirmDialog('copy')">
+        <sc-icon icon="copy"></sc-icon><br>
+        <span>Copy</span>
+      </button>
+      <button class="nav-item min-80" scIconButton (click)="openConfirmDialog('move')">
+        <sc-icon icon="arrow_cross"></sc-icon><br>
+        <span>Move</span>
+        
+      </button>
+      <button class="nav-item min-80" scIconButton (click)="openConfirmDialog('delete')">
+        <sc-icon icon="delete"></sc-icon><br>
+        <span>Delete</span>
+      </button>
+      <button class="nav-item min-80" scIconButton (click)="openInsertOptions()">
+        <sc-icon icon="add"></sc-icon><br>
+        <span>Create </span>
+      </button> <button class="nav-item min-80" scIconButton (click)="openInputDialog('search')">
+        <sc-icon icon="magnifying_glass"></sc-icon><br>
+        <span>Search</span>
+        
+      </button>
+      <button class="nav-item min-80" scIconButton (click)="selectAll()">
+        <sc-icon icon="arrow_circle2"></sc-icon><br>
+        <span>{{selectText}} all</span>       
+      </button>
+    </sc-tab>
+    <sc-tab label="View/Edit" class="darkbg">
+      <button class="nav-item min-80" scIconButton [(scToggle)]="commanderSettings.fastViewEnabled" (click)="fastViewSearch()">
+        <sc-icon icon="eye"></sc-icon><br>
+        <span>View</span>
+      </button>
+      <button class="nav-item min-80" scIconButton [(scToggle)]="commanderSettings.fastViewEnabled" (click)="fastViewSearch()">
+        <sc-icon icon="media_eject"></sc-icon><br>
+        <span>Media</span>
+      </button>
+      <sc-dropdown class="nav-item ">
+        <button scDropdownToggle class="min-80" scIconButton (click)="loadEditorOptions()">
+          <sc-icon icon="edit"></sc-icon><br>
+          <span>Edit</span>
+        </button>
+        <sc-dropdown-menu class="dropdownMenu" *ngIf="editorOptions && commanderSettings.selectedItem">
+          <sc-dropdown-header>Content Editor</sc-dropdown-header>
+          <a *ngFor="let lang of editorOptions.Languages" scDropdownItem target="_blank"
+            href="/sitecore/shell/Applications/Content%20Editor.aspx?fo={{commanderSettings.selectedItem.Id}}&la={{lang}}&sc_lang=en">{{lang}}</a>
 
-              <div *ngIf="editorOptions.HasPresentation">
-                <sc-dropdown-divider></sc-dropdown-divider>
-                <sc-dropdown-header>Exp Editor</sc-dropdown-header>
-                <a *ngFor="let lang of editorOptions.Languages" scDropdownItem target="_blank"
-                  href="/?sc_mode=edit&sc_itemid={{commanderSettings.selectedItem.Id}}&sc_lang={{lang}}">{{lang}}</a>
-              </div>
-            </sc-dropdown-menu>
-          </sc-dropdown>
-          <button class="nav-item" scIconButton [(scToggle)]="commanderSettings.fastViewEnabled" (click)="fastViewSearch()">
-            <sc-icon icon="eye"></sc-icon>
-            View
-          </button>
-          <button class="nav-item" scIconButton (click)="openInputDialog('rename')">
-            <sc-icon icon="ballpen"></sc-icon>
-            Rename
-          </button>
-          <button class="nav-item" scIconButton (click)="openConfirmDialog('copy')">
-            <sc-icon icon="copy"></sc-icon>
-            Copy
-          </button>
-          <button class="nav-item" scIconButton (click)="openConfirmDialog('move')">
-            <sc-icon icon="arrow_cross"></sc-icon>
-            Move
-          </button>
-          <button class="nav-item" scIconButton (click)="downloadAsPackage()">
-            <sc-icon icon="arrow_down"></sc-icon>
-            Download as Package
-          </button>
-          <button class="nav-item" scIconButton (click)="openConfirmDialog('delete')">
-            <sc-icon icon="delete"></sc-icon>
-            Delete
-          </button>
-          <button class="nav-item" scIconButton (click)="openInsertOptions()">
-            <sc-icon icon="add"></sc-icon>
-            Create Item
-          </button>
-          <button class="nav-item" scIconButton (click)="openInputDialog('search')">
-            <sc-icon icon="magnifying_glass"></sc-icon>
-            Search
-          </button>
-          <button class="nav-item" scIconButton (click)="selectAll()">
-            <sc-icon icon="arrow_circle2"></sc-icon>
-            {{selectText}} all in active tab
-          </button>
-          <sc-dropdown class="nav-item"> <button scButton scDropdownToggle>
-              <sc-icon icon="lock"></sc-icon>
-              Lock/UnLock<sc-icon icon="lock_open"></sc-icon>
-            </button>
-            <sc-dropdown-menu class="dropdownMenu">
-              <sc-dropdown-header>Lock/Unlock</sc-dropdown-header>
-              <a scDropdownItem (click)="openConfirmDialog('lock')">Lock</a>
-              <a scDropdownItem (click)="openConfirmDialog('unlock')">Unlock</a>
-            </sc-dropdown-menu>
-          </sc-dropdown>
+          <div *ngIf="editorOptions.HasPresentation">
+            <sc-dropdown-divider></sc-dropdown-divider>
+            <sc-dropdown-header>Exp Editor</sc-dropdown-header>
+            <a *ngFor="let lang of editorOptions.Languages" scDropdownItem target="_blank"
+              href="/?sc_mode=edit&sc_itemid={{commanderSettings.selectedItem.Id}}&sc_lang={{lang}}">{{lang}}</a>
+          </div>
+        </sc-dropdown-menu>
+      </sc-dropdown>
+      <sc-dropdown class="nav-item min-80"> <button scButton  class="min-80" scDropdownToggle>
+        <sc-icon icon="lock"></sc-icon><br>
+        <span>Locking</span></button>
+      <sc-dropdown-menu class="dropdownMenu">
+        <sc-dropdown-header>Lock/Unlock</sc-dropdown-header>
+        <a scDropdownItem (click)="openConfirmDialog('lock')">Lock</a>
+        <a scDropdownItem (click)="openConfirmDialog('unlock')">Unlock</a>
+      </sc-dropdown-menu>
+    </sc-dropdown>
+    </sc-tab>
+  
+    <sc-tab label="Developer" class="darkbg" >
+      <button class="nav-item min-80" scIconButton (click)="downloadAsPackage()">
+        <sc-icon icon="arrow_down"></sc-icon>   <br>
+        <span>Download</span>
+        
+      </button>
+    </sc-tab>
+    <sc-tab label="Security" class="darkbg" >
+      <button class="nav-item min-80" scIconButton (click)="downloadAsPackage()">
+        <sc-icon icon="security_agent"></sc-icon>   <br>
+        <span>Security Editor</span>
+        
+      </button>
+      <button class="nav-item min-80" scIconButton (click)="downloadAsPackage()">
+        <sc-icon icon="security_badge"></sc-icon>   <br>
+        <span>Access Viewer</span>
+        
+      </button>
+    </sc-tab>
+    <sc-tab label="Settings" class="darkbg">
+      <div class="menu-wrapper darkbg menu-table row">
+      <table class="darkbg " style="color:white;border-right-style: solid;">
+        <tr><td colspan="6"><span class="table-title">Column settings</span></td></tr>
+        <tr><td  *ngFor="let option of commanderSettings.options"> <label >
+          <input (change)="storeOptions()" type="checkbox" name="options" value="{{option.value}}"
+            [(ngModel)]="option.checked" />
+          {{option.name}}
+        </label></td></tr>
+       
+      </table>
+      <table class="darkbg " style="color:white;">
+        <tr><td colspan="6"><span class="table-title">Visibility</span></td></tr>
+        
+        <tr>
+          <td  colspan="6"> <label>Show hidden items:
+            <input type="checkbox" name="hiddenItems" [(ngModel)]="commanderSettings.hiddenItems"
+              (change)="showHiddenItems()" /></label></td>
+        </tr>
+      </table>
+      
+    </div>
+  
+     
+    </sc-tab>
+  </sc-tab-group>
+    <sc-action-bar class="darkbg grey-border">
+      <sc-action-bar-left>
+        <div class="row ">
+          <div class="col-4">  <span class="table-title">Selected Database</span></div>
+          <div class="col-6"> <select id="database" [(ngModel)]="commanderSettings.selectedDatabase" class="form-control"
+            (change)="changeDatabase()">
+            <option *ngFor="let c of commanderSettings.databases" [value]="c">{{ c }}</option>
+          </select></div>
+       
         </div>
+        
+      
       </sc-action-bar-left>
       <sc-action-bar-right>
-
-        <button type="button" scIconButton [(scToggle)]="isSearching">
-          <sc-icon icon="gearwheels"></sc-icon>
-        </button>
+       
       </sc-action-bar-right>
     </sc-action-bar>
   </div>
@@ -136,32 +192,7 @@
       </div>
     </div>
   </article>
-  <aside scPageContext [show]="isSearching" class="bg-basic-white">
-    <div class="p-3">
-      <h4>Database</h4>
-      <select id="database" [(ngModel)]="commanderSettings.selectedDatabase" class="form-control"
-        (change)="changeDatabase()">
-        <option *ngFor="let c of commanderSettings.databases" [value]="c">{{ c }}</option>
-      </select>
-    </div>
-
-    <div class="p-3">
-      <label>Show columns:</label>
-      <div *ngFor="let option of commanderSettings.options">
-        <label>
-          <input (change)="storeOptions()" type="checkbox" name="options" value="{{option.value}}"
-            [(ngModel)]="option.checked" />
-          {{option.name}}
-        </label>
-      </div>
-    </div>
-
-    <div class="p-3">
-      <label>Show hidden items:
-        <input type="checkbox" name="hiddenItems" [(ngModel)]="commanderSettings.hiddenItems"
-          (change)="showHiddenItems()" /></label>
-    </div>
-  </aside>
+ 
 </sc-page>
 
 

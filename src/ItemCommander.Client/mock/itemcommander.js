@@ -60,7 +60,7 @@ module.exports = {
       }
     ])
   },
-  'GET /sitecore/api/ssc/ItemComander-EntityService-Controllers/Entity/%7B0DE95AE4-41AB-4D01-9EB0-67441B7C2450%7D/editoroptions': function (req, res) {
+  'GET /sitecore/api/ssc/itemcommander/editoroptions': function (req, res) {
     res.json({"Languages":["en","ja-JP","de-DE","da"],"HasPresentation":true});
   },
   'GET /sitecore/api/ssc/ItemComander-EntityService-Controllers/Entity/-/search': function (req, res) {
