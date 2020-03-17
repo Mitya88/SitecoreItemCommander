@@ -97,6 +97,19 @@
         }
 
         /// <summary>
+        /// Media View.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <param name="db">The database.</param>
+        /// <returns>media view contract</returns>
+        [HttpGet]
+        [Route("media")]
+        public MediaViewResponse MediaView(string id, string db)
+        {
+            return this._customRepositoryActions.GetMediaView(id, db);
+        }
+
+        /// <summary>
         /// Queries the specified identifier.
         /// </summary>
         /// <param name="id">The identifier.</param>
@@ -206,15 +219,13 @@
         /// <summary>
         /// Searches the specified identifier.
         /// </summary>
-        /// <param name="id">The identifier.</param>
-        /// <param name="keyword">The keyword.</param>
-        /// <param name="db">The database.</param>
-        /// <returns></returns>
-        [HttpGet]
+        /// <param name="request">The request.</param>
+        /// <returns>the search result</returns>
+        [HttpPost]
         [Route("search")]
-        public ItemCommanderResponse Search(string keyword, string db)
+        public ItemCommanderResponse Search([FromBody]SearchItemRequest request)
         {
-            return this._customRepositoryActions.Search(keyword, db);
+            return this._customRepositoryActions.Search(request.Keyword, request.Database);
         }
 
         /// <summary>

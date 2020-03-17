@@ -38,6 +38,8 @@ import { ItemService } from './services/item.service';
 import { BookmarkService } from './services/bookmark.service';
 import { PopupService } from './services/popup.service';
 import { CommanderViewComponent } from './components/commander-view/commander-view.component';
+import { MediaViewPageComponent } from './media-view-page/media-view-page.component';
+import { MediaService } from './media.service';
 
 @NgModule({
   declarations: [
@@ -48,7 +50,8 @@ import { CommanderViewComponent } from './components/commander-view/commander-vi
     TextComponent,
     FilterChildren,
     MultilistComponent,
-    CommanderViewComponent
+    CommanderViewComponent,
+    MediaViewPageComponent
   ],
   imports: [
     BrowserModule,
@@ -83,7 +86,7 @@ import { CommanderViewComponent } from './components/commander-view/commander-vi
     })
   ],
   providers: [
-    ItemCommanderService, SciLogoutService, FastViewService, ItemService, BookmarkService, PopupService
+    ItemCommanderService, SciLogoutService, FastViewService, ItemService, BookmarkService, PopupService,MediaService
   ],
   bootstrap: [AppComponent]
 })

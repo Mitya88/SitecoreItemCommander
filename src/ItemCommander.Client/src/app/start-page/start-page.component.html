@@ -46,7 +46,7 @@
         <sc-icon icon="eye"></sc-icon><br>
         <span>View</span>
       </button>
-      <button class="nav-item min-80" scIconButton [(scToggle)]="commanderSettings.fastViewEnabled" (click)="fastViewSearch()">
+      <button class="nav-item min-80" scIconButton [(scToggle)]="commanderSettings.mediaViewEnabled" (click)="mediaView()">
         <sc-icon icon="media_eject"></sc-icon><br>
         <span>Media</span>
       </button>
@@ -65,6 +65,10 @@
             <sc-dropdown-header>Exp Editor</sc-dropdown-header>
             <a *ngFor="let lang of editorOptions.Languages" scDropdownItem target="_blank"
               href="/?sc_mode=edit&sc_itemid={{commanderSettings.selectedItem.Id}}&sc_lang={{lang}}">{{lang}}</a>
+              <sc-dropdown-divider></sc-dropdown-divider>
+            <sc-dropdown-header>Preview</sc-dropdown-header>
+            <a *ngFor="let lang of editorOptions.Languages" scDropdownItem target="_blank"
+              href="/?sc_mode=previewt&sc_itemid={{commanderSettings.selectedItem.Id}}&sc_lang={{lang}}">{{lang}}</a>
           </div>
         </sc-dropdown-menu>
       </sc-dropdown>
@@ -87,16 +91,28 @@
       </button>
     </sc-tab>
     <sc-tab label="Security" class="darkbg" >
-      <button class="nav-item min-80" scIconButton (click)="downloadAsPackage()">
+      <a class="nav-item min-80" scIconButton target="_blank" *ngIf="commanderSettings.selectedItem"
+      href="/sitecore/shell/Applications/Security/Security%20Editor.aspx?fo={{commanderSettings.selectedItem.Id}}&sc_bw=1">
         <sc-icon icon="security_agent"></sc-icon>   <br>
         <span>Security Editor</span>
         
-      </button>
-      <button class="nav-item min-80" scIconButton (click)="downloadAsPackage()">
+    </a>
+    <button class="nav-item min-80" scIconButton target="_blank" *ngIf="!commanderSettings.selectedItem" disabled>
+        <sc-icon icon="security_agent"></sc-icon>   <br>
+        <span>Security Editor</span>
+        
+    </button>
+      <a class="nav-item min-80" scIconButton target="_blank"  *ngIf="commanderSettings.selectedItem"
+      href="/sitecore/shell/Applications/Security/Access%20Viewer.aspx?fo={{commanderSettings.selectedItem.Id}}&sc_bw=1">
         <sc-icon icon="security_badge"></sc-icon>   <br>
         <span>Access Viewer</span>
         
-      </button>
+  </a>
+  <button class="nav-item min-80" scIconButton target="_blank"  *ngIf="!commanderSettings.selectedItem" disabled>
+    <sc-icon icon="security_badge"></sc-icon>   <br>
+    <span>Access Viewer</span>
+    
+</button>
     </sc-tab>
     <sc-tab label="Settings" class="darkbg">
       <div class="menu-wrapper darkbg menu-table row">
@@ -168,7 +184,9 @@
         <div class="col-6">
           <sc-fast-view-page [ngClass]="{'hidden_fastview':!commanderSettings.fastViewEnabled}"
             [selectedDatabase]=commanderSettings.selectedDatabase></sc-fast-view-page>
-          <div class="bookmark-row" *ngIf="!commanderSettings.fastViewEnabled">
+            <sc-media-view-page [ngClass]="{'hidden_fastview':!commanderSettings.mediaViewEnabled}"
+            [selectedDatabase]=commanderSettings.selectedDatabase></sc-media-view-page>
+          <div class="bookmark-row" *ngIf="!commanderSettings.fastViewEnabled && !commanderSettings.mediaViewEnabled">
             <sc-dropdown class="bookmarkTools">
               <button scDropdownToggle scIconButton>
 
@@ -185,7 +203,7 @@
 
             <input type="text" class="form-control" [ngModel]="commanderSettings.rightPath" disabled />
           </div>
-          <sc-app-commander-view #rightview [side]=right [commanderSettings]="commanderSettings" (onError) = "handleError($event)"></sc-app-commander-view>        
+          <sc-app-commander-view #rightview [side]=right [commanderSettings]="commanderSettings" (onError) = "handleError($event)" [ngClass]="{'hidden_commanderview':commanderSettings.fastViewEnabled || commanderSettings.mediaViewEnabled}"></sc-app-commander-view>        
           <sc-progress-indicator-panel [show]="rightLoading">
           </sc-progress-indicator-panel>
         </div>
@@ -226,6 +244,23 @@
       <p>&nbsp;</p>
       <label *ngIf="parent.popupSettings.isCopy">Copy Subitems?
         <input type="checkbox" name="hiddenItems" [(ngModel)]="parent.popupSettings.copySubItems" (change)="parent.changeTest()"/></label>
+    </sc-dialog-body>
+    <sc-dialog-footer>
+      <button scButton scDialogClose>Cancel</button>
+      <button scButton="primary" (click)="parent.singleInputAction()">Go</button>
+    </sc-dialog-footer>
+  </sc-dialog>
+</template>
+
+<template #queryInput>
+  <sc-dialog>
+    <sc-dialog-header>
+      <h4>{{parent.popupSettings.singleInputTitle}}</h4>
+    </sc-dialog-header>
+    <sc-dialog-body>
+      <p [innerHtml]="parent.popupSettings.singleInputDescription"></p>
+      <h4>{{parent.popupSettings.singleInputText}}</h4>     
+      <input type="text" class="form-control" [(ngModel)]="parent.popupSettings.queryInputValue" />
     </sc-dialog-body>
     <sc-dialog-footer>
       <button scButton scDialogClose>Cancel</button>

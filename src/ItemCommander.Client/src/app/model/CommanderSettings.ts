@@ -16,6 +16,7 @@ export class CommanderSettings {
     rightData: ItemCommanderResponse;
     targetPath:string;
     fastViewEnabled: boolean;
+    mediaViewEnabled:boolean;
     leftIdBeforeSearch:string;
 
     constructor() {

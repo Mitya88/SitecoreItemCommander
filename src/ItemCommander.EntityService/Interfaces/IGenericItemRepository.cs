@@ -83,6 +83,14 @@
         FastViewResponse GetFastView(string id, string db);
 
         /// <summary>
+        /// Gets the media view view.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <param name="db">The database.</param>
+        /// <returns>Media view contract</returns>
+        MediaViewResponse GetMediaView(string id, string db);
+
+        /// <summary>
         /// Gets the insert options.
         /// </summary>
         /// <param name="id">The identifier.</param>
