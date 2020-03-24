@@ -4,6 +4,7 @@ import { Item } from '../../contract/Item';
 import { ItemCommanderService } from '../../item-commander.service';
 import { ItemCommanderResponse } from '../../contract/ItemCommanderResponse';
 import { FastViewService } from '../../fast-view/fastview.service';
+import { MediaService } from '../../media.service';
 
 @Component({
   selector: 'sc-app-commander-view',
@@ -25,7 +26,8 @@ export class CommanderViewComponent implements OnInit {
   loadedItems: any;
 
   constructor(private itemCommanderApiService: ItemCommanderService,
-    private fastViewService: FastViewService) { }
+    private fastViewService: FastViewService,
+    private mediaViewService:MediaService ) { }
 
   ngOnInit() {
     this.load();
@@ -187,6 +189,11 @@ export class CommanderViewComponent implements OnInit {
 
     if (this.commanderSettings.fastViewEnabled) {
       this.fastViewService.search.emit(item.Id);
+      return;
+    }
+
+    if (this.commanderSettings.mediaViewEnabled) {
+      this.mediaViewService.search.emit(item.Id);
       return;
     }
 

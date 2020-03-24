@@ -10,5 +10,19 @@ module.exports = {
   'GET /sitecore/api/ssc/itemcommander/children': function (req, res) {
     res.json({ "CurrentPath": "/sitecore/content", "CurrentId": "{0DE95AE4-41AB-4D01-9EB0-67441B7C2450}", "ParentId": "{11111111-1111-1111-1111-111111111111}", "Children": [{ "Name": "Home", "Path": "/sitecore/content/Home", "Language": "en", "Icon": "https://via.placeholder.com/10x10", "TemplateName": "Sample Item", "TemplateId": null, "ParentId": null, "HasChildren": false, "IsLocked": false, "LastModified": "2019-08-03T15:06:47Z", "Created": "2008-04-07T10:59:00Z", "IsHidden": false, "Fields": [], "Id": "{110D559F-DEA5-42EA-9C1C-8A5DF7E70EF9}", "Url": null }, { "Name": "Site1", "Path": "/sitecore/content/Site1", "Language": "en", "Icon": "https://via.placeholder.com/10x10", "TemplateName": "Sample Item", "TemplateId": null, "ParentId": null, "HasChildren": true, "IsLocked": false, "LastModified": "2019-08-03T15:06:53Z", "Created": "2008-04-07T10:59:00Z", "IsHidden": false, "Fields": [], "Id": "{4B6DDC95-8285-4A50-B71C-466D92E78018}", "Url": null }, { "Name": "Site2", "Path": "/sitecore/content/Site2", "Language": "en", "Icon": "https://via.placeholder.com/10x10", "TemplateName": "Sample Item", "TemplateId": null, "ParentId": null, "HasChildren": false, "IsLocked": false, "LastModified": "2019-08-03T15:06:53Z", "Created": "2008-04-07T10:59:00Z", "IsHidden": false, "Fields": [], "Id": "{792B3356-72F9-4B44-AA38-9880B92BF185}", "Url": null }, { "Name": "Site3", "Path": "/sitecore/content/Site3", "Language": "en", "Icon": "https://via.placeholder.com/10x10", "TemplateName": "Sample Item", "TemplateId": null, "ParentId": null, "HasChildren": false, "IsLocked": false, "LastModified": "2019-08-03T15:06:53Z", "Created": "2008-04-07T10:59:00Z", "IsHidden": false, "Fields": [], "Id": "{1B4AAEEB-1013-44BD-B960-8945B3086998}", "Url": null }] })
 
+  },
+  'GET /sitecore/api/ssc/itemcommander/media': function (req, res) {
+    res.json({ "IsMedia": true, 
+    "Src": "https://scsugcon2020.local/-/media/1", 
+    "MediaType":"Video", 
+    "MimeType":"video/mp4",
+    "Size":"123",
+  "Extension":"mp4",
+      "Id":"{0DE95AE4-41AB-4D01-9EB0-67441B7C2450}",
+    "Path":"/sitecore/media library/item",
+  "Name":"VideoItem",
+"TemplateName":"Video",
+"Icon":"http://speak3.local/sitecore/shell/themes/standard/-/media/E496344F960B41E8960E7C94D7AE702E.ashx?h=50&amp;thn=1&amp;w=32&amp;db=master" })
+
   }
 };

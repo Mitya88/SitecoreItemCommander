@@ -24,6 +24,7 @@ import { FolderRequest } from '../contract/folderRequest';
 import { ProcessResponse } from '../contract/processResponse';
 import { ProgressResponse } from '../contract/progressResponse';
 import { Observable } from 'rxjs';
+import { MediaService } from '../media.service';
 
 @Component({
   selector: 'app-start-page',
@@ -38,6 +39,9 @@ export class StartPageComponent implements OnInit {
 
   @ViewChild('simpleInput')
   private simpleInputRef: TemplateRef<any>
+
+  @ViewChild('queryInput')
+  private queryInput: TemplateRef<any>
 
   @ViewChild('warning')
   private warningRef: TemplateRef<any>
@@ -60,6 +64,7 @@ export class StartPageComponent implements OnInit {
     public dialogService: ScDialogService,
     private router: Router,
     private fastviewService: FastViewService,
+    private mediaService: MediaService,
     private itemService: ItemService,
     private bookmarkService: BookmarkService,
     private popupService: PopupService
@@ -116,6 +121,14 @@ export class StartPageComponent implements OnInit {
     }
   }
 
+  mediaView() {
+    let data = this.itemService.getSelectedItems(this.commanderSettings);
+    if (data.length > 0 && this.commanderSettings.mediaViewEnabled) {
+      this.mediaService.search.emit(data[0].Id);
+      return;
+    }
+  }
+
   singleSelect(item: Item) {
     if (item.IsSelected) {
       item.IsSelected = false;
@@ -144,13 +157,20 @@ export class StartPageComponent implements OnInit {
   }
 
   openInputDialog(dialogAction: string) {   
+    this.popupSettings.isCopy = false;
     if (dialogAction == 'rename' && !this.commanderSettings.selectedItem){
       if (this.popupService.checkAndOpenWarning(this.warningRef, this.popupSettings, this.commanderSettings)) {
         return;
       }
     }
    
-    this.popupService.openInputDialog(dialogAction, this.simpleInputRef, this.popupSettings);
+    if(dialogAction == 'search'){
+      this.popupService.openInputDialog(dialogAction, this.queryInput, this.popupSettings);
+    }
+    else{
+      this.popupService.openInputDialog(dialogAction, this.simpleInputRef, this.popupSettings);
+    }
+    
   }
 
   openConfirmDialog(dialogAction: string) {
@@ -233,10 +253,10 @@ export class StartPageComponent implements OnInit {
   search() {
     this.leftLoading = true;
     this.commanderSettings.leftIdBeforeSearch = this.commanderSettings.leftData.CurrentId;
-    this.itemCommanderApiService.search(this.popupSettings.inputDialogValue, this.commanderSettings.selectedDatabase).subscribe({
+    this.itemCommanderApiService.search(this.popupSettings.queryInputValue, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
         this.commanderSettings.leftData = response as ItemCommanderResponse;
-        this.commanderSettings.leftPath = this.popupSettings.inputDialogValue;
+        this.commanderSettings.leftPath = this.popupSettings.queryInputValue;
         this.leftLoading = false;
         this.dialogService.close();
       },

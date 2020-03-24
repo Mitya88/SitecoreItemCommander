@@ -1,0 +1,51 @@
+
+<sc-progress-indicator-panel *ngIf="mediaViewLoading" [show]="mediaViewLoading">
+</sc-progress-indicator-panel>
+
+<div class="card mb-3" *ngIf="responseData && !responseData.IsMedia">
+  <div class="card-block">
+    <h4 class="card-title">The selected item is not a media item!</h4>
+    </div>
+</div>
+<div class="card mb-3" *ngIf="responseData && responseData.IsMedia">
+  <div class="card-block">
+    <h4 class="card-title">Media View</h4>
+    <video *ngIf="responseData && responseData.MediaType=='video'" width="640" height="480" controls>
+      <source src="{{responseData.Src}}" type="{{responseData.MimeType}}">
+      Your browser does not support the video tag.
+    </video>
+    
+    <img *ngIf="responseData && responseData.MediaType=='image'"  src="{{responseData.Src}}" />
+    <h4 class="card-title">Details</h4>
+    <a href="/sitecore/shell/download.aspx?file={{itemId}}" target="_blank">Download</a>
+    <table>
+      <tr>
+        <td class="display-4">Name</td>
+        <td>{{responseData.Name}} <img width="32" height="32" src="{{responseData.Icon}}"/></td>
+      </tr>
+      <tr>
+        <td class="display-4">Id</td>
+        <td>{{responseData.Id}}</td>
+      </tr>
+      <tr>
+        <td class="display-4">Path</td>
+        <td>{{responseData.Path}}</td>
+      </tr>
+      <tr>
+        <td class="display-4">Mime Type</td>
+        <td>{{responseData.MimeType}}</td>
+      </tr>
+      <tr>
+        <td class="display-4">Size</td>
+        <td>{{responseData.Size}}</td>
+      </tr>
+      <tr>
+        <td class="display-4">Extension</td>
+        <td>{{responseData.Extension}}</td>
+      </tr>
+      
+      
+
+    </table>
+  </div>
+</div>

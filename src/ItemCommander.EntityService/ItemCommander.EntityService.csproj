@@ -211,11 +211,14 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Constants.cs" />
     <Compile Include="Controllers\EntityController.cs" />
     <Compile Include="Interfaces\IGenericItemRepository.cs" />
     <Compile Include="Models\BaseItemListRequest.cs" />
     <Compile Include="Models\BaseRequest.cs" />
+    <Compile Include="Models\SearchItemRequest.cs" />
     <Compile Include="Models\EditorResponse.cs" />
+    <Compile Include="Models\MediaViewResponse.cs" />
     <Compile Include="Models\ProcessResponse.cs" />
     <Compile Include="Models\ProgressResponse.cs" />
     <Compile Include="Models\RenameRequest.cs" />

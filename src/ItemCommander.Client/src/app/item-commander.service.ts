@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { SearchRequest } from './contract/searchRequest';
 
 @Injectable()
 export class ItemCommanderService {
@@ -52,7 +53,10 @@ export class ItemCommanderService {
   }
 
   search(keyword: any, database:string) {
-    return this.httpClient.get(this.baseUrl +'/search?keyword='+keyword +'&db='+database);
+    var request = new SearchRequest();
+    request.Keyword = keyword;
+    request.Database = database;
+    return this.httpClient.post(this.baseUrl +'/search', request);
   }
   
   fastView(id: any, database:string) {
@@ -65,6 +69,10 @@ export class ItemCommanderService {
 
   mediaUrl(id: any, database:string) {
     return this.httpClient.get(this.baseUrl + '/mediaurl?db='+database+'&id='+id);
+  }
+
+  media(id: any, database:string) {
+    return this.httpClient.get(this.baseUrl + '/media?db='+database+'&id='+id);
   }
 
   getItems(body: any) {

@@ -8,7 +8,7 @@ export class  Constants{
     static CopySingleItem = "(Children items will not be copied)";
 
     static SearchDialogTitle = "Search";
-    static SearchInputText = "Enter a keyword..";
+    static SearchInputText = "Enter a keyword or sitecore query..";
 
     static RenameDialogTitle = "Rename";
     static RenameText = "New item name format";

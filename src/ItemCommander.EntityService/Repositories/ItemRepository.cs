@@ -603,6 +603,63 @@
         }
 
         /// <summary>
+        /// Gets the media view.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <param name="db">The database.</param>
+        /// <returns>
+        /// Media view contract
+        /// </returns>
+        public MediaViewResponse GetMediaView(string id, string db)
+        {
+            this.SetDatabase(db);
+
+            var item = database.GetItem(new ID(id));
+            MediaViewResponse vr = null;
+
+            if (item.Paths.IsMediaItem && item.TemplateName != Constants.MediaFolderTemplateName)
+            {
+                vr = new MediaViewResponse
+                {
+                    IsMedia = true,
+                    Name = item.Name,
+                    Id = item.ID.ToString(),
+                    Path = item.Paths.FullPath,
+                    Icon = GetIcon(item),
+                    MimeType = item["Mime Type"],
+                    Extenions = item["Extension"],
+                    Size = item["Size"]
+                };
+
+                var mediaItem = new MediaItem(item);
+                vr.Src = MediaManager.GetMediaUrl(mediaItem);
+
+                if (Constants.VideoAudioTemplates.Contains(item.TemplateName))
+                {
+                    vr.MediaType = "video";
+                }
+                else if (Constants.ImageTemplates.Contains(item.TemplateName))
+                {
+                    vr.MediaType = "image";
+                    vr.Src = HashingUtils.ProtectAssetUrl(MediaManager.GetMediaUrl(mediaItem, new MediaUrlOptions { MaxWidth = 640 }));
+                }
+                else
+                {
+                    vr.MediaType = "other";
+                }
+            }
+            else
+            {
+                vr = new MediaViewResponse
+                {
+                    IsMedia = false
+                };
+            }
+
+            return vr;
+        }
+
+        /// <summary>
         /// Renames the specified request.
         /// </summary>
         /// <param name="request">The request.</param>
@@ -706,36 +763,57 @@
             this.SetDatabase(db);
             var itemCommanderResponse = new ItemCommanderResponse();
 
-            using (var searchContext = this.GetSearchIndex().CreateSearchContext())
+            if (keyword.StartsWith("/"))
             {
-                var queryable = searchContext.GetQueryable<ItemCommanderSearchResult>();
-                var predicate = PredicateBuilder.True<ItemCommanderSearchResult>();
-                var subPredicate = PredicateBuilder.True<ItemCommanderSearchResult>();
-
-                predicate = predicate.And(t => t.Path.StartsWith("/sitecore/content"));
-                predicate = predicate.And(t => t.IsLatestVersion == true);
-                predicate = predicate.And(t => t.Language == "en");
-                subPredicate = subPredicate.Or(t => t.Name.Contains(keyword));
-                subPredicate = subPredicate.Or(t => t.Content.Contains(keyword));
-                predicate = predicate.And(subPredicate);
-
-                queryable = queryable.Filter(predicate);
-                var results = queryable.GetResults().Where(t => t.Document.GetItem() != null);
-                itemCommanderResponse.Children = results.Select(t => new ItemResponse
+                itemCommanderResponse.Children = this.database.SelectItems(keyword).Select(t => new ItemResponse
                 {
-                    Name = t.Document.Name,
-                    Id = t.Document.ItemId.ToString(),
-                    Language = t.Document.Language.ToString(),
-                    Path = t.Document.Path,
-                    TemplateName = t.Document.TemplateName,
+                    Name = t.Name,
+                    Id = t.ID.ToString(),
+                    Language = t.Language.ToString(),
+                    Path = t.Paths.FullPath,
+                    TemplateName = t.TemplateName,
                     Fields = new List<FieldResponse>(),
-                    HasChildren = t.Document.GetItem().HasChildren,
-                    LastModified = t.Document.Updated,
-                    Created = t.Document.CreatedDate,
-                    Icon = GetIcon(t.Document.GetItem())
+                    HasChildren = t.HasChildren,
+                    LastModified = t.Statistics.Updated,
+                    Created = t.Statistics.Created,
+                    Icon = GetIcon(t)
                 }).ToList();
-                itemCommanderResponse.CurrentId = ""; // it should be empty string for the frontend
+                itemCommanderResponse.CurrentId = "";
             }
+            else
+            {
+                using (var searchContext = this.GetSearchIndex().CreateSearchContext())
+                {
+                    var queryable = searchContext.GetQueryable<ItemCommanderSearchResult>();
+                    var predicate = PredicateBuilder.True<ItemCommanderSearchResult>();
+                    var subPredicate = PredicateBuilder.True<ItemCommanderSearchResult>();
+
+                    predicate = predicate.And(t => t.Path.StartsWith("/sitecore/content"));
+                    predicate = predicate.And(t => t.IsLatestVersion == true);
+                    predicate = predicate.And(t => t.Language == "en");
+                    subPredicate = subPredicate.Or(t => t.Name.Contains(keyword));
+                    subPredicate = subPredicate.Or(t => t.Content.Contains(keyword));
+                    predicate = predicate.And(subPredicate);
+
+                    queryable = queryable.Filter(predicate);
+                    var results = queryable.GetResults().Where(t => t.Document.GetItem() != null);
+                    itemCommanderResponse.Children = results.Select(t => new ItemResponse
+                    {
+                        Name = t.Document.Name,
+                        Id = t.Document.ItemId.ToString(),
+                        Language = t.Document.Language.ToString(),
+                        Path = t.Document.Path,
+                        TemplateName = t.Document.TemplateName,
+                        Fields = new List<FieldResponse>(),
+                        HasChildren = t.Document.GetItem().HasChildren,
+                        LastModified = t.Document.Updated,
+                        Created = t.Document.CreatedDate,
+                        Icon = GetIcon(t.Document.GetItem())
+                    }).ToList();
+                    itemCommanderResponse.CurrentId = ""; // it should be empty string for the frontend
+                }
+            }
+            
             return itemCommanderResponse;
         }
 
