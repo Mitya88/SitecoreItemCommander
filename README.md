@@ -43,6 +43,12 @@ Fast view allows you to check the selected item's fields. If multiple language i
 - Hide standard fields from UI
 - Copy values to clipboard
 
+#### Media View
+Media view allows you to check the selected media item
+- Play Video/Audio files
+- Display images
+- Download the attached file
+ 
 ## Supported Sitecore Versions
 
 - Sitecore 9.0
@@ -62,6 +68,12 @@ Fast view allows you to check the selected item's fields. If multiple language i
   - Added ServicesApiController instead of EntityService
 - 1.0 - [package](sc.package/ItemCommander-1.0.zip)
   - Added support to include subitems during copy
+  - Bugfixes
+- 1.1 - [package](sc.package/ItemCommander-1.1.zip)
+  - New UI
+  - Media View
+  - Searchbox supports Sitecore queries too
+  - Open more Sitecore applications from the Commander View
   - Bugfixes
 
 ## Installation
@@ -96,15 +108,15 @@ Run `npm run start` for a disconnected mode. Navigate to `http://localhost:4123/
 
 ## Screenshots
 
-![alt text](documentation/1.png "Main")
-![alt text](documentation/2.png "Main")
-![alt text](documentation/3.png "Main")
-![alt text](documentation/4.png "Main")
-![alt text](documentation/5.png "Main")
-![alt text](documentation/6.png "Main")
-![alt text](documentation/7.png "Main")
-![alt text](documentation/8.png "Main")
-![alt text](documentation/9.png "Main")
-![alt text](documentation/10.png "Main")
+![File](C:/git/itemcommander/documentation/file.png)
+![Multiselect](C:/git/itemcommander/documentation/multiselect.png)
+![2File](C:/git/itemcommander/documentation/2file.png)
+![Settings](C:/git/itemcommander/documentation/settings.png)
+![Proggressbar](C:/git/itemcommander/documentation/proggressbar.png)
+![Create](C:/git/itemcommander/documentation/create.png)
+![Warning](C:/git/itemcommander/documentation/warning.png)
+![Fast](C:/git/itemcommander/documentation/fast.png)
+![Media](C:/git/itemcommander/documentation/media.png)
+![Query](C:/git/itemcommander/documentation/query.png)
 
 
