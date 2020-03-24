@@ -256,7 +256,7 @@ export class StartPageComponent implements OnInit {
     this.itemCommanderApiService.search(this.popupSettings.queryInputValue, this.commanderSettings.selectedDatabase).subscribe({
       next: response => {
         this.commanderSettings.leftData = response as ItemCommanderResponse;
-        this.commanderSettings.leftPath = this.popupSettings.inputDialogValue;
+        this.commanderSettings.leftPath = this.popupSettings.queryInputValue;
         this.leftLoading = false;
         this.dialogService.close();
       },
