@@ -108,15 +108,15 @@ Run `npm run start` for a disconnected mode. Navigate to `http://localhost:4123/
 
 ## Screenshots
 
-![File](C:/git/itemcommander/documentation/file.png)
-![Multiselect](C:/git/itemcommander/documentation/multiselect.png)
-![2File](C:/git/itemcommander/documentation/2file.png)
-![Settings](C:/git/itemcommander/documentation/settings.png)
-![Proggressbar](C:/git/itemcommander/documentation/proggressbar.png)
-![Create](C:/git/itemcommander/documentation/create.png)
-![Warning](C:/git/itemcommander/documentation/warning.png)
-![Fast](C:/git/itemcommander/documentation/fast.png)
-![Media](C:/git/itemcommander/documentation/media.png)
-![Query](C:/git/itemcommander/documentation/query.png)
+![File](documentation/file.png)
+![Multiselect](documentation/multiselect.png)
+![2File](documentation/2file.png)
+![Settings](documentation/settings.png)
+![Proggressbar]documentation/proggressbar.png)
+![Create](documentation/create.png)
+![Warning](documentation/warning.png)
+![Fast](documentation/fast.png)
+![Media](documentation/media.png)
+![Query](documentation/query.png)
 
 
