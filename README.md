@@ -58,6 +58,7 @@ Media view allows you to check the selected media item
 - Sitecore 9.1 Update-1
 - Sitecore 9.2
 - Sitecore 9.3 
+- Sitecore 10
 
 ## Releases
 - 0.8  - [package](sc.package/ItemCommander-0.8.zip)
