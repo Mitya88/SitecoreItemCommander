@@ -40,7 +40,7 @@
     "@types/jasminewd2": "~2.0.2",
     "@types/node": "~6.0.60",
     "codelyzer": "~3.0.1",
-    "express": "^4.15.4",
+    "express": "^4.17.3",
     "express-mock-middleware": "0.0.6",
     "jasmine-core": "~2.6.2",
     "jasmine-spec-reporter": "~4.1.0",
